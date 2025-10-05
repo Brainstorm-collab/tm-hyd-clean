@@ -1,0 +1,84 @@
+.team-timeline-root {
+  font-family: "Inter", sans-serif;
+  padding: 28px;
+  background: #fff;
+  color: #111827;
+}
+
+/* header */
+.timeline-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.timeline-header h2 {
+  font-size: 20px;
+  margin: 0;
+  font-weight: 600;
+}
+.subtitle { margin: 2px 0 0 0; color: #6b7280; font-size: 13px; }
+
+/* top actions */
+.timeline-actions { display:flex; gap:10px; align-items:center; }
+.date-btn { display:flex; gap:8px; align-items:center; border-radius:10px; padding:8px 12px; border:1px solid #e6e6e9; background:#fff; cursor:pointer; font-weight:600;}
+.invite-btn { background:#f3e8ff; color:#7c3aed; border:none; padding:8px 14px; border-radius:8px; font-weight:600;}
+.add-btn { background:#000; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-weight:600;}
+
+/* canvas and top dates bar */
+.timeline-canvas { position:relative; margin-top:12px; }
+.dates-bar { height:48px; background:transparent; display:flex; align-items:center; }
+.dates-inner { margin-left:150px; display:flex; gap:0; align-items:center; width:100%; padding:8px 0; }
+.date { flex:1; text-align:center; background:#f3f3f4; margin:0 8px; padding:12px 0; border-radius:8px; color:#6b7280; font-weight:600; }
+
+/* svg connectors overlay (full size of canvas area) */
+.connectors-svg { position:absolute; left:0; top:0; width:100%; height:100%; pointer-events:none; overflow:visible; }
+
+/* rows area */
+.rows { margin-top:18px; display:flex; flex-direction:column; gap:28px; padding-bottom:48px; }
+
+/* single row */
+.row { display:flex; align-items:flex-start; gap:12px; min-height:80px; }
+
+/* left member column */
+.member-col { width:150px; display:flex; align-items:center; gap:10px; color:#374151; }
+.member-col img { width:28px; height:28px; border-radius:50%; }
+.member-name { font-weight:600; font-size:14px; }
+.kebab { margin-left:auto; color:#9ca3af; }
+
+/* row canvas where absolute task cards live */
+.row-canvas { position:relative; flex:1; min-height:84px; }
+
+/* task card: absolutely positioned inside row-canvas */
+.task-card {
+  position:absolute;
+  top:6px;
+  background:#fff;
+  border:1px solid #eef2f6;
+  border-radius:10px;
+  padding:12px 16px;
+  box-shadow:0 6px 16px rgba(17,24,39,0.06);
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  min-height:56px;
+}
+
+/* checkbox */
+.task-checkbox { width:18px; height:18px; accent-color:#7c3aed; margin-top:6px; }
+
+/* body inside card */
+.task-body { display:flex; flex-direction:column; gap:8px; }
+.task-title { font-weight:600; color:#111827; font-size:14px; }
+.task-sub { display:flex; align-items:center; gap:8px; color:#6b7280; font-size:13px; }
+.task-sub img { width:18px; height:18px; border-radius:50%; }
+
+/* marker dot (drawn by SVG) has white stroke to match screenshot */
+
+/* footer */
+.timeline-footer { margin-top:28px; color:#6b7280; text-align:center; font-size:13px; }
+.timeline-footer a { color:#7c3aed; font-weight:600; text-decoration:none; }
+
+
