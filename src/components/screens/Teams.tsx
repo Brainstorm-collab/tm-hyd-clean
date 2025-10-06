@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Plus, 
   MoreVertical, 
@@ -23,8 +24,7 @@ interface Team {
 export const Teams: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [openDropdowns, setOpenDropdowns] = useState<{[key: string]: boolean}>({});
-  // Navigate to invite screen
-  const navigate = require('react-router-dom').useNavigate();
+  const navigate = useNavigate();
   
   // Refs for dropdowns
   const dropdownRefs = useRef<{[key: string]: HTMLDivElement | null}>({});

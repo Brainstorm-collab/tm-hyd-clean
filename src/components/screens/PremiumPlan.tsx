@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, Zap, ShieldCheck, CreditCard, Building, Smartphone, Copy, Download } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription, ModalFooter } from '../ui/Modal';
 import { 
   calculatePricing, 
@@ -14,6 +15,7 @@ import {
   getPlanDisplayName
 } from '../../utils/billingService';
 import { PaymentMethod } from '../../types';
+import { validateAndApplyPromo, removePromo, PromoMessageType } from '../../utils/promo';
 
 export const PremiumPlan: React.FC = () => {
   const navigate = useNavigate();
@@ -390,6 +392,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   isProcessing,
   error
 }) => {
+  const { success, error: toastError } = useToast();
   const [selectedMethod, setSelectedMethod] = useState<'card' | 'netbanking' | 'upi'>('card');
   const [cardDetails, setCardDetails] = useState({
     number: '',
@@ -407,6 +410,20 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   const [qrPaymentComplete, setQrPaymentComplete] = useState(false);
   const [promoCode, setPromoCode] = useState('');
   const [promoApplied, setPromoApplied] = useState(false);
+  const [promoMessage, setPromoMessage] = useState<string | null>(null);
+  const [promoMessageType, setPromoMessageType] = useState<PromoMessageType>(null);
+
+  const handleApplyPromo = () => {
+    validateAndApplyPromo(promoCode, {
+      setPromoApplied,
+      setPromoMessage,
+      setPromoMessageType
+    });
+  };
+
+  const handleClearPromo = () => {
+    removePromo({ setPromoApplied, setPromoMessage, setPromoMessageType, setPromoCode });
+  };
 
   const handlePayment = () => {
     // Create payment method object
@@ -571,7 +588,27 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                     <label className="block text-sm font-medium text-gray-700 mb-1">UPI ID</label>
                     <div className="flex items-center space-x-2">
                       <input value={upiId} onChange={(e)=>setUpiId(e.target.value)} placeholder="UPI ID (name@bank)" className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
-                      <button onClick={()=>navigator.clipboard?.writeText(upiId)} className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 hover:bg-gray-50"><Copy className="w-4 h-4" /></button>
+                      <button
+                        onClick={async () => {
+                          if (!upiId) {
+                            toastError('Copy failed', 'Enter a UPI ID first.');
+                            return;
+                          }
+                          try {
+                            if (!navigator.clipboard || !navigator.clipboard.writeText) {
+                              throw new Error('Clipboard API unavailable');
+                            }
+                            await navigator.clipboard.writeText(upiId);
+                            success('Copied', 'UPI ID copied to clipboard');
+                          } catch (err) {
+                            toastError('Copy failed', 'Could not copy to clipboard.');
+                          }
+                        }}
+                        className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
+                        aria-label="Copy UPI ID to clipboard"
+                      >
+                        <Copy className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
                   <button onClick={()=>setShowQR(true)} className="w-full py-2 px-4 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors font-medium">Show QR Code</button>
@@ -583,15 +620,15 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                   <div className="text-center">
                     <h4 className="font-medium text-gray-900 mb-4">Scan QR Code to Pay</h4>
                     <div className="bg-white border-2 border-gray-300 rounded-lg p-4 mb-4 inline-block">
-                      <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=upi://pay?pn=Superpage&pa=example@upi&am=1" alt="UPI QR" className="w-56 h-56 object-contain" />
+                      <img src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=upi://pay?pn=Superpage&pa=${upiId}&am=${totalAmount}`} alt="UPI QR" className="w-56 h-56 object-contain" />
                       <div className="mt-2 text-xs text-gray-500 flex items-center justify-center space-x-2">
                         <Download className="w-3 h-3" />
-                        <a href="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=upi://pay?pn=Superpage&pa=example@upi&am=1" download>Download QR</a>
+                        <a href={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=upi://pay?pn=Superpage&pa=${upiId}&am=${totalAmount}`} download>Download QR</a>
                       </div>
                     </div>
                   </div>
                   <div className="bg-gray-50 rounded-lg p-4">
-                    <p className="text-sm text-gray-600 mb-1"><span className="font-medium">Amount:</span> {formatCurrency(pricing.actualPrice)}</p>
+                    <p className="text-sm text-gray-600 mb-1"><span className="font-medium">Amount:</span> {formatCurrency(totalAmount)}</p>
                     <p className="text-sm text-gray-600 mb-1"><span className="font-medium">Users:</span> {userCount}</p>
                     <p className="text-sm text-gray-600 mb-1"><span className="font-medium">UPI ID:</span> {upiId}</p>
                     <p className="text-xs text-gray-500 mt-2">Scan this QR code with any UPI app to complete payment</p>
@@ -613,10 +650,22 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                 {promoApplied && (<div className="flex justify-between text-sm text-green-600 mb-1"><span>Promo Applied</span><span>-{formatCurrency(discountAmount)}</span></div>)}
                 <div className="flex justify-between text-sm font-semibold text-gray-900 pt-2 border-t border-gray-200"><span>Total</span><span>{formatCurrency(totalAmount)}</span></div>
               </div>
-              <div className="flex items-center space-x-2 mb-3">
-                <input value={promoCode} onChange={(e)=>setPromoCode(e.target.value)} placeholder="Promo code (SAVE10)" className="flex-1 px-3 py-2 border border-gray-300 rounded-lg" />
-                <button onClick={()=>{ if(promoCode.trim().toUpperCase()==='SAVE10') setPromoApplied(true); }} className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm">Apply</button>
+              <div className="flex items-center space-x-2 mb-2">
+                <input
+                  value={promoCode}
+                  onChange={(e)=>{ setPromoCode(e.target.value); setPromoMessage(null); setPromoMessageType(null); }}
+                  placeholder="Promo code (SAVE10)"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg"
+                  aria-label="Enter promo code"
+                />
+                <button onClick={handleApplyPromo} className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm">Apply</button>
+                {(promoApplied || promoCode) && (
+                  <button onClick={handleClearPromo} className="px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm" aria-label="Clear promo code">Clear</button>
+                )}
               </div>
+              {promoMessage && (
+                <div className={`${promoMessageType === 'success' ? 'text-green-600' : 'text-red-600'} text-xs mb-3`}>{promoMessage}</div>
+              )}
               <div className="text-xs text-gray-500">By completing this purchase you agree to our <a href="#" className="text-purple-600">Terms</a> and <a href="#" className="text-purple-600">Privacy Policy</a>.</div>
             </div>
           </div>

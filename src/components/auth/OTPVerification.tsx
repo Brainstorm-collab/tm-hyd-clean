@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { Mail } from 'lucide-react';
@@ -11,10 +11,11 @@ interface OTPVerificationProps {
 export const OTPVerification: React.FC<OTPVerificationProps> = ({ onSwitchToLogin }) => {
   const { verifyOTP, resendOTP } = useAuth();
   const { success, error, info } = useToast();
-  const [otp, setOtp] = useState<string[]>(new Array(6).fill(''));
+
   const [email, setEmail] = useState('');
+  const [otp, setOtp] = useState<string[]>(Array(6).fill(''));
   const [isLoading, setIsLoading] = useState(false);
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
 
   const handleChange = (element: HTMLInputElement, index: number) => {
     if (isNaN(Number(element.value))) return;
@@ -99,7 +100,23 @@ export const OTPVerification: React.FC<OTPVerificationProps> = ({ onSwitchToLogi
             </div>
 
             <h1 className="text-2xl font-bold text-gray-900 text-center mb-2">Verify email address</h1>
-            <p className="text-gray-600 text-center mb-8">Enter OTP send to your email</p>
+            <p className="text-gray-600 text-center mb-8">Enter OTP sent to your email</p>
+
+            <form onSubmit={handleSendOTP} className="space-y-4 mb-6">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+              <div className="flex items-center space-x-2">
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  className="flex-1 px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  required
+                />
+                <button type="submit" disabled={isLoading} className="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm rounded-md">Send OTP</button>
+              </div>
+            </form>
 
             <form onSubmit={handleVerifyOTP} className="space-y-6">
               <div className="flex justify-center space-x-2">
@@ -109,7 +126,7 @@ export const OTPVerification: React.FC<OTPVerificationProps> = ({ onSwitchToLogi
                     type="text"
                     maxLength={1}
                     value={digit}
-                    onChange={(e) => handleChange(e.target, index)}
+                    onChange={(e) => handleChange(e.target as HTMLInputElement, index)}
                     onKeyDown={(e) => handleKeyDown(e, index)}
                     ref={(el) => { inputRefs.current[index] = el; }}
                     className="w-12 h-12 text-center text-2xl border border-gray-300  focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
@@ -128,7 +145,7 @@ export const OTPVerification: React.FC<OTPVerificationProps> = ({ onSwitchToLogi
               <div className="text-center">
                 <p className="text-sm text-gray-600">
                   Still not received?{' '}
-                  <button type="button" onClick={(e) => handleSendOTP(e as any)} className="text-purple-600 hover:text-purple-700 font-medium">Resend</button>
+                  <button type="button" onClick={handleResendOTP} className="text-purple-600 hover:text-purple-700 font-medium">Resend</button>
                 </p>
               </div>
 

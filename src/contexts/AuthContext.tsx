@@ -6,11 +6,11 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
-  signup: (name: string, email: string, password: string) => Promise<{ success: boolean; message: string }>;
+  signup: (name: string, email: string, password: string, options?: { receiveTips?: boolean }) => Promise<{ success: boolean; message: string }>;
   logout: () => void;
   continueAsGuest: () => void;
   socialLogin: (provider: 'google' | 'facebook') => Promise<{ success: boolean; message: string }>;
-  updateUser: (updates: Partial<User>) => void;
+  updateUser: (updates: Partial<User>) => Promise<void>;
   forgotPassword: (email: string) => Promise<{ success: boolean; message: string }>;
   resetPassword: (token: string, newPassword: string) => Promise<{ success: boolean; message: string }>;
   verifyOTP: (email: string, otp: string) => Promise<{ success: boolean; message: string }>;
@@ -96,7 +96,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const signup = async (name: string, email: string, password: string): Promise<{ success: boolean; message: string }> => {
+  const signup = async (name: string, email: string, password: string, options?: { receiveTips?: boolean }): Promise<{ success: boolean; message: string }> => {
     try {
       setIsLoading(true);
       
@@ -128,6 +128,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             autoRenew: true
           }
         };
+        // Optionally store marketing preference locally for demo purposes
+        if (options?.receiveTips) {
+          // no-op persistence stub for now
+        }
         
         setCurrentUser(user);
         localStorage.setItem('currentUser', JSON.stringify(user));
@@ -217,7 +221,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const updateUser = (updates: Partial<User>) => {
+  const updateUser = async (updates: Partial<User>) => {
     if (currentUser) {
       const updatedUser = { ...currentUser, ...updates };
       setCurrentUser(updatedUser);

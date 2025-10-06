@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { 
   Filter,
   ChevronDown,
@@ -12,7 +12,6 @@ import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 
 export const SearchResults: React.FC = () => {
   const location = useLocation();
-  const navigate = useNavigate();
   const urlParams = new URLSearchParams(location.search);
   const searchQuery = urlParams.get('q') || '';
   const [showFilters, setShowFilters] = useState(true);
@@ -21,7 +20,7 @@ export const SearchResults: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState('Nov 2022');
   const debouncedQuery = useDebouncedValue(searchQuery, 400);
 
-  // Keep user on search page; do not redirect when query is empty
+  // Manage local UI state for search filters and results; routing is handled elsewhere
 
   // Dropdown state for announcements and teams entries
   const [openAnnouncement, setOpenAnnouncement] = useState<string | null>(null);
@@ -49,7 +48,7 @@ export const SearchResults: React.FC = () => {
     return () => document.removeEventListener('mousedown', onDocClick);
   }, [openAnnouncement, openTeam, showFilters]);
 
-  // Note: navigation effect above routes to home when query is empty.
+  // Note: This component does not perform navigation on empty queries.
 
   const searchResults = {
     tasks: [
@@ -233,7 +232,7 @@ export const SearchResults: React.FC = () => {
                           />
                           <div className="flex-1">
                             <h3 className="font-medium text-gray-900 text-sm leading-tight mb-1">
-                              No task results for '{searchQuery}'
+                              No task results for '{debouncedQuery}'
                             </h3>
                             <div className="text-xs text-gray-500">Try a different keyword.</div>
                           </div>

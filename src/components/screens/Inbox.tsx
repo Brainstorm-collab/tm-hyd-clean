@@ -18,6 +18,7 @@ export const Inbox: React.FC = () => {
   const settingsMenuRef = useRef<HTMLDivElement>(null);
   const headerMenuRef = useRef<HTMLDivElement>(null);
   const bottomMenuRef = useRef<HTMLDivElement>(null);
+  const [isActionLoading, setIsActionLoading] = useState<string | null>(null);
 
   // Sample conversations data
   const conversations = [
@@ -190,6 +191,47 @@ export const Inbox: React.FC = () => {
     console.log(`Settings action: ${action}`);
   };
 
+  const getCurrentChatId = () => currentConversation?.id || '';
+
+  const handleMuteNotifications = async (chatId: string) => {
+    try {
+      setIsActionLoading('mute');
+      // TODO: call API to mute notifications for chatId
+      await new Promise(r => setTimeout(r, 400));
+    } catch (e) {
+      console.error('Mute failed', e);
+    } finally {
+      setIsActionLoading(null);
+      setShowHeaderMenu(false);
+    }
+  };
+
+  const handleBlockUser = async (chatId: string) => {
+    try {
+      setIsActionLoading('block');
+      // TODO: call API to block user for chatId
+      await new Promise(r => setTimeout(r, 400));
+    } catch (e) {
+      console.error('Block failed', e);
+    } finally {
+      setIsActionLoading(null);
+      setShowHeaderMenu(false);
+    }
+  };
+
+  const handleDeleteChat = async (chatId: string) => {
+    try {
+      setIsActionLoading('delete');
+      // TODO: call API to delete chatId and optimistically update UI
+      await new Promise(r => setTimeout(r, 400));
+    } catch (e) {
+      console.error('Delete failed', e);
+    } finally {
+      setIsActionLoading(null);
+      setShowHeaderMenu(false);
+    }
+  };
+
   const currentConversation = conversations.find(c => c.name === activeConversation);
 
   return (
@@ -248,7 +290,7 @@ export const Inbox: React.FC = () => {
                     />
                   </button>
                   {conversation.isOnline && (
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white "></div>
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -319,22 +361,25 @@ export const Inbox: React.FC = () => {
                   View Profile
                 </button>
                 <button
-                  onClick={() => { setShowHeaderMenu(false); }}
+                  onClick={() => handleMuteNotifications(getCurrentChatId())}
                   className="flex items-center w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
+                  aria-busy={isActionLoading==='mute'}
                 >
                   <BellOff className="w-4 h-4 text-gray-500 mr-2" />
                   Mute Notifications
                 </button>
                 <button
-                  onClick={() => { setShowHeaderMenu(false); }}
+                  onClick={() => handleBlockUser(getCurrentChatId())}
                   className="flex items-center w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
+                  aria-busy={isActionLoading==='block'}
                 >
                   <Ban className="w-4 h-4 text-gray-500 mr-2" />
                   Block User
                 </button>
                 <button
-                  onClick={() => { setShowHeaderMenu(false); }}
+                  onClick={() => handleDeleteChat(getCurrentChatId())}
                   className="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                  aria-busy={isActionLoading==='delete'}
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
                   Delete Chat

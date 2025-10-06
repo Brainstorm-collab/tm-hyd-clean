@@ -26,11 +26,12 @@ export const ForgotPassword: React.FC<ForgotPasswordProps> = ({
       } else {
         error('Failed to Send Reset Link', result.message);
       }
+    } catch (err) {
+      error('Error', 'An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen bg-white">
       <div className="flex items-center justify-between p-6">

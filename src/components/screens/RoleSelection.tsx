@@ -26,30 +26,27 @@ export const RoleSelection: React.FC = () => {
     );
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (selectedRoles.length > 0) {
       const primaryRole = selectedRoles[0];
-      updateUser({
-        preferences: {
-          // keep existing preferences, update role and onboarding flag; updateUser merges shallowly, so include both
-          // downstream code should tolerate extra fields
-          role: primaryRole as any,
-          onboardingCompleted: true as any
-        } as any
-      });
-      navigate('/home');
+      try {
+        await updateUser({ role: primaryRole });
+        navigate('/home');
+      } catch (err) {
+        console.error('Failed to update user role:', err);
+      }
     }
   };
 
-  const handleSkip = () => {
-    updateUser({
-      preferences: {
-        onboardingCompleted: true as any
-      } as any
-    });
-    navigate('/home');
+  const handleSkip = async () => {
+    try {
+      await updateUser({});
+      navigate('/home');
+    } catch (error) {
+      console.error('Failed to update user preferences:', error);
+      // TODO: Show error message to user
+    }
   };
-
   return (
     <div className="min-h-screen bg-white">
       <div className="flex items-center justify-between p-6">
@@ -58,8 +55,8 @@ export const RoleSelection: React.FC = () => {
           <span className="font-semibold text-lg text-gray-900">Superpage</span>
         </div>
         <div className="flex items-center space-x-3">
-          <button className="px-4 py-2 text-gray-600 bg-gray-100  hover:bg-gray-200 transition-colors">Explore Features</button>
-          <button className="px-4 py-2 text-white bg-black  hover:bg-gray-800 transition-colors">Get Started</button>
+          <button onClick={() => navigate('/features')} aria-label="Explore Features" className="px-4 py-2 text-gray-600 bg-gray-100  hover:bg-gray-200 transition-colors">Explore Features</button>
+          <button onClick={() => navigate('/signup')} aria-label="Get Started" className="px-4 py-2 text-white bg-black  hover:bg-gray-800 transition-colors">Get Started</button>
         </div>
       </div>
 

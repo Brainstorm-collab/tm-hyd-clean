@@ -176,10 +176,6 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchQuery(value);
-    if (!value.trim()) {
-      // Stay on search page when clearing input
-      navigate('/search');
-    }
   };
 
   // Navigate when debounced query changes, only if it matches latest input

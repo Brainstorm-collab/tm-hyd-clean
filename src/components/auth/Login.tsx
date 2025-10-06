@@ -62,13 +62,18 @@ export const Login: React.FC<LoginProps> = ({
           <span className="font-semibold text-lg text-gray-900">Superpage</span>
         </div>
         <div className="flex items-center space-x-3">
-          <button className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
+          <button 
+            onClick={() => {/* navigate to features page */}}
+            className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+          >
             Explore Features
           </button>
-          <button className="px-4 py-2 text-white bg-black hover:bg-gray-800 transition-colors">
+          <button 
+            onClick={onSwitchToSignup}
+            className="px-4 py-2 text-white bg-black hover:bg-gray-800 transition-colors"
+          >
             Get Started
-          </button>
-        </div>
+          </button>        </div>
       </div>
 
       <div className="flex items-center justify-center h-[calc(100vh-80px)] px-4">
@@ -101,8 +106,8 @@ export const Login: React.FC<LoginProps> = ({
                   disabled={isLoading}
                   className="w-full flex items-center justify-center px-3 py-2.5 border border-gray-300 hover:bg-gray-50 transition-colors text-sm bg-white text-gray-700 font-medium rounded-md"
                 >
-                  <img src="/images/google-g.svg" alt="Google" className="w-4 h-4 mr-2" />
-                  Sign up with Google
+                  <img src="/images/google-g.svg" alt="Google" className="w-4 h-4 mr-2" aria-label="Sign in with Google" />
+                  Sign in with Google
                 </button>
                 <button
                   type="button"
@@ -111,8 +116,7 @@ export const Login: React.FC<LoginProps> = ({
                   className="w-full flex items-center justify-center px-3 py-2.5 border border-gray-300 hover:bg-gray-50 transition-colors text-sm bg-white text-gray-700 font-medium rounded-md"
                 >
                   <img src="/images/facebook-f.svg" alt="Facebook" className="w-4 h-4 mr-2" />
-                  Sign up with Facebook
-                </button>
+                  Sign in with Facebook                </button>
               </div>
 
               <div className="flex items-center my-3">
@@ -130,12 +134,11 @@ export const Login: React.FC<LoginProps> = ({
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6B40ED] focus:border-transparent"
-                    placeholder="Johsnwilliamson@gmail.com"
+                    placeholder="johnwilliamson@gmail.com"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-                  <input
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>                  <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}

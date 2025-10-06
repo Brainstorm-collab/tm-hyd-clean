@@ -38,9 +38,10 @@ export const UserProfile: React.FC = () => {
   const [showAssignTask, setShowAssignTask] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
   const [taskName, setTaskName] = useState('Design new draft');
-  const [dueDate, setDueDate] = useState('20-10-2022');
-  const [dueTime, setDueTime] = useState('11:30 AM');
+  const [dueDate, setDueDate] = useState('2022-10-20');
+  const [dueTime, setDueTime] = useState('11:30');
   const [taskTags] = useState<string[]>(['User Experience Design', 'UI Design']);
+  const [selectedTag, setSelectedTag] = useState(taskTags[0]);
   const { success } = useToast();
 
   return (<>
@@ -166,13 +167,20 @@ export const UserProfile: React.FC = () => {
             <label className="block text-sm text-gray-700 mb-1">Task Tag</label>
             <div className="flex flex-wrap gap-2">
               {taskTags.map((tag, idx) => (
-                <span key={idx} className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-purple-100 text-purple-700">{tag}</span>
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setSelectedTag(tag)}
+                  className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${selectedTag === tag ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-700'}`}
+                >
+                  {tag}
+                </button>
               ))}
             </div>
           </div>
           <button
             onClick={() => {
-              setTasks(prev => [{ id: `t${Date.now()}`, title: taskName, date: `${dueDate} - ${dueTime}`, tag: taskTags[0] || 'Design', done: false }, ...prev]);
+              setTasks(prev => [{ id: `t${Date.now()}`, title: taskName, date: `${dueDate} - ${dueTime}`, tag: selectedTag || taskTags[0], done: false }, ...prev]);
               setShowAssignTask(false);
               success('Task Created', 'The task was created successfully.');
             }}

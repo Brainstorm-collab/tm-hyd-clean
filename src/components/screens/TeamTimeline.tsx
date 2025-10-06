@@ -25,6 +25,23 @@ const rows = [
   "Olivia Thomas",
 ];
 
+// Helper to construct profile navigation path and state
+function createProfileNavigation(name: string, image: string) {
+  const firstName = (name || "").trim().split(" ")[0]?.toLowerCase() || "";
+  const initials = (name || "")
+    .trim()
+    .split(" ")
+    .filter(Boolean)
+    .map((w) => w[0])
+    .join("");
+  return {
+    path: `/profile/${firstName}`,
+    // The navigate API expects the second argument to be an options object
+    // where the "state" key holds the actual history state payload
+    state: { state: { user: { id: firstName, name, image, avatar: initials } } },
+  };
+}
+
 
 const tasks: TaskDef[] = [
   // Row 1 with smaller width
@@ -186,7 +203,11 @@ const TeamTimeline: React.FC = () => {
             <div className="row" key={name}>
               <div className="member-col">
                 <button
-                  onClick={() => navigate(`/profile/${name.split(" ")[0].toLowerCase()}`, { state: { user: { id: name.split(" ")[0].toLowerCase(), name, image: `https://i.pravatar.cc/40?img=${rowIdx + 1}`, avatar: name.split(" ").map(w=>w[0]).join("") } } })}
+                  onClick={() => {
+                    const imageUrl = `https://i.pravatar.cc/40?img=${rowIdx + 1}`;
+                    const nav = createProfileNavigation(name, imageUrl);
+                    navigate(nav.path, nav.state);
+                  }}
                   className="member-btn"
                   aria-label={`Open ${name} profile`}
                 >
@@ -215,7 +236,12 @@ const TeamTimeline: React.FC = () => {
                           <div className="task-title">{t.title}</div>
                           <div className="task-sub">
                             <button
-                              onClick={() => navigate(`/profile/${rows[t.row].split(" ")[0].toLowerCase()}`, { state: { user: { id: rows[t.row].split(" ")[0].toLowerCase(), name: rows[t.row], image: t.avatar, avatar: rows[t.row].split(" ").map(w=>w[0]).join("") } } })}
+                              onClick={() => {
+                                const memberName = rows[t.row];
+                                const imageUrl = t.avatar;
+                                const nav = createProfileNavigation(memberName, imageUrl);
+                                navigate(nav.path, nav.state);
+                              }}
                               className="avatar-btn"
                               aria-label="Open profile"
                             >
