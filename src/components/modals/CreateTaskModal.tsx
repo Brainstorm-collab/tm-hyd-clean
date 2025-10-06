@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Input } from '../ui/Input';
 import { X, Plus, Calendar, Clock } from 'lucide-react';
 import { useModalManager } from '../ModalManager';
+import { useToast } from '../../contexts/ToastContext';
 
 interface CreateTaskModalProps {
   children: React.ReactNode;
@@ -11,6 +12,7 @@ interface CreateTaskModalProps {
 
 export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ children, onTaskCreated, onModalOpen }) => {
   const { openModal, closeModal } = useModalManager();
+  const { success } = useToast();
   const [taskName, setTaskName] = useState('Design new draft');
   const [dueDate, setDueDate] = useState('20-10-2022');
   const [dueTime, setDueTime] = useState('11:30 AM');
@@ -27,6 +29,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ children, onTa
     if (newTag.trim() && !taskTags.includes(newTag.trim())) {
       setTaskTags([...taskTags, newTag.trim()]);
       setNewTag('');
+      success('Tag Added!', `Tag "${newTag.trim()}" has been added to the task.`);
     }
   };
 
@@ -38,6 +41,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ children, onTa
     if (newAssignee.trim() && !assignedTo.includes(newAssignee.trim())) {
       setAssignedTo([...assignedTo, newAssignee.trim()]);
       setNewAssignee('');
+      success('Assignee Added!', `Assignee "${newAssignee.trim()}" has been added to the task.`);
     }
   };
 
@@ -55,6 +59,9 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ children, onTa
 
     onTaskCreated?.(task);
     closeModal();
+    
+    // Show success toast
+    success('Task Created!', `Task "${taskName}" has been successfully created.`);
     
     // Reset form
     setTaskName('Design new draft');

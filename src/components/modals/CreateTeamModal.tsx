@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Input } from '../ui/Input';
 import { X, Plus } from 'lucide-react';
 import { useModalManager } from '../ModalManager';
+import { useToast } from '../../contexts/ToastContext';
 
 interface CreateTeamModalProps {
   children: React.ReactNode;
@@ -11,6 +12,7 @@ interface CreateTeamModalProps {
 
 export const CreateTeamModal: React.FC<CreateTeamModalProps> = ({ children, onTeamCreated, onModalOpen }) => {
   const { openModal, closeModal } = useModalManager();
+  const { success } = useToast();
   const [teamName, setTeamName] = useState('Design new draft');
   const [description, setDescription] = useState('');
   const [invitedMembers, setInvitedMembers] = useState(['@Johnsonwils', 'Anderson123@gmail.com']);
@@ -24,6 +26,7 @@ export const CreateTeamModal: React.FC<CreateTeamModalProps> = ({ children, onTe
     if (newMember.trim() && !invitedMembers.includes(newMember.trim())) {
       setInvitedMembers([...invitedMembers, newMember.trim()]);
       setNewMember('');
+      success('Member Added!', `Member "${newMember.trim()}" has been added to the team.`);
     }
   };
 
@@ -38,6 +41,9 @@ export const CreateTeamModal: React.FC<CreateTeamModalProps> = ({ children, onTe
 
     onTeamCreated?.(team);
     closeModal();
+    
+    // Show success toast
+    success('Team Created!', `Team "${teamName}" has been successfully created.`);
     
     // Reset form
     setTeamName('Design new draft');

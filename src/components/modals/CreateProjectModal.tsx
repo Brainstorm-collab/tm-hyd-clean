@@ -4,6 +4,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Project, TeamMember } from '../../types';
 import { getTeamMembers, setProjects, getProjects } from '../../utils/localStorage';
+import { useToast } from '../../contexts/ToastContext';
 
 interface CreateProjectModalProps {
   children: React.ReactNode;
@@ -11,6 +12,7 @@ interface CreateProjectModalProps {
 }
 
 export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ children, onProjectCreated }) => {
+  const { success } = useToast();
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -58,6 +60,9 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ children
 
     setOpen(false);
     onProjectCreated?.(newProject);
+    
+    // Show success toast
+    success('Project Created!', `Project "${formData.name}" has been successfully created.`);
   };
 
   return (

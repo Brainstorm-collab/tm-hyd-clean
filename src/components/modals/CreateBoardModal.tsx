@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Input } from '../ui/Input';
 import { Upload, X } from 'lucide-react';
 import { useModalManager } from '../ModalManager';
+import { useToast } from '../../contexts/ToastContext';
 
 interface CreateBoardModalProps {
   children: React.ReactNode;
@@ -11,6 +12,7 @@ interface CreateBoardModalProps {
 
 export const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ children, onBoardCreated, onModalOpen }) => {
   const { openModal, closeModal } = useModalManager();
+  const { success } = useToast();
   const [boardName, setBoardName] = useState('Design new draft');
   const [uploadedIcon, setUploadedIcon] = useState<File | null>(null);
 
@@ -31,6 +33,9 @@ export const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ children, on
 
     onBoardCreated?.(board);
     closeModal();
+    
+    // Show success toast
+    success('Board Created!', `Board "${boardName}" has been successfully created.`);
     
     // Reset form
     setBoardName('Design new draft');

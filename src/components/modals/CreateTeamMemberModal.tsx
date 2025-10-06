@@ -4,6 +4,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { TeamMember } from '../../types';
 import { setTeamMembers, getTeamMembers } from '../../utils/localStorage';
+import { useToast } from '../../contexts/ToastContext';
 
 interface CreateTeamMemberModalProps {
   children: React.ReactNode;
@@ -11,6 +12,7 @@ interface CreateTeamMemberModalProps {
 }
 
 export const CreateTeamMemberModal: React.FC<CreateTeamMemberModalProps> = ({ children, onMemberCreated }) => {
+  const { success } = useToast();
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -46,6 +48,9 @@ export const CreateTeamMemberModal: React.FC<CreateTeamMemberModalProps> = ({ ch
 
     setOpen(false);
     onMemberCreated?.(newMember);
+    
+    // Show success toast
+    success('Team Member Added!', `Team member "${formData.name}" has been successfully added.`);
   };
 
   return (

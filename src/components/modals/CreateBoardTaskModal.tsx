@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Input } from '../ui/Input';
 import { Calendar, Clock, X } from 'lucide-react';
 import { useModalManager } from '../ModalManager';
+import { useToast } from '../../contexts/ToastContext';
 
 interface CreateBoardTaskModalProps {
   children: React.ReactNode;
@@ -11,6 +12,7 @@ interface CreateBoardTaskModalProps {
 
 export const CreateBoardTaskModal: React.FC<CreateBoardTaskModalProps> = ({ children, onTaskCreated, onModalOpen }) => {
   const { openModal, closeModal } = useModalManager();
+  const { success } = useToast();
   const [taskName, setTaskName] = useState('Design new draft');
   const [description, setDescription] = useState("It's a new task");
   const [dueDate, setDueDate] = useState('20-10-2022');
@@ -28,6 +30,9 @@ export const CreateBoardTaskModal: React.FC<CreateBoardTaskModalProps> = ({ chil
 
     onTaskCreated?.(task);
     closeModal();
+    
+    // Show success toast
+    success('Board Task Created!', `Board task "${taskName}" has been successfully created.`);
     
     // Reset form
     setTaskName('Design new draft');

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Modal, ModalTrigger, ModalContent, ModalHeader, ModalTitle, ModalClose } from '../ui/Modal';
 import { Avatar, AvatarFallback } from '../ui/Avatar';
 import { X } from 'lucide-react';
+import { useToast } from '../../contexts/ToastContext';
 
 interface Contact {
   id: string;
@@ -20,6 +21,7 @@ export const StartConversationModal: React.FC<StartConversationModalProps> = ({
   children, 
   onConversationStarted 
 }) => {
+  const { success } = useToast();
   const [open, setOpen] = useState(false);
 
   const contacts: Contact[] = [
@@ -70,6 +72,9 @@ export const StartConversationModal: React.FC<StartConversationModalProps> = ({
   const handleContactSelect = (contact: Contact) => {
     onConversationStarted?.(contact);
     setOpen(false);
+    
+    // Show success toast
+    success('Conversation Started!', `Conversation with ${contact.name} has been started.`);
   };
 
   return (

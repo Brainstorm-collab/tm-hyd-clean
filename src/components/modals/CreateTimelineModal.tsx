@@ -12,7 +12,7 @@ interface CreateTimelineModalProps {
 
 export const CreateTimelineModal: React.FC<CreateTimelineModalProps> = ({ children, onTimelineCreated, onModalOpen }) => {
   const { openModal, closeModal } = useModalManager();
-  const { clearAllToasts } = useToast();
+  const { clearAllToasts, success } = useToast();
   const [timelineName, setTimelineName] = useState('');
   const [description, setDescription] = useState('');
   const [startDate, setStartDate] = useState('');
@@ -32,6 +32,9 @@ export const CreateTimelineModal: React.FC<CreateTimelineModalProps> = ({ childr
     onTimelineCreated?.(timeline);
     closeModal();
     setIsModalOpen(false);
+    
+    // Show success toast
+    success('Timeline Created!', `Timeline "${timelineName}" has been successfully created.`);
     
     // Reset form
     setTimelineName('');

@@ -3,6 +3,7 @@ import { Modal, ModalTrigger, ModalContent, ModalHeader, ModalTitle, ModalDescri
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { X, UserPlus, Search } from 'lucide-react';
+import { useToast } from '../../contexts/ToastContext';
 
 interface CreateConversationModalProps {
   children: React.ReactNode;
@@ -10,6 +11,7 @@ interface CreateConversationModalProps {
 }
 
 export const CreateConversationModal: React.FC<CreateConversationModalProps> = ({ children, onConversationCreated }) => {
+  const { success } = useToast();
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
@@ -39,6 +41,9 @@ export const CreateConversationModal: React.FC<CreateConversationModalProps> = (
 
     setOpen(false);
     onConversationCreated?.(newConversation);
+    
+    // Show success toast
+    success('Conversation Started!', `Conversation "${formData.title}" has been successfully created.`);
   };
 
   return (
