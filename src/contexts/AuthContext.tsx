@@ -312,9 +312,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const checkPremiumAccess = (): boolean => {
     if (!currentUser) return false;
-    if (currentUser.id === 'guest') return false;
-    if (currentUser.subscription?.plan === 'guest') return false;
-    return true;
+    const premiumPlans = ['premium', 'pro', 'enterprise'];
+    return premiumPlans.includes(currentUser.subscription?.plan || '');
   };
 
   const isGuest = currentUser?.id === 'guest' || localStorage.getItem('isGuest') === 'true';

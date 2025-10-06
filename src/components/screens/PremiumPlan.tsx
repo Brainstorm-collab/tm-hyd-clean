@@ -139,18 +139,23 @@ export const PremiumPlan: React.FC = () => {
     return billingCycle === 'yearly' ? `Save ${formatCurrency(pricing.yearlySavings)}` : '';
   };
 
-  // For guests, show toast and redirect
-  if (isGuest) {
-    warning(
-      'Login Required',
-      'Please sign in to access premium features and billing.',
-      {
-        label: 'Sign In',
-        onClick: () => {
-          navigate('/login');
+  React.useEffect(() => {
+    if (isGuest) {
+      warning(
+        'Login Required',
+        'Please sign in to access premium features and billing.',
+        {
+          label: 'Sign In',
+          onClick: () => {
+            navigate('/login');
+          }
         }
-      }
-    );
+      );
+      navigate('/login');
+    }
+  }, [isGuest, warning, navigate]);
+
+  if (isGuest) {
     return null;
   }
 

@@ -185,21 +185,27 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
   };
 
   // Navigate when debounced query changes, only if it matches latest input
+  // Reset navigation flag after location changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      isNavigatingRef.current = false;
+    }, 50);
+    return () => clearTimeout(timer);
+  }, [location.pathname]);
+
   // Only auto-navigate to search if user is currently typing (not navigating away)
   useEffect(() => {
     if (isNavigatingRef.current) return; // Prevent navigation during programmatic navigation
-    
+
     const normalized = debouncedQuery.trim();
     if (normalized && debouncedQuery === searchQuery && location.pathname !== '/search') {
       // Only navigate to search if we're not already on search page
       isNavigatingRef.current = true;
       navigate(`/search?q=${encodeURIComponent(normalized)}`);
-      setTimeout(() => { isNavigatingRef.current = false; }, 100);
     } else if (!normalized && location.pathname === '/search') {
       // Keep user on search route with empty query only if they're already there
       isNavigatingRef.current = true;
       navigate('/search');
-      setTimeout(() => { isNavigatingRef.current = false; }, 100);
     }
   }, [debouncedQuery, searchQuery, navigate, location.pathname]);
 
@@ -230,9 +236,9 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
         <div className="flex items-center space-x-4 min-w-0 flex-shrink-0">
           <button
             onClick={() => {
-              // Navigate back to home page
+              // Navigate back to previous page
               isNavigatingRef.current = true;
-              navigate('/home');
+              navigate(-1);
               setTimeout(() => { isNavigatingRef.current = false; }, 100);
             }}
             className={`flex items-center space-x-2 transition-colors w-8 h-8 flex-shrink-0 ${

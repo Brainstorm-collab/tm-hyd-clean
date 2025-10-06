@@ -26,7 +26,7 @@ export const EmptyHome: React.FC = () => {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold text-gray-900">Hi Guest User!, You are almost done.</h2>
-            <p className="text-gray-600">Please complete few steps to setup your account completly.</p>
+            <p className="text-gray-600">Please complete few steps to setup your account completely.</p>
           </div>
           <button className="px-4 py-2 bg-primary-100 text-primary-700 hover:bg-primary-200 transition-colors">
             Setup Account &gt;

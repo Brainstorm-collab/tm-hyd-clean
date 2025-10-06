@@ -45,8 +45,8 @@ export const Layout: React.FC<LayoutProps> = ({
 
   const handleSearch = (query: string) => {
     if (query.trim()) {
-      // Navigate to tasks page with search query
-      navigate(`/tasks?search=${encodeURIComponent(query)}`);
+      // Navigate to search results page
+      navigate(`/search?q=${encodeURIComponent(query)}`);
     }
   };
 

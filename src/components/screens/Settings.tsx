@@ -555,12 +555,18 @@ export const Settings: React.FC = () => {
                     type={showPasswords.current ? 'text' : 'password'}
                     value={passwordData.currentPassword}
                     onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                    className="w-full px-3 py-2 pr-10 border border-gray-300  focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                    disabled={isGuest}
+                    className={`w-full px-3 py-2 pr-10 border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 ${
+                      isGuest ? 'bg-gray-100 cursor-not-allowed opacity-60' : ''
+                    }`}
                   />
                   <button 
                     type="button"
                     onClick={() => setShowPasswords({ ...showPasswords, current: !showPasswords.current })}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 hover:text-gray-600 transition-colors"
+                    disabled={isGuest}
+                    className={`absolute right-3 top-1/2 transform -translate-y-1/2 transition-colors ${
+                      isGuest ? 'cursor-not-allowed opacity-60' : 'hover:text-gray-600'
+                    }`}
                   >
                     {showPasswords.current ? (
                       <EyeOff className="w-4 h-4 text-gray-400" />
@@ -579,12 +585,18 @@ export const Settings: React.FC = () => {
                     type={showPasswords.new ? 'text' : 'password'}
                     value={passwordData.newPassword}
                     onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                    className="w-full px-3 py-2 pr-10 border border-gray-300  focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                    disabled={isGuest}
+                    className={`w-full px-3 py-2 pr-10 border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 ${
+                      isGuest ? 'bg-gray-100 cursor-not-allowed opacity-60' : ''
+                    }`}
                   />
                   <button 
                     type="button"
                     onClick={() => setShowPasswords({ ...showPasswords, new: !showPasswords.new })}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 hover:text-gray-600 transition-colors"
+                    disabled={isGuest}
+                    className={`absolute right-3 top-1/2 transform -translate-y-1/2 transition-colors ${
+                      isGuest ? 'cursor-not-allowed opacity-60' : 'hover:text-gray-600'
+                    }`}
                   >
                     {showPasswords.new ? (
                       <EyeOff className="w-4 h-4 text-gray-400" />
@@ -603,7 +615,9 @@ export const Settings: React.FC = () => {
                     type={showPasswords.retype ? 'text' : 'password'}
                     value={passwordData.retypePassword}
                     onChange={(e) => setPasswordData({ ...passwordData, retypePassword: e.target.value })}
+                    disabled={isGuest}
                     className={`w-full px-3 py-2 pr-10 border focus:ring-2 focus:ring-purple-500 focus:border-purple-500 ${
+                      isGuest ? 'bg-gray-100 cursor-not-allowed opacity-60 border-gray-300' : 
                       passwordData.retypePassword && passwordData.newPassword && 
                       passwordData.retypePassword !== passwordData.newPassword 
                         ? 'border-red-300' 
@@ -613,7 +627,10 @@ export const Settings: React.FC = () => {
                   <button 
                     type="button"
                     onClick={() => setShowPasswords({ ...showPasswords, retype: !showPasswords.retype })}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 hover:text-gray-600 transition-colors"
+                    disabled={isGuest}
+                    className={`absolute right-3 top-1/2 transform -translate-y-1/2 transition-colors ${
+                      isGuest ? 'cursor-not-allowed opacity-60' : 'hover:text-gray-600'
+                    }`}
                   >
                     {showPasswords.retype ? (
                       <EyeOff className="w-4 h-4 text-gray-400" />
@@ -630,7 +647,10 @@ export const Settings: React.FC = () => {
 
               <Button 
                 onClick={handlePasswordChange}
-                className="flex items-center space-x-2 hover:opacity-80"
+                disabled={isGuest}
+                className={`flex items-center space-x-2 ${
+                  isGuest ? 'cursor-not-allowed opacity-60' : 'hover:opacity-80'
+                }`}
               >
                 <Check className="w-4 h-4" />
                 <span>Change Password</span>
@@ -755,6 +775,13 @@ export const Settings: React.FC = () => {
                 <div className="flex items-center space-x-4 mt-4">
                   <Button 
                     onClick={() => {
+                      if (isGuest) {
+                        error(
+                          'Login Required',
+                          'Please login to upgrade your plan. You can login using the login button in the profile dropdown.'
+                        );
+                        return;
+                      }
                       console.log('Upgrade Plan button clicked, navigating to /premium');
                       try {
                         navigate('/premium');
@@ -924,7 +951,10 @@ export const Settings: React.FC = () => {
                     value={deactivationData.reason}
                     onChange={(e) => setDeactivationData({ ...deactivationData, reason: e.target.value })}
                     placeholder="Write your reason...."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                    disabled={isGuest}
+                    className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 ${
+                      isGuest ? 'bg-gray-100 cursor-not-allowed opacity-60' : ''
+                    }`}
                     rows={4}
                   />
                 </div>
@@ -935,8 +965,11 @@ export const Settings: React.FC = () => {
                     type="checkbox"
                     checked={deactivationData.agreeToTerms}
                     onChange={(e) => setDeactivationData({ ...deactivationData, agreeToTerms: e.target.checked })}
-                    className="w-4 h-4 rounded-sm border-gray-300 focus:ring-2"
-                    style={{ accentColor: '#6B40ED' }}
+                    disabled={isGuest}
+                    className={`w-4 h-4 rounded-sm border-gray-300 focus:ring-2 ${
+                      isGuest ? 'cursor-not-allowed opacity-60' : ''
+                    }`}
+                    style={{ accentColor: isGuest ? '#9CA3AF' : '#6B40ED' }}
                   />
                   <label className="text-sm text-gray-700">
                     I agree with your terms and conditions to delete or deactive my account
@@ -945,8 +978,22 @@ export const Settings: React.FC = () => {
 
                 {/* Action Buttons */}
                 <div className="flex space-x-3">
-                  <Button className="bg-gray-600 text-white hover:bg-gray-700">Deactivate Account</Button>
-                  <Button className="bg-red-400 text-white hover:bg-red-500">Delete Account</Button>
+                  <Button 
+                    disabled={isGuest}
+                    className={`bg-gray-600 text-white ${
+                      isGuest ? 'cursor-not-allowed opacity-60' : 'hover:bg-gray-700'
+                    }`}
+                  >
+                    Deactivate Account
+                  </Button>
+                  <Button 
+                    disabled={isGuest}
+                    className={`bg-red-400 text-white ${
+                      isGuest ? 'cursor-not-allowed opacity-60' : 'hover:bg-red-500'
+                    }`}
+                  >
+                    Delete Account
+                  </Button>
                 </div>
               </div>
             </div>

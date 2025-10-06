@@ -129,6 +129,7 @@ export const CreateTeamModal: React.FC<CreateTeamModalProps> = ({ children, onTe
                 <button
                   onClick={handleAddMember}
                   className="px-3 py-2 rounded-button bg-primary-100 text-primary-700 hover:bg-primary-200"
+                  aria-label="Add member"
                 >
                   <Plus className="w-4 h-4" />
                 </button>

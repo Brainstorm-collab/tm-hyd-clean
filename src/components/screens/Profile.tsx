@@ -23,8 +23,11 @@ const guestData = {
 export const Profile: React.FC = () => {
   const { success, error } = useToast();
   const { currentUser, updateUser, isGuest } = useAuth();
-  const [user, setUserState] = useState<UserType | null>(null);
+  const [userState, setUserState] = useState<UserType | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  
+  // Alias for easier reference
+  const user = userState;
   
   const [editData, setEditData] = useState({
     name: '',
@@ -66,24 +69,37 @@ export const Profile: React.FC = () => {
         }
       } as UserType);
       setEditData(guestData);
+    } else if (currentUser) {
+      setUserState(currentUser);
+      setEditData({
+        name: currentUser.name || '',
+        firstName: currentUser.firstName || '',
+        lastName: currentUser.lastName || '',
+        email: currentUser.email || '',
+        role: currentUser.role || '',
+        bio: currentUser.bio || '',
+        phone: currentUser.phone || '',
+        location: currentUser.location || '',
+        website: currentUser.website || ''
+      });
     } else {
-      const currentUser = getUser();
-      if (currentUser) {
-        setUserState(currentUser);
+      const storedUser = getUser();
+      if (storedUser) {
+        setUserState(storedUser);
         setEditData({
-          name: currentUser.name || '',
-          firstName: currentUser.firstName || '',
-          lastName: currentUser.lastName || '',
-          email: currentUser.email || '',
-          role: currentUser.role || '',
-          bio: currentUser.bio || '',
-          phone: currentUser.phone || '',
-          location: currentUser.location || '',
-          website: currentUser.website || ''
+          name: storedUser.name || '',
+          firstName: storedUser.firstName || '',
+          lastName: storedUser.lastName || '',
+          email: storedUser.email || '',
+          role: storedUser.role || '',
+          bio: storedUser.bio || '',
+          phone: storedUser.phone || '',
+          location: storedUser.location || '',
+          website: storedUser.website || ''
         });
       }
     }
-  }, [isGuest]);
+  }, [isGuest, currentUser]);
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
