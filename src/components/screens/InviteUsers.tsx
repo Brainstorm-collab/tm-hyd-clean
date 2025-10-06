@@ -7,18 +7,16 @@ import { useToast } from '../../contexts/ToastContext';
 // Simple email validator for client-side UX only
 const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
-const InviteUsers: React.FC = () => {
-  const { success, error, info } = useToast();
-  const [emailInput, setEmailInput] = useState('Johnsonwillamson123');
-  const [emails, setEmails] = useState<string[]>([
-    'Henrykane@gmail.com',
-    'Johnwillamson@gmail.com',
-    'Julianaolivia@gmail.com'
-  ]);
-  const [submitting, setSubmitting] = useState(false);
+interface InviteUsersProps {
+  totalInvites?: number;
+  acceptedInvites?: number;
+}
 
-  const totalInvites = 10200;
-  const acceptedInvites = 10200;
+const InviteUsers: React.FC<InviteUsersProps> = ({ totalInvites = 0, acceptedInvites = 0 }) => {
+  const { success, error, info } = useToast();
+  const [emailInput, setEmailInput] = useState('');
+  const [emails, setEmails] = useState<string[]>([]);
+  const [submitting, setSubmitting] = useState(false);
 
   const inviteCountText = useMemo(() => `${emails.length} email address${emails.length === 1 ? '' : 'es'} added to invite`, [emails.length]);
 
@@ -30,18 +28,22 @@ const InviteUsers: React.FC = () => {
   const handleSubmit = async () => {
     if (submitting || emails.length === 0) return;
     setSubmitting(true);
-    // Simulate request
     setTimeout(() => {
       setSubmitting(false);
-      // In a real app, show toast success here
+      success(
+        'Invites Sent',
+        `Successfully sent invites to ${emails.length} email address${emails.length === 1 ? '' : 'es'}.`
+      );
+      setEmails([]);
     }, 800);
   };
 
   const addFromInput = () => {
-    const trimmed = emailInput.trim();
-    if (!trimmed) return;
-    const candidates = trimmed.split(/[\s,;]+/).filter(Boolean);
-    const validNew = candidates.filter(c => isValidEmail(c) && !emails.includes(c));
+    const raw = emailInput.trim();
+    if (!raw) return;
+    const entries = raw.split(/[\s,;]+/).filter(Boolean);
+    const unique = entries.filter((e) => !emails.includes(e));
+    const validNew = unique.filter(isValidEmail);
     if (validNew.length > 0) {
       setEmails(prev => [...prev, ...validNew]);
       setEmailInput('');
@@ -67,7 +69,7 @@ const InviteUsers: React.FC = () => {
                 <FileText className="w-5 h-5 text-purple-600" />
               </div>
               <div>
-                <p className="text-xs text-gray-500">Total Invites Send</p>
+                <p className="text-xs text-gray-500">Total Invites Sent</p>
                 <p className="text-base font-semibold text-gray-900">{(totalInvites / 1000).toFixed(1)}K</p>
               </div>
             </div>
