@@ -3,6 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { Smile } from 'lucide-react';
 import { Logo } from '../ui/Logo';
+import { SocialLogin } from './SocialLogin';
 
 interface LoginProps {
   onSwitchToSignup: () => void;
@@ -35,18 +36,9 @@ export const Login: React.FC<LoginProps> = ({
     }
   };
 
-  const handleSocial = async (provider: 'google' | 'facebook') => {
-    setIsLoading(true);
-    try {
-      const result = await socialLogin(provider);
-      if (result.success) {
-        success('Welcome!', `Successfully signed in with ${provider}`);
-      } else {
-        error('Login Failed', result.message);
-      }
-    } finally {
-      setIsLoading(false);
-    }
+  const handleSocialSuccess = () => {
+    // Social login success is handled in the SocialLogin component
+    // This callback can be used for any additional actions after successful login
   };
 
   const handleGuest = () => {
@@ -99,24 +91,11 @@ export const Login: React.FC<LoginProps> = ({
             </p>
 
             <div className="mb-3">
-              <div className="space-y-2 mb-3">
-                <button
-                  type="button"
-                  onClick={() => handleSocial('google')}
+              <div className="mb-3">
+                <SocialLogin 
+                  onSuccess={handleSocialSuccess}
                   disabled={isLoading}
-                  className="w-full flex items-center justify-center px-3 py-2.5 border border-gray-300 hover:bg-gray-50 transition-colors text-sm bg-white text-gray-700 font-medium rounded-md"
-                >
-                  <img src="/images/google-g.svg" alt="Google" className="w-4 h-4 mr-2" aria-label="Sign in with Google" />
-                  Sign in with Google
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleSocial('facebook')}
-                  disabled={isLoading}
-                  className="w-full flex items-center justify-center px-3 py-2.5 border border-gray-300 hover:bg-gray-50 transition-colors text-sm bg-white text-gray-700 font-medium rounded-md"
-                >
-                  <img src="/images/facebook-f.svg" alt="Facebook" className="w-4 h-4 mr-2" />
-                  Sign in with Facebook                </button>
+                />
               </div>
 
               <div className="flex items-center my-3">

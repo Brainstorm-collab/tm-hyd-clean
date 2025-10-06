@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { Smile } from 'lucide-react';
 import { Logo } from '../ui/Logo';
+import { SocialLogin } from './SocialLogin';
 
 interface SignupProps {
   onSwitchToLogin: () => void;
@@ -55,6 +56,11 @@ export const Signup: React.FC<SignupProps> = ({
     }
   };
 
+  const handleSocialSuccess = () => {
+    // After successful social signup, go to onboarding role selection
+    navigate('/onboarding/role');
+  };
+
   return (
     <div className="h-screen bg-white overflow-hidden">
       <div className="flex items-center justify-between p-4">
@@ -94,21 +100,11 @@ export const Signup: React.FC<SignupProps> = ({
               </button>
             </p>
 
-            <div className="space-y-2 mb-3">
-              <button
-                type="button"
-                className="w-full flex items-center justify-center px-3 py-2.5 border border-gray-300 hover:bg-gray-50 transition-colors text-sm bg-white text-gray-700 font-medium rounded-md"
-              >
-                <img src="/images/google-g.svg" alt="Google" className="w-4 h-4 mr-2" />
-                Sign up with Google
-              </button>
-              <button
-                type="button"
-                className="w-full flex items-center justify-center px-3 py-2.5 border border-gray-300 hover:bg-gray-50 transition-colors text-sm bg-white text-gray-700 font-medium rounded-md"
-              >
-                <img src="/images/facebook-f.svg" alt="Facebook" className="w-4 h-4 mr-2" />
-                Sign up with Facebook
-              </button>
+            <div className="mb-3">
+              <SocialLogin 
+                onSuccess={handleSocialSuccess}
+                disabled={isLoading}
+              />
             </div>
 
             <div className="relative my-3">

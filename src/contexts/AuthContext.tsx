@@ -10,7 +10,7 @@ interface AuthContextType {
   signup: (name: string, email: string, password: string, options?: { receiveTips?: boolean }) => Promise<{ success: boolean; message: string }>;
   logout: () => void;
   continueAsGuest: () => void;
-  socialLogin: (provider: 'google' | 'facebook') => Promise<{ success: boolean; message: string }>;
+  socialLogin: (provider: 'google' | 'facebook', userData?: any) => Promise<{ success: boolean; message: string }>;
   updateUser: (updates: Partial<User>) => Promise<void>;
   forgotPassword: (email: string) => Promise<{ success: boolean; message: string }>;
   resetPassword: (token: string, newPassword: string) => Promise<{ success: boolean; message: string }>;
@@ -185,18 +185,38 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.setItem('isGuest', 'true');
   };
 
-  const socialLogin = async (provider: 'google' | 'facebook'): Promise<{ success: boolean; message: string }> => {
+  const socialLogin = async (provider: 'google' | 'facebook', userData?: any): Promise<{ success: boolean; message: string }> => {
     try {
       setIsLoading(true);
       
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
+      // Extract user data based on provider
+      let name = `${provider.charAt(0).toUpperCase() + provider.slice(1)} User`;
+      let email = `user@${provider}.com`;
+      let avatarUrl = '';
+      
+      if (userData) {
+        if (provider === 'google') {
+          // For Google, userData would contain the credential response
+          // In a real app, you'd decode the JWT token to get user info
+          name = userData.name || name;
+          email = userData.email || email;
+          avatarUrl = userData.picture || avatarUrl;
+        } else if (provider === 'facebook') {
+          // For Facebook, userData contains the response object
+          name = userData.name || name;
+          email = userData.email || email;
+          avatarUrl = userData.picture?.data?.url || avatarUrl;
+        }
+      }
+      
       const user: User = {
         id: Date.now().toString(),
-        name: `${provider.charAt(0).toUpperCase() + provider.slice(1)} User`,
-        email: `user@${provider}.com`,
-        avatarUrl: '',
+        name: name,
+        email: email,
+        avatarUrl: avatarUrl,
         preferences: {
           theme: 'light',
           notifications: true,
