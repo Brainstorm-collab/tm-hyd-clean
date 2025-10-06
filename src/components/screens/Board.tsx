@@ -6,7 +6,8 @@ import {
   Monitor,
   CheckCircle,
   FolderOpen,
-  Check
+  Check,
+  Trash2
 } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '../ui/Card';
 import { Avatar, AvatarFallback } from '../ui/Avatar';
@@ -24,6 +25,7 @@ interface Task {
 }
 
 export const Board: React.FC = () => {
+  const [selectedColumn, setSelectedColumn] = useState<string | null>(null);
   const [tasks, setTasks] = useState<Task[]>([
     {
       id: '1',
@@ -142,6 +144,12 @@ export const Board: React.FC = () => {
     return tasks.filter(task => task.status === status);
   };
 
+  const handleDeleteColumn = (columnId: string) => {
+    // Delete all tasks in this column
+    setTasks(prevTasks => prevTasks.filter(task => task.status !== columnId));
+    setSelectedColumn(null);
+  };
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -182,9 +190,25 @@ export const Board: React.FC = () => {
                       <button className="p-1 hover:bg-gray-100 rounded-button">
                         <Plus className="w-4 h-4 text-gray-600" />
                       </button>
-                      <button className="p-1 hover:bg-gray-100 rounded-button">
-                        <MoreVertical className="w-4 h-4 text-gray-600" />
-                      </button>
+                      <div className="relative">
+                        <button 
+                          onClick={() => setSelectedColumn(selectedColumn === column.id ? null : column.id)}
+                          className="p-1 hover:bg-gray-100 rounded-button"
+                        >
+                          <MoreVertical className="w-4 h-4 text-gray-600" />
+                        </button>
+                        {selectedColumn === column.id && (
+                          <div className="absolute right-0 mt-2 w-48 bg-white rounded-card shadow-lg border border-gray-300 py-1 z-50">
+                            <button
+                              onClick={() => handleDeleteColumn(column.id)}
+                              className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Delete
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -2,8 +2,20 @@ import React from 'react';
 import { Card, CardContent, CardHeader } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Calendar, Plus, UserPlus } from 'lucide-react';
+import { CreateTimelineModal } from '../modals/CreateTimelineModal';
+import { useToast } from '../../contexts/ToastContext';
 
 export const EmptyTimeline: React.FC = () => {
+  const { success } = useToast();
+
+  const handleTimelineCreated = (timeline: any) => {
+    console.log('Timeline created:', timeline);
+    success(
+      'Timeline Created',
+      `${timeline.name} has been added to your timelines.`
+    );
+  };
+
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
@@ -20,10 +32,12 @@ export const EmptyTimeline: React.FC = () => {
             <UserPlus className="w-4 h-4" />
             <span>Invite</span>
           </Button>
-          <Button className="bg-black text-white flex items-center space-x-2">
-            <Plus className="w-4 h-4" />
-            <span>Add Task</span>
-          </Button>
+          <CreateTimelineModal onTimelineCreated={handleTimelineCreated}>
+            <Button className="bg-black text-white flex items-center space-x-2">
+              <Plus className="w-4 h-4" />
+              <span>Add Timeline</span>
+            </Button>
+          </CreateTimelineModal>
         </div>
       </div>
 

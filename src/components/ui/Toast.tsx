@@ -15,17 +15,17 @@ const toastIcons = {
 };
 
 const toastStyles = {
-  success: 'bg-primary-100 border-primary-200 text-primary-700',
-  error: 'bg-red-50 border-red-200 text-red-800',
-  warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
-  info: 'bg-primary-100 border-primary-200 text-primary-700',
+  success: 'bg-green-100 border-green-300 text-green-900',
+  error: 'bg-red-100 border-red-300 text-red-900',
+  warning: 'bg-yellow-100 border-yellow-300 text-yellow-900',
+  info: 'bg-blue-100 border-blue-300 text-blue-900',
 };
 
 const iconStyles = {
-  success: 'text-primary-500',
-  error: 'text-red-500',
-  warning: 'text-yellow-500',
-  info: 'text-primary-500',
+  success: 'text-green-600',
+  error: 'text-red-600',
+  warning: 'text-yellow-600',
+  info: 'text-blue-600',
 };
 
 export const Toast: React.FC<ToastProps> = ({ toast, onRemove }) => {
@@ -33,7 +33,7 @@ export const Toast: React.FC<ToastProps> = ({ toast, onRemove }) => {
 
   return (
     <div
-      className={`w-full bg-white shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden border ${toastStyles[toast.type]}`}
+      className={`w-full bg-white shadow-xl rounded-lg pointer-events-auto ring-2 ring-black ring-opacity-10 overflow-hidden border-2 ${toastStyles[toast.type]}`}
     >
       <div className="p-4">
         <div className="flex items-start space-x-3">
@@ -51,8 +51,8 @@ export const Toast: React.FC<ToastProps> = ({ toast, onRemove }) => {
                   onClick={toast.action.onClick}
                   className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
                     toast.action.variant === 'primary'
-                      ? 'bg-primary-700 text-white hover:bg-primary-600'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'bg-green-700 text-white hover:bg-green-800'
+                      : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
                   }`}
                 >
                   {toast.action.label}
@@ -62,7 +62,7 @@ export const Toast: React.FC<ToastProps> = ({ toast, onRemove }) => {
           </div>
           <div className="flex-shrink-0">
             <button
-              className="bg-white rounded-md inline-flex text-gray-400 hover:text-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 p-1"
+              className="bg-white rounded-md inline-flex text-gray-500 hover:text-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600 p-1"
               onClick={() => onRemove(toast.id)}
             >
               <span className="sr-only">Close</span>

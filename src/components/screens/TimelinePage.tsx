@@ -15,9 +15,20 @@ import {
   Grid3X3
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '../ui/Avatar';
+import { CreateTimelineModal } from '../modals/CreateTimelineModal';
+import { useToast } from '../../contexts/ToastContext';
 
 export const TimelinePage: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date(2022, 9, 21)); // October 2022
+  const { success } = useToast();
+
+  const handleTimelineCreated = (timeline: any) => {
+    console.log('Timeline created:', timeline);
+    success(
+      'Timeline Created',
+      `${timeline.name} has been added to your timelines.`
+    );
+  };
 
   const teamMembers = [
     {
@@ -228,10 +239,12 @@ export const TimelinePage: React.FC = () => {
               <span>Invite</span>
             </button>
             
-            <button className="bg-black text-white px-4 py-2  hover:bg-gray-800 transition-colors flex items-center space-x-2">
-              <Plus className="w-4 h-4" />
-              <span>Add Task</span>
-            </button>
+            <CreateTimelineModal onTimelineCreated={handleTimelineCreated}>
+              <button className="bg-black text-white px-4 py-2  hover:bg-gray-800 transition-colors flex items-center space-x-2">
+                <Plus className="w-4 h-4" />
+                <span>Add Timeline</span>
+              </button>
+            </CreateTimelineModal>
           </div>
         </div>
 

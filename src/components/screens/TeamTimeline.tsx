@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import "./TeamTimeline.css";
 import InviteMembersModal from "../modals/InviteMembersModal";
 import DateFilterDropdown from "../modals/DateFilterDropdown";
+import { CreateTimelineModal } from "../modals/CreateTimelineModal";
+import { useToast } from "../../contexts/ToastContext";
 
 type TaskDef = {
   id: number;
@@ -47,6 +49,15 @@ const TeamTimeline: React.FC = () => {
   const [isDateFilterOpen, setIsDateFilterOpen] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState("November");
   const [selectedYear, setSelectedYear] = useState("2022");
+  const { success } = useToast();
+
+  const handleTimelineCreated = (timeline: any) => {
+    console.log('Timeline created:', timeline);
+    success(
+      'Timeline Created',
+      `${timeline.name} has been added to your timelines.`
+    );
+  };
 
   const setRef = (id: number, el: HTMLDivElement | null) => {
     taskRefs.current[id] = el;
@@ -126,7 +137,9 @@ const TeamTimeline: React.FC = () => {
             {selectedMonth.slice(0, 3)}, {selectedYear}
           </button>
           <button className="invite-btn" onClick={() => setIsInviteModalOpen(true)}>+ Invite</button>
-          <button className="add-btn">+ Add Task</button>
+          <CreateTimelineModal onTimelineCreated={handleTimelineCreated}>
+            <button className="add-btn">+ Add Timeline</button>
+          </CreateTimelineModal>
         </div>
       </header>
 

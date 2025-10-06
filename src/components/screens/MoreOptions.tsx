@@ -95,20 +95,20 @@ export const MoreOptions: React.FC = () => {
   };
 
   return (
-    <div className="h-screen bg-white overflow-hidden">
-      <div className="p-6 h-full flex flex-col">
+    <div className="h-full bg-white overflow-hidden">
+      <div className="p-4 h-full flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between flex-shrink-0 mb-6">
+        <div className="flex items-center justify-between flex-shrink-0 mb-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">More options</h1>
-            <p className="text-gray-600">Extra options for fast working.</p>
+            <p className="text-base text-gray-600">Extra options for fast working.</p>
           </div>
           
           <div className="flex items-center space-x-4">
             {/* Filters Button */}
             <button 
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-button hover:bg-gray-50"
+              className="flex items-center space-x-2 px-3 py-2 border border-gray-300 rounded-button hover:bg-gray-50"
             >
               <Filter className="w-4 h-4 text-gray-600" />
               <span className="text-sm font-medium">Filters</span>
@@ -122,27 +122,27 @@ export const MoreOptions: React.FC = () => {
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 flex gap-6">
+        <div className="flex-1 relative min-h-0">
           {/* Options Grid */}
-          <div className="flex-1 overflow-hidden">
-            <div className="grid grid-cols-2 gap-4 h-full">
+          <div className="h-full overflow-hidden">
+            <div className="grid grid-cols-2 gap-3 h-full">
               {options.map((option) => {
                 const Icon = option.icon;
                 return (
                   <button
                     key={option.id}
                     onClick={() => handleOptionClick(option.id)}
-                    className={`p-4 text-left border rounded-card transition-colors ${
+                    className={`p-3 text-left border rounded-card transition-colors ${
                       selectedOption === option.id
                         ? 'border-purple-500 bg-purple-50'
                         : 'border-gray-300 hover:bg-gray-50'
                     }`}
                   >
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                    <div className="flex items-center space-x-2">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                         selectedOption === option.id ? 'bg-purple-100' : 'bg-gray-100'
                       }`}>
-                        <Icon className={`w-5 h-5 ${
+                        <Icon className={`w-4 h-4 ${
                           selectedOption === option.id ? 'text-[#6B40ED]' : 'text-gray-600'
                         }`} />
                       </div>
@@ -158,21 +158,21 @@ export const MoreOptions: React.FC = () => {
             </div>
           </div>
 
-          {/* Filters Panel */}
+          {/* Filters Panel - Overlay */}
           {showFilters && (
-            <div className="w-64 bg-white border border-gray-200 rounded-card p-4 flex-shrink-0">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Filters</h3>
+            <div className="absolute top-0 right-0 w-48 bg-white border-l border-gray-200 shadow-lg p-3 z-10">
+              <h3 className="text-sm font-semibold text-gray-900 mb-3">Filters</h3>
               
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {/* Categories */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
                     Categories
                   </label>
                   <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-transparent"
                   >
                     <option value="All Categories">All Categories</option>
                     <option value="Design">Design</option>
@@ -183,13 +183,13 @@ export const MoreOptions: React.FC = () => {
 
                 {/* Select Tag */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
                     Select Tag
                   </label>
                   <select
                     value={selectedTag}
                     onChange={(e) => setSelectedTag(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-transparent"
                   >
                     <option value="Design">Design</option>
                     <option value="Development">Development</option>
@@ -200,7 +200,7 @@ export const MoreOptions: React.FC = () => {
 
                 {/* Select Date */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
                     Select Date
                   </label>
                   <div className="relative">
@@ -208,9 +208,9 @@ export const MoreOptions: React.FC = () => {
                       type="text"
                       value={selectedDate}
                       onChange={(e) => setSelectedDate(e.target.value)}
-                      className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="w-full px-2 py-1 pr-8 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-transparent"
                     />
-                    <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Calendar className="absolute right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-400" />
                   </div>
                 </div>
               </div>

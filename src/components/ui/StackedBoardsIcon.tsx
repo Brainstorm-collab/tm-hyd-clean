@@ -1,54 +1,61 @@
 import React from 'react';
 
 interface StackedBoardsIconProps {
+  size?: number;
+  color?: string;
   className?: string;
-  size?: 'sm' | 'md' | 'lg';
   style?: React.CSSProperties;
 }
 
 export const StackedBoardsIcon: React.FC<StackedBoardsIconProps> = ({ 
-  className = '', 
-  size = 'md',
+  size = 24, 
+  color = '#6B40ED',
+  className = '',
   style = {}
 }) => {
-  const sizeClasses = {
-    sm: 'w-4 h-4',
-    md: 'w-6 h-6',
-    lg: 'w-8 h-8',
-  };
-
-  const currentSizeClass = sizeClasses[size];
-
   return (
-    <svg
-      className={`${currentSizeClass} ${className}`}
+    <svg 
+      width={size} 
+      height={size} 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      className={className}
       style={style}
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
     >
-      {/* Bottom circle (largest) */}
-      <circle
-        cx="12"
-        cy="16"
-        r="6"
-        fill="currentColor"
-        opacity="0.8"
+      {/* Bottom rectangle (largest) */}
+      <rect 
+        x="4" 
+        y="14" 
+        width="16" 
+        height="6" 
+        rx="1" 
+        stroke={color} 
+        strokeWidth="1.5" 
+        fill="none"
       />
-      {/* Middle circle */}
-      <circle
-        cx="12"
-        cy="12"
-        r="5"
-        fill="currentColor"
-        opacity="0.9"
+      
+      {/* Middle rectangle (medium) */}
+      <rect 
+        x="6" 
+        y="10" 
+        width="12" 
+        height="4" 
+        rx="1" 
+        stroke={color} 
+        strokeWidth="1.5" 
+        fill="none"
       />
-      {/* Top circle (smallest) */}
-      <circle
-        cx="12"
-        cy="8"
-        r="4"
-        fill="currentColor"
+      
+      {/* Top rectangle (smallest) */}
+      <rect 
+        x="8" 
+        y="6" 
+        width="8" 
+        height="4" 
+        rx="1" 
+        stroke={color} 
+        strokeWidth="1.5" 
+        fill="none"
       />
     </svg>
   );

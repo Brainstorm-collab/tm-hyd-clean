@@ -314,6 +314,29 @@ function LegacyAppContent() {
 
   // Show main app interface for guest users (with empty data)
   if (isAuthenticated && currentUser?.id === 'guest') {
+    // If guest user wants to login, show login screen
+    if (authScreen === 'login') {
+      return (
+        <div className="min-h-screen bg-gray-50">
+          <div className="max-w-md mx-auto pt-8">
+            <button
+              onClick={() => setAuthScreen('main')}
+              className="mb-4 text-gray-600 hover:text-gray-800 flex items-center"
+            >
+              ← Back to App
+            </button>
+            <Login
+              onLogin={handleLogin}
+              onSwitchToSignup={() => setAuthScreen('signup')}
+              onSwitchToForgotPassword={() => setAuthScreen('forgot-password')}
+              onContinueAsGuest={handleContinueAsGuest}
+              onSocialLogin={handleSocialLogin}
+            />
+          </div>
+        </div>
+      );
+    }
+    
     return (
       <Router>
         <AppRouter 

@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Camera, Upload, X, User as UserIcon } from 'lucide-react';
+import { Camera, Upload, User as UserIcon } from 'lucide-react';
 import { Button } from './Button';
 import { useToast } from '../../contexts/ToastContext';
 
@@ -97,13 +97,6 @@ export const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
     fileInputRef.current?.click();
   };
 
-  const handleRemovePicture = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-    setPreviewUrl(null);
-    // You might want to call onUpload with null or empty to remove the picture
-  };
 
   const getInitials = (name: string): string => {
     return name
@@ -152,15 +145,6 @@ export const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
           <Camera className={cameraIconSizes[size]} />
         </button>
 
-        {/* Remove button (only show if there's a picture and not disabled) */}
-        {displayUrl && !isUploading && !disabled && (
-          <button
-            onClick={handleRemovePicture}
-            className="absolute top-0 right-0 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg"
-          >
-            <X className="w-3 h-3" />
-          </button>
-        )}
       </div>
 
       {/* Upload button (optional) */}

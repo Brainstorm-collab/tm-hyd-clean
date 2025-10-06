@@ -249,11 +249,11 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
         </form>
 
         {/* Right side */}
-        <div className="flex items-center space-x-3 flex-shrink-0">
+        <div className="flex items-center space-x-2 flex-shrink-0" style={{ gap: '5px' }}>
           {/* Pro Subscription Button */}
           <button 
             onClick={() => navigate('/premium')}
-            className="flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-lg hover:from-yellow-500 hover:to-orange-600 transition-all duration-200 shadow-sm"
+            className="flex items-center space-x-2 pl-3 pr-4 py-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-lg hover:from-yellow-500 hover:to-orange-600 transition-all duration-200 shadow-sm"
           >
             <Crown className="w-4 h-4" />
             <span className="text-sm font-medium">Pro</span>
@@ -474,12 +474,10 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
                 <button
                   onClick={() => {
                     if (user?.id === 'guest') {
-                      console.log('Header: Guest login button clicked, onNavigateToLogin:', onNavigateToLogin);
+                      setShowUserMenu(false);
                       if (onNavigateToLogin) {
-                        console.log('Header: Calling onNavigateToLogin');
                         onNavigateToLogin();
                       } else {
-                        console.log('Header: onNavigateToLogin is not available, trying navigation');
                         navigate('/login');
                       }
                     } else {

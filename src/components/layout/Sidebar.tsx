@@ -75,26 +75,45 @@ export const Sidebar: React.FC<SidebarProps> = ({
   return (
     <div className={cn(
       'bg-white border-r border-gray-200 transition-all duration-300 flex flex-col',
-      isCollapsed ? 'w-16' : 'w-64'
+      isCollapsed ? 'w-20' : 'w-64'
     )}>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
-        {!isCollapsed && (
-          <div className="flex items-center space-x-3">
+      <div className={cn(
+        'flex items-center border-b border-gray-200',
+        isCollapsed ? 'justify-center p-3 relative' : 'justify-between p-4'
+      )}>
+        {!isCollapsed ? (
+          <>
+            <button 
+              onClick={() => navigate('/home')}
+              className="flex items-center space-x-3 hover:scale-105 transition-transform duration-200 cursor-pointer"
+            >
+              <Logo size="sm" />
+              <span className="font-semibold text-lg text-gray-900">Superpage</span>
+            </button>
+            <button
+              onClick={onToggle}
+              className="p-1 rounded-button hover:bg-gray-100 transition-colors"
+            >
+              <ChevronLeft className="w-5 h-5 text-gray-600" />
+            </button>
+          </>
+        ) : (
+          <button 
+            onClick={() => navigate('/home')}
+            className="flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer"
+          >
             <Logo size="sm" />
-            <span className="font-semibold text-lg text-gray-900">Superpage</span>
-          </div>
+          </button>
         )}
-        <button
-          onClick={onToggle}
-          className="p-1 rounded-button hover:bg-gray-100 transition-colors"
-        >
-          {isCollapsed ? (
-            <ChevronRight className="w-5 h-5 text-gray-600" />
-          ) : (
-            <ChevronLeft className="w-5 h-5 text-gray-600" />
-          )}
-        </button>
+        {isCollapsed && (
+          <button
+            onClick={onToggle}
+            className="absolute top-2 right-2 p-1 rounded-button hover:bg-gray-100 transition-colors"
+          >
+            <ChevronRight className="w-4 h-4 text-gray-600" />
+          </button>
+        )}
       </div>
 
       {/* Navigation */}
@@ -108,7 +127,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
               key={item.id}
               onClick={() => handleItemClick(item)}
               className={cn(
-                'w-full flex items-center space-x-3 px-3 py-2 text-left transition-colors rounded-button',
+                'w-full flex items-center transition-colors rounded-button',
+                isCollapsed 
+                  ? 'justify-center px-3 py-3' 
+                  : 'space-x-3 px-3 py-2 text-left',
                 isActive
                   ? 'border-r-2'
                   : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
@@ -119,7 +141,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 borderRightColor: '#6B40ED'
               } : {}}
             >
-              <Icon className="w-5 h-5 flex-shrink-0" />
+              <Icon className={cn(
+                'flex-shrink-0',
+                isCollapsed ? 'w-6 h-6' : 'w-5 h-5'
+              )} />
               {!isCollapsed && (
                 <span className="font-medium">{item.label}</span>
               )}
@@ -134,15 +159,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
           'flex items-center space-x-3',
           isCollapsed && 'justify-center'
         )}>
-          <Avatar className="w-8 h-8">
+          <Avatar className={cn(
+            isCollapsed ? 'w-10 h-10' : 'w-8 h-8'
+          )}>
             {user?.avatarUrl ? (
               <AvatarImage 
                 src={user.avatarUrl} 
                 alt={user.name || 'User'} 
-                className="w-8 h-8 object-cover"
+                className={cn(
+                  isCollapsed ? 'w-10 h-10' : 'w-8 h-8',
+                  'object-cover'
+                )}
               />
             ) : null}
-            <AvatarFallback className="bg-primary-100 text-primary-700 text-sm">
+            <AvatarFallback className={cn(
+              'bg-primary-100 text-primary-700',
+              isCollapsed ? 'text-base' : 'text-sm'
+            )}>
               {user ? getInitials(user.name) : 'AU'}
             </AvatarFallback>
           </Avatar>

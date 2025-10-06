@@ -18,10 +18,13 @@ export const Signup: React.FC<SignupProps> = ({
     <div className="h-screen bg-white overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between p-4">
-        <div className="flex items-center space-x-2">
+        <button 
+          onClick={() => window.location.href = '/home'}
+          className="flex items-center space-x-2 hover:scale-105 transition-transform duration-200 cursor-pointer"
+        >
           <Logo size="md" />
           <span className="font-semibold text-lg text-gray-900">Superpage</span>
-        </div>
+        </button>
         <div className="flex items-center space-x-3">
           <button className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
             Explore Features
@@ -67,6 +70,7 @@ export const Signup: React.FC<SignupProps> = ({
                     headerTitle: 'hidden',
                     headerSubtitle: 'hidden',
                     socialButtonsBlockButton: 'w-full flex items-center justify-center px-3 py-2.5 border border-gray-300 hover:bg-gray-50 transition-colors text-sm bg-white text-gray-700 font-medium rounded-md mb-2',
+                    socialButtonsBlockButtonIcon: 'w-6 h-6 mr-3',
                     socialButtonsBlockButtonText: 'text-gray-700 font-medium',
                     dividerLine: 'bg-gray-300',
                     dividerText: 'text-gray-500 text-sm',

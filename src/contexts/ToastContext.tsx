@@ -19,6 +19,7 @@ interface ToastContextType {
   toasts: Toast[];
   addToast: (toast: Omit<Toast, 'id'>) => void;
   removeToast: (id: string) => void;
+  clearAllToasts: () => void;
   success: (title: string, message?: string, action?: ToastAction) => void;
   error: (title: string, message?: string, action?: ToastAction) => void;
   warning: (title: string, message?: string, action?: ToastAction) => void;
@@ -39,14 +40,17 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   const addToast = useCallback((toast: Omit<Toast, 'id'>) => {
+    // Clear any existing toasts first
+    setToasts([]);
+    
     const id = Math.random().toString(36).substr(2, 9);
     const newToast: Toast = {
       ...toast,
       id,
-      duration: toast.duration || 5000,
+      duration: toast.duration || 3000, // Reduced from 5000 to 3000ms
     };
 
-    setToasts(prev => [...prev, newToast]);
+    setToasts([newToast]); // Only show the new toast
 
     // Auto remove toast after duration
     setTimeout(() => {
@@ -56,6 +60,10 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const removeToast = useCallback((id: string) => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
+  }, []);
+
+  const clearAllToasts = useCallback(() => {
+    setToasts([]);
   }, []);
 
   const success = useCallback((title: string, message?: string, action?: ToastAction) => {
@@ -79,6 +87,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       toasts,
       addToast,
       removeToast,
+      clearAllToasts,
       success,
       error,
       warning,

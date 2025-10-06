@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   User, 
   Bell, 
@@ -40,6 +41,7 @@ import {
 export const Settings: React.FC = () => {
   const { currentUser, updateUser } = useAuth();
   const { success, error } = useToast();
+  const navigate = useNavigate();
   
   // Check if user is a guest
   const isGuest = currentUser?.id === 'guest';
@@ -55,6 +57,11 @@ export const Settings: React.FC = () => {
     newPassword: '',
     retypePassword: ''
   });
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    retype: false
+  });
 
   // Initialize profile data from current user
   useEffect(() => {
@@ -66,6 +73,15 @@ export const Settings: React.FC = () => {
         phone: '+1234567890' // Default phone, can be extended in User interface
       });
     }
+    
+    // Initialize original notifications state
+    setOriginalNotifications({
+      newUserJoining: false,
+      uiKitBuying: false,
+      newUiKitLaunched: false,
+      weeklyReport: false,
+      newMessage: false
+    });
   }, [currentUser]);
 
   // Handle profile update
@@ -78,6 +94,51 @@ export const Settings: React.FC = () => {
       };
       updateUser(updatedUser);
       // Show success message or handle success
+    }
+  };
+
+  // Handle notification settings save
+  const handleNotificationSave = () => {
+    const notificationNames = {
+      newUserJoining: 'New User Joining',
+      uiKitBuying: 'UI Kit Buying',
+      newUiKitLaunched: 'New UI Kit Launched',
+      weeklyReport: 'Weekly Report',
+      newMessage: 'New Message'
+    };
+
+    // Check what changed and show appropriate toast messages
+    const changes: string[] = [];
+    
+    Object.keys(notifications).forEach((key) => {
+      const notificationKey = key as keyof typeof notifications;
+      const originalValue = originalNotifications[notificationKey];
+      const currentValue = notifications[notificationKey];
+      
+      if (originalValue !== currentValue) {
+        if (currentValue) {
+          changes.push(`${notificationNames[notificationKey]} enabled`);
+        } else {
+          changes.push(`${notificationNames[notificationKey]} disabled`);
+        }
+      }
+    });
+
+    if (changes.length > 0) {
+      // Update original notifications to current state
+      setOriginalNotifications({ ...notifications });
+      
+      // Show success message with all changes
+      success(
+        'Notification Settings Updated',
+        `Changes saved: ${changes.join(', ')}`
+      );
+    } else {
+      // No changes made
+      success(
+        'No Changes',
+        'Your notification settings are already up to date'
+      );
     }
   };
 
@@ -105,7 +166,61 @@ export const Settings: React.FC = () => {
     }
   };
 
+  // Handle password change
+  const handlePasswordChange = () => {
+    if (isGuest) {
+      error(
+        'Login Required',
+        'Please login to change your password. You can login using the login button in the profile dropdown.'
+      );
+      return;
+    }
+
+    // Validate passwords
+    if (!passwordData.currentPassword.trim()) {
+      error('Validation Error', 'Current password is required');
+      return;
+    }
+
+    if (!passwordData.newPassword.trim()) {
+      error('Validation Error', 'New password is required');
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      error('Validation Error', 'New password must be at least 6 characters long');
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.retypePassword) {
+      error('Password Mismatch', 'New password and retype password do not match');
+      return;
+    }
+
+    if (passwordData.currentPassword === passwordData.newPassword) {
+      error('Validation Error', 'New password must be different from current password');
+      return;
+    }
+
+    // If all validations pass, show success message
+    success('Password Updated', 'Your password has been changed successfully!');
+    
+    // Clear password fields
+    setPasswordData({
+      currentPassword: '',
+      newPassword: '',
+      retypePassword: ''
+    });
+  };
+
   const [notifications, setNotifications] = useState({
+    newUserJoining: false,
+    uiKitBuying: false,
+    newUiKitLaunched: false,
+    weeklyReport: false,
+    newMessage: false
+  });
+  const [originalNotifications, setOriginalNotifications] = useState({
     newUserJoining: false,
     uiKitBuying: false,
     newUiKitLaunched: false,
@@ -164,8 +279,24 @@ export const Settings: React.FC = () => {
     }
     
     const updatedIntegrations = [...integrations];
+    const integration = updatedIntegrations[index];
+    const wasConnected = integration.connected;
+    
     updatedIntegrations[index].connected = !updatedIntegrations[index].connected;
     setIntegrations(updatedIntegrations);
+    
+              // Show toast message based on the action
+              if (wasConnected) {
+                success(
+                  'Integration Disconnected',
+                  `${integration.name} has been disconnected.`
+                );
+              } else {
+                success(
+                  'Integration Connected',
+                  `${integration.name} has been connected.`
+                );
+              }
   };
 
   const renderIntegrationIcon = (icon: string) => {
@@ -237,25 +368,16 @@ export const Settings: React.FC = () => {
       {/* Left Sidebar - Settings Navigation */}
       <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
         {/* Header */}
-        <div className="p-4 border-b border-gray-200">
-          <div className="flex items-center space-x-2">
-            <span className="text-gray-600">←</span>
-            <h1 className="text-lg font-semibold text-gray-900">Settings</h1>
-          </div>
+        <div className="px-4 pt-2 pb-1">
           {isGuest && (
-            <p className="text-sm text-gray-500 mt-2">
+            <p className="text-sm text-gray-500">
               Login to access all settings and customization options
             </p>
           )}
         </div>
 
         {/* Settings Navigation */}
-        <div className="p-4">
-          <div className="mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Settings</h2>
-            <p className="text-sm text-gray-600">You can find all settings here.</p>
-          </div>
-          
+        <div className="px-4 pt-2">
           <nav className="space-y-1">
             {tabs.map((tab) => {
               const Icon = tab.icon;
@@ -263,9 +385,9 @@ export const Settings: React.FC = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`w-full flex items-center space-x-3 px-3 py-2 text-left transition-colors  ${
+                  className={`w-full flex items-center space-x-3 px-3 py-2 text-left transition-colors rounded-lg ${
                     activeTab === tab.id
-                      ? 'bg-gray-100 text-gray-900'
+                      ? 'bg-purple-100 text-purple-700 border-r-2 border-purple-500'
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                   }`}
                 >
@@ -432,13 +554,21 @@ export const Settings: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
                 <div className="relative">
                   <input
-                    type="password"
+                    type={showPasswords.current ? 'text' : 'password'}
                     value={passwordData.currentPassword}
                     onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
                     className="w-full px-3 py-2 pr-10 border border-gray-300  focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                   />
-                  <button className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                    <Eye className="w-4 h-4 text-gray-400" />
+                  <button 
+                    type="button"
+                    onClick={() => setShowPasswords({ ...showPasswords, current: !showPasswords.current })}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 hover:text-gray-600 transition-colors"
+                  >
+                    {showPasswords.current ? (
+                      <EyeOff className="w-4 h-4 text-gray-400" />
+                    ) : (
+                      <Eye className="w-4 h-4 text-gray-400" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -448,13 +578,21 @@ export const Settings: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
                 <div className="relative">
                   <input
-                    type="password"
+                    type={showPasswords.new ? 'text' : 'password'}
                     value={passwordData.newPassword}
                     onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
                     className="w-full px-3 py-2 pr-10 border border-gray-300  focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                   />
-                  <button className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                    <EyeOff className="w-4 h-4 text-gray-400" />
+                  <button 
+                    type="button"
+                    onClick={() => setShowPasswords({ ...showPasswords, new: !showPasswords.new })}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 hover:text-gray-600 transition-colors"
+                  >
+                    {showPasswords.new ? (
+                      <EyeOff className="w-4 h-4 text-gray-400" />
+                    ) : (
+                      <Eye className="w-4 h-4 text-gray-400" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -464,18 +602,38 @@ export const Settings: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Re-type Password</label>
                 <div className="relative">
                   <input
-                    type="password"
+                    type={showPasswords.retype ? 'text' : 'password'}
                     value={passwordData.retypePassword}
                     onChange={(e) => setPasswordData({ ...passwordData, retypePassword: e.target.value })}
-                    className="w-full px-3 py-2 pr-10 border border-gray-300  focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                    className={`w-full px-3 py-2 pr-10 border focus:ring-2 focus:ring-purple-500 focus:border-purple-500 ${
+                      passwordData.retypePassword && passwordData.newPassword && 
+                      passwordData.retypePassword !== passwordData.newPassword 
+                        ? 'border-red-300' 
+                        : 'border-gray-300'
+                    }`}
                   />
-                  <button className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                    <Eye className="w-4 h-4 text-gray-400" />
+                  <button 
+                    type="button"
+                    onClick={() => setShowPasswords({ ...showPasswords, retype: !showPasswords.retype })}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 hover:text-gray-600 transition-colors"
+                  >
+                    {showPasswords.retype ? (
+                      <EyeOff className="w-4 h-4 text-gray-400" />
+                    ) : (
+                      <Eye className="w-4 h-4 text-gray-400" />
+                    )}
                   </button>
                 </div>
+                {passwordData.retypePassword && passwordData.newPassword && 
+                 passwordData.retypePassword !== passwordData.newPassword && (
+                  <p className="mt-1 text-sm text-red-600">Passwords do not match</p>
+                )}
               </div>
 
-              <Button className="flex items-center space-x-2 hover:opacity-80">
+              <Button 
+                onClick={handlePasswordChange}
+                className="flex items-center space-x-2 hover:opacity-80"
+              >
                 <Check className="w-4 h-4" />
                 <span>Change Password</span>
               </Button>
@@ -522,11 +680,17 @@ export const Settings: React.FC = () => {
               </div>
               
               <div className="flex space-x-3 mt-8">
-                <button className="flex items-center space-x-2 px-4 py-2 bg-[#6B40ED] text-white rounded-button hover:opacity-80 transition-colors">
+                <button 
+                  onClick={handleNotificationSave}
+                  className="flex items-center space-x-2 px-4 py-2 bg-[#6B40ED] text-white rounded-button hover:opacity-80 transition-colors"
+                >
                   <Check className="w-4 h-4" />
                   <span>Save Changes</span>
                 </button>
-                <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-button hover:bg-gray-50 transition-colors">
+                <button 
+                  onClick={() => setNotifications({ ...originalNotifications })}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-button hover:bg-gray-50 transition-colors"
+                >
                   Cancel
                 </button>
               </div>
@@ -592,7 +756,15 @@ export const Settings: React.FC = () => {
                 
                 <div className="flex items-center space-x-4 mt-4">
                   <Button 
-                    onClick={() => window.location.href = '/premium-plan'}
+                    onClick={() => {
+                      console.log('Upgrade Plan button clicked, navigating to /premium');
+                      try {
+                        navigate('/premium');
+                        console.log('Navigation called successfully');
+                      } catch (error) {
+                        console.error('Navigation error:', error);
+                      }
+                    }}
                     className="hover:opacity-80"
                   >
                     {currentUser?.subscription ? 'Manage Plan' : 'Upgrade Plan'}
@@ -775,8 +947,8 @@ export const Settings: React.FC = () => {
 
                 {/* Action Buttons */}
                 <div className="flex space-x-3">
-                  <Button className="hover:opacity-80">Deactivate Account</Button>
-                  <Button className="bg-red-600 text-white hover:bg-red-700">Delete Account</Button>
+                  <Button className="bg-gray-600 text-white hover:bg-gray-700">Deactivate Account</Button>
+                  <Button className="bg-red-400 text-white hover:bg-red-500">Delete Account</Button>
                 </div>
               </div>
             </div>

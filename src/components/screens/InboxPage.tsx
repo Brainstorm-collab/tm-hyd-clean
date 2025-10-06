@@ -30,7 +30,12 @@ import {
   Check,
   Send,
   Smile,
-  ChevronDown
+  ChevronDown,
+  VolumeX,
+  Image,
+  Video,
+  Mic,
+  Edit
 } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '../ui/Card';
 import { Avatar, AvatarFallback } from '../ui/Avatar';
@@ -49,6 +54,18 @@ export const InboxPage: React.FC = () => {
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [showSettingsPopup, setShowSettingsPopup] = useState(false);
+  const [showTopDropdown, setShowTopDropdown] = useState(false);
+  const [showUploadDropdown, setShowUploadDropdown] = useState(false);
+  const [showMessageDropdown, setShowMessageDropdown] = useState(false);
+  const [showTopMessagesDropdown, setShowTopMessagesDropdown] = useState(false);
+  const [showChatHeaderDropdown, setShowChatHeaderDropdown] = useState(false);
+  const [showConversationDropdown, setShowConversationDropdown] = useState<string | null>(null);
+  const topDropdownRef = useRef<HTMLDivElement>(null);
+  const uploadDropdownRef = useRef<HTMLDivElement>(null);
+  const messageDropdownRef = useRef<HTMLDivElement>(null);
+  const topMessagesDropdownRef = useRef<HTMLDivElement>(null);
+  const chatHeaderDropdownRef = useRef<HTMLDivElement>(null);
+  const conversationDropdownRef = useRef<HTMLDivElement>(null);
 
   const conversations: Conversation[] = [
     {
@@ -153,6 +170,33 @@ export const InboxPage: React.FC = () => {
     }
   };
 
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (topDropdownRef.current && !topDropdownRef.current.contains(event.target as Node)) {
+        setShowTopDropdown(false);
+      }
+      if (uploadDropdownRef.current && !uploadDropdownRef.current.contains(event.target as Node)) {
+        setShowUploadDropdown(false);
+      }
+      if (messageDropdownRef.current && !messageDropdownRef.current.contains(event.target as Node)) {
+        setShowMessageDropdown(false);
+      }
+      if (topMessagesDropdownRef.current && !topMessagesDropdownRef.current.contains(event.target as Node)) {
+        setShowTopMessagesDropdown(false);
+      }
+      if (chatHeaderDropdownRef.current && !chatHeaderDropdownRef.current.contains(event.target as Node)) {
+        setShowChatHeaderDropdown(false);
+      }
+      if (conversationDropdownRef.current && !conversationDropdownRef.current.contains(event.target as Node)) {
+        setShowConversationDropdown(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
     <div className="flex bg-white" style={{ width: '1440px', height: '816px' }}>
       {/* Left Sidebar - Navigation */}
@@ -207,6 +251,67 @@ export const InboxPage: React.FC = () => {
               <button className="w-8 h-8 bg-primary-100 text-primary-700 hover:bg-primary-200 transition-colors flex items-center justify-center">
                 <Plus className="w-4 h-4" />
               </button>
+              {/* Debug indicator */}
+              <span className="text-xs text-red-500">{showTopDropdown ? 'OPEN' : 'CLOSED'}</span>
+              <button 
+                onClick={() => {
+                  console.log('Test button clicked');
+                  setShowMessageDropdown(!showMessageDropdown);
+                }}
+                className="px-2 py-1 bg-red-500 text-white text-xs rounded"
+              >
+                Test Dropdown
+              </button>
+              <div className="relative" ref={topDropdownRef}>
+                <button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Top dropdown clicked, current state:', showTopDropdown);
+                    setShowTopDropdown(prev => {
+                      console.log('Setting top dropdown to:', !prev);
+                      return !prev;
+                    });
+                  }}
+                  className={`w-8 h-8 text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors flex items-center justify-center rounded ${showTopDropdown ? 'bg-gray-200' : ''}`}
+                >
+                  <MoreVertical className="w-4 h-4" />
+                </button>
+                {showTopDropdown && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-300 py-1" style={{ zIndex: 9999 }}>
+                    <button 
+                      onClick={() => {
+                        console.log('Mute notifications clicked');
+                        setShowTopDropdown(false);
+                      }}
+                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      <VolumeX className="w-4 h-4 mr-2" />
+                      Mute Notifications
+                    </button>
+                    <button 
+                      onClick={() => {
+                        console.log('Block clicked');
+                        setShowTopDropdown(false);
+                      }}
+                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      <Ban className="w-4 h-4 mr-2" />
+                      Block
+                    </button>
+                    <button 
+                      onClick={() => {
+                        console.log('Chat settings clicked');
+                        setShowTopDropdown(false);
+                      }}
+                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      <Settings className="w-4 h-4 mr-2" />
+                      Chat Settings
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           
@@ -230,9 +335,53 @@ export const InboxPage: React.FC = () => {
               <h2 className="text-lg font-semibold text-gray-900">Messages</h2>
               <p className="text-sm text-gray-600">Direct and team messages</p>
             </div>
-            <button className="p-1 hover:bg-gray-100 ">
-              <MoreHorizontal className="w-5 h-5 text-gray-600" />
-            </button>
+            <div className="relative" ref={topMessagesDropdownRef}>
+              <button 
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('Top Messages dropdown clicked');
+                  setShowTopMessagesDropdown(!showTopMessagesDropdown);
+                }}
+                className="p-1 hover:bg-gray-100 rounded"
+              >
+                <MoreHorizontal className="w-5 h-5 text-gray-600" />
+              </button>
+              {showTopMessagesDropdown && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-300 py-1" style={{ zIndex: 9999 }}>
+                  <button 
+                    onClick={() => {
+                      console.log('Mark all as read clicked');
+                      setShowTopMessagesDropdown(false);
+                    }}
+                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    <Check className="w-4 h-4 mr-2" />
+                    Mark All as Read
+                  </button>
+                  <button 
+                    onClick={() => {
+                      console.log('Archive all clicked');
+                      setShowTopMessagesDropdown(false);
+                    }}
+                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    <Archive className="w-4 h-4 mr-2" />
+                    Archive All
+                  </button>
+                  <button 
+                    onClick={() => {
+                      console.log('Delete all clicked');
+                      setShowTopMessagesDropdown(false);
+                    }}
+                    className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete All
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
           
           <StartConversationModal>
@@ -244,13 +393,13 @@ export const InboxPage: React.FC = () => {
         </div>
 
         {/* Conversation List */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto p-2">
           {filteredConversations.map((conversation) => (
             <div
               key={conversation.id}
               onClick={() => setSelectedConversationId(conversation.id)}
-              className={`p-4 cursor-pointer hover:bg-gray-50 ${
-                selectedConversationId === conversation.id ? 'bg-gray-100' : ''
+              className={`p-4 m-2 cursor-pointer hover:bg-gray-50 hover:shadow-md transition-all duration-200 rounded-lg relative ${
+                selectedConversationId === conversation.id ? 'bg-gray-100 shadow-md' : ''
               }`}
             >
               <div className="flex items-start space-x-3">
@@ -280,6 +429,59 @@ export const InboxPage: React.FC = () => {
                   </p>
                 </div>
               </div>
+              
+              {/* 3 Dots Button - always visible */}
+              <div className="absolute top-2 right-2" ref={conversationDropdownRef}>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    console.log('Conversation dropdown clicked for:', conversation.sender);
+                    setShowConversationDropdown(showConversationDropdown === conversation.id ? null : conversation.id);
+                  }}
+                  className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded"
+                >
+                  <MoreVertical className="w-4 h-4" />
+                </button>
+                
+                {/* Dropdown Menu */}
+                {showConversationDropdown === conversation.id && (
+                  <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-xl border border-gray-300 py-1" style={{ zIndex: 9999 }}>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        console.log('Mark as read clicked for:', conversation.sender);
+                        setShowConversationDropdown(null);
+                      }}
+                      className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      <Check className="w-3 h-3 mr-2" />
+                      Mark as Read
+                    </button>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        console.log('Archive clicked for:', conversation.sender);
+                        setShowConversationDropdown(null);
+                      }}
+                      className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      <Archive className="w-3 h-3 mr-2" />
+                      Archive
+                    </button>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        console.log('Delete clicked for:', conversation.sender);
+                        setShowConversationDropdown(null);
+                      }}
+                      className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                    >
+                      <Trash2 className="w-3 h-3 mr-2" />
+                      Delete
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -308,6 +510,63 @@ export const InboxPage: React.FC = () => {
                     </p>
                   </div>
                 </div>
+                <div className="relative" ref={chatHeaderDropdownRef}>
+                  <button 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log('Chat header dropdown clicked');
+                      setShowChatHeaderDropdown(!showChatHeaderDropdown);
+                    }}
+                    className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded"
+                  >
+                    <MoreVertical className="w-5 h-5" />
+                  </button>
+                  {showChatHeaderDropdown && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-300 py-1" style={{ zIndex: 9999 }}>
+                      <button 
+                        onClick={() => {
+                          console.log('Mute notifications clicked');
+                          setShowChatHeaderDropdown(false);
+                        }}
+                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        <VolumeX className="w-4 h-4 mr-2" />
+                        Mute Notifications
+                      </button>
+                      <button 
+                        onClick={() => {
+                          console.log('Block user clicked');
+                          setShowChatHeaderDropdown(false);
+                        }}
+                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        <Ban className="w-4 h-4 mr-2" />
+                        Block User
+                      </button>
+                      <button 
+                        onClick={() => {
+                          console.log('Chat settings clicked');
+                          setShowChatHeaderDropdown(false);
+                        }}
+                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        <Settings className="w-4 h-4 mr-2" />
+                        Chat Settings
+                      </button>
+                      <button 
+                        onClick={() => {
+                          console.log('Delete chat clicked');
+                          setShowChatHeaderDropdown(false);
+                        }}
+                        className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete Chat
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -317,13 +576,67 @@ export const InboxPage: React.FC = () => {
                 {/* Juliana's first message */}
                 <div className="flex justify-start">
                   <div className="max-w-xs lg:max-w-md">
-                    <div className="flex items-center space-x-2 mb-2">
+                    <div className="flex items-center justify-between mb-2">
                       <AvatarImage 
                         src="https://randomuser.me/api/portraits/women/25.jpg"
                         alt="Juliana Wills"
                         fallback="JW"
                         size="sm"
                       />
+                      <div className="relative" ref={messageDropdownRef}>
+                        <button 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            console.log('Juliana message dropdown clicked, current state:', showMessageDropdown);
+                            setShowMessageDropdown(prev => {
+                              console.log('Setting message dropdown to:', !prev);
+                              return !prev;
+                            });
+                          }}
+                          className={`p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded border ${showMessageDropdown ? 'bg-blue-100 border-blue-300' : 'border-gray-300'}`}
+                        >
+                          <MoreHorizontal className="w-4 h-4" />
+                        </button>
+                        {/* Debug indicator */}
+                        <span className="absolute -top-6 left-0 text-xs text-red-500 bg-yellow-100 px-1 rounded">
+                          {showMessageDropdown ? 'OPEN' : 'CLOSED'}
+                        </span>
+                        {showMessageDropdown && (
+                          <div className="absolute right-0 top-full mt-2 w-40 bg-yellow-100 rounded-lg shadow-xl border-2 border-red-500 py-1" style={{ zIndex: 9999 }}>
+                            <button 
+                              onClick={() => {
+                                console.log('Edit Juliana message clicked');
+                                setShowMessageDropdown(false);
+                              }}
+                              className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            >
+                              <Edit className="w-3 h-3 mr-2" />
+                              Edit
+                            </button>
+                            <button 
+                              onClick={() => {
+                                console.log('Delete Juliana message clicked');
+                                setShowMessageDropdown(false);
+                              }}
+                              className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                            >
+                              <Trash2 className="w-3 h-3 mr-2" />
+                              Delete
+                            </button>
+                            <button 
+                              onClick={() => {
+                                console.log('Copy Juliana message clicked');
+                                setShowMessageDropdown(false);
+                              }}
+                              className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            >
+                              <FileText className="w-3 h-3 mr-2" />
+                              Copy
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                     <div className="px-4 py-2  bg-gray-100 text-gray-900">
                       <p className="text-sm">Hi 👋 I'll do that task now, you can start working on another task!</p>
@@ -372,7 +685,7 @@ export const InboxPage: React.FC = () => {
                 {/* Your message */}
                 <div className="flex justify-end">
                   <div className="max-w-xs lg:max-w-md">
-                    <div className="px-4 py-2  bg-gray-200 text-gray-900">
+                    <div className="px-4 py-2 bg-gray-200 text-gray-900">
                       <p className="text-sm">Hello @Juliana, I'll completed the task you send ✅</p>
                     </div>
                     <p className="text-xs text-gray-500 mt-1">Today • 2hrs ago</p>
@@ -397,8 +710,20 @@ export const InboxPage: React.FC = () => {
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    className="w-full px-4 py-2 pr-12 border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    className="w-full px-4 py-2 pr-20 border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   />
+                  {/* Image Upload Button */}
+                  <button
+                    onClick={() => {
+                      console.log('Image upload clicked');
+                      // TODO: Implement image upload functionality
+                    }}
+                    className="absolute right-10 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-primary-700 transition-colors"
+                    title="Upload Image"
+                  >
+                    <Image className="w-5 h-5" />
+                  </button>
+                  {/* Send Button */}
                   <button
                     onClick={handleSendMessage}
                     className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-primary-700 transition-colors"
@@ -409,12 +734,56 @@ export const InboxPage: React.FC = () => {
                 <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
                   <Settings className="w-5 h-5" />
                 </button>
-                <button 
-                  onClick={() => setShowSettingsPopup(!showSettingsPopup)}
-                  className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <MoreHorizontal className="w-5 h-5" />
-                </button>
+                <div className="relative" ref={uploadDropdownRef}>
+                  <button 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log('Upload dropdown clicked, current state:', showUploadDropdown);
+                      setShowUploadDropdown(prev => {
+                        console.log('Setting upload dropdown to:', !prev);
+                        return !prev;
+                      });
+                    }}
+                    className={`p-2 text-gray-400 hover:text-gray-600 transition-colors rounded ${showUploadDropdown ? 'bg-gray-200' : ''}`}
+                  >
+                    <MoreHorizontal className="w-5 h-5" />
+                  </button>
+                  {showUploadDropdown && (
+                    <div className="absolute right-0 bottom-full mb-2 w-48 bg-white rounded-lg shadow-xl border border-gray-300 py-1" style={{ zIndex: 9999 }}>
+                      <button 
+                        onClick={() => {
+                          console.log('Upload image clicked');
+                          setShowUploadDropdown(false);
+                        }}
+                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        <Image className="w-4 h-4 mr-2" />
+                        Upload Image
+                      </button>
+                      <button 
+                        onClick={() => {
+                          console.log('Upload video clicked');
+                          setShowUploadDropdown(false);
+                        }}
+                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        <Video className="w-4 h-4 mr-2" />
+                        Upload Video
+                      </button>
+                      <button 
+                        onClick={() => {
+                          console.log('Upload audio clicked');
+                          setShowUploadDropdown(false);
+                        }}
+                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        <Mic className="w-4 h-4 mr-2" />
+                        Upload Audio
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
               
               {/* Settings Popup */}
