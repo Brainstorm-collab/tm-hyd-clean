@@ -10,12 +10,18 @@ interface LoginProps {
   onSwitchToSignup: () => void;
   onSwitchToForgotPassword: () => void;
   onSwitchToOTP: () => void;
+  // When rendered inside a modal, set variant="modal" to use compact layout
+  variant?: 'page' | 'modal';
+  // Optional close handler for modal variant
+  onClose?: () => void;
 }
 
 export const Login: React.FC<LoginProps> = ({ 
   onSwitchToSignup, 
   onSwitchToForgotPassword, 
-  onSwitchToOTP 
+  onSwitchToOTP,
+  variant = 'page',
+  onClose
 }) => {
   const { login, socialLogin, continueAsGuest } = useAuth();
   const { success, error } = useToast();
@@ -42,6 +48,7 @@ export const Login: React.FC<LoginProps> = ({
       const result = await login(formData.email, formData.password);
       if (result.success) {
         success('Welcome back!', `Successfully logged in as ${formData.email}`);
+        if (onClose) onClose();
       } else {
         error('Login Failed', result.message);
       }
@@ -58,6 +65,7 @@ export const Login: React.FC<LoginProps> = ({
       const result = await socialLogin(provider);
       if (result.success) {
         success('Welcome back!', `Successfully logged in via ${provider}`);
+        if (onClose) onClose();
       } else {
         error('Login Failed', result.message);
       }
@@ -71,24 +79,29 @@ export const Login: React.FC<LoginProps> = ({
   const handleGuestLogin = () => {
     continueAsGuest();
     success('Welcome, Guest!', 'You have successfully logged in as a guest user.');
+    if (onClose) onClose();
   };
 
+  const isModal = variant === 'modal';
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className={isModal ? 'w-full' : 'min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8'}>
+      <div className={isModal ? 'w-full space-y-6' : 'max-w-md w-full space-y-8'}>
         <div className="text-center">
           <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
             Sign in to your account
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Or{' '}
-            <button
-              onClick={onSwitchToSignup}
-              className="font-medium text-indigo-600 hover:text-indigo-500"
-            >
-              create a new account
-            </button>
-          </p>
+          {!isModal && (
+            <p className="mt-2 text-sm text-gray-600">
+              Or{' '}
+              <button
+                onClick={onSwitchToSignup}
+                className="font-medium text-indigo-600 hover:text-indigo-500"
+              >
+                create a new account
+              </button>
+            </p>
+          )}
         </div>
 
         <Card>
@@ -199,15 +212,17 @@ export const Login: React.FC<LoginProps> = ({
                   </label>
                 </div>
 
-                <div className="text-sm">
-                  <button
-                    type="button"
-                    onClick={onSwitchToForgotPassword}
-                    className="font-medium text-indigo-600 hover:text-indigo-500"
-                  >
-                    Forgot your password?
-                  </button>
-                </div>
+                {!isModal && (
+                  <div className="text-sm">
+                    <button
+                      type="button"
+                      onClick={onSwitchToForgotPassword}
+                      className="font-medium text-indigo-600 hover:text-indigo-500"
+                    >
+                      Forgot your password?
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-3">
@@ -219,21 +234,25 @@ export const Login: React.FC<LoginProps> = ({
                   {isLoading ? 'Signing in...' : 'Sign in'}
                 </Button>
 
-                <Button
-                  type="button"
-                  onClick={onSwitchToOTP}
-                  className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  Sign in with OTP
-                </Button>
+                {!isModal && (
+                  <Button
+                    type="button"
+                    onClick={onSwitchToOTP}
+                    className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    Sign in with OTP
+                  </Button>
+                )}
 
-                <Button
-                  type="button"
-                  onClick={handleGuestLogin}
-                  className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  Continue as Guest
-                </Button>
+                {!isModal && (
+                  <Button
+                    type="button"
+                    onClick={handleGuestLogin}
+                    className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    Continue as Guest
+                  </Button>
+                )}
               </div>
             </form>
           </CardContent>
