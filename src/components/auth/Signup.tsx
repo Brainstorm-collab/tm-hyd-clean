@@ -33,16 +33,19 @@ export const Signup: React.FC<SignupProps> = ({
       error('Accept Terms', 'Please accept the terms and privacy policy');
       return;
     }
-    const hasLetter = /[A-Za-z]/.test(password);
-    const hasNumber = /\d/.test(password);
-    if (password.length < 8 || !(hasLetter && hasNumber)) {
+    const trimmedPassword = password.trim();
+    const hasLetter = /[A-Za-z]/.test(trimmedPassword);
+    const hasNumber = /\d/.test(trimmedPassword);
+    if (trimmedPassword.length < 8 || !(hasLetter && hasNumber)) {
       error('Weak Password', 'Use at least 8 characters with letters and numbers.');
       return;
-    }    setIsLoading(true);
+    }
+    setIsLoading(true);
     try {
       const result = await signup(username || 'User', email, trimmedPassword, { receiveTips });
       if (result.success) {
-      const result = await signup(username || 'User', email, password, { receiveTips });        // After successful signup, go to onboarding role selection
+        success('Welcome!', `Account created for ${username || email}`);
+        // After successful signup, go to onboarding role selection
         navigate('/onboarding/role');
       } else {
         error('Signup failed', result.message);
