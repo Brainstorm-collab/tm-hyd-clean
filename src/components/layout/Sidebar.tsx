@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   Home,
@@ -14,8 +14,8 @@ import {
 import { cn } from '../../utils/cn';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/Avatar';
 import { getInitials } from '../ui/Avatar';
-import { getUser } from '../../utils/localStorage';
 import { Logo } from '../ui/Logo';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -42,30 +42,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [user, setUser] = useState(getUser());
-
-  // Update user data when localStorage changes
-  useEffect(() => {
-    const handleStorageChange = () => {
-      setUser(getUser());
-    };
-
-    // Listen for storage changes
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Also check for changes periodically (for same-tab updates)
-    const interval = setInterval(() => {
-      const currentUser = getUser();
-      if (currentUser && currentUser !== user) {
-        setUser(currentUser);
-      }
-    }, 1000);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      clearInterval(interval);
-    };
-  }, [user]);
+  const { currentUser } = useAuth();
+  const user = currentUser;
 
   const handleItemClick = (item: { id: string; path: string }) => {
     onItemClick(item.id);

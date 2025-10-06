@@ -27,8 +27,11 @@ import { KanbanBoard } from './components/screens/KanbanBoard';
 import { Notifications } from './components/screens/Notifications';
 import { SearchResults } from './components/screens/SearchResults';
 import { PremiumPlan } from './components/screens/PremiumPlan';
+import { RoleSelection } from './components/screens/RoleSelection';
 import { MyContacts } from './components/screens/MyContacts';
 import { HelpSupport } from './components/screens/HelpSupport';
+import { UserProfile } from './components/screens/UserProfile';
+import InviteUsers from './components/screens/InviteUsers';
 import { initializeDummyData } from './utils/localStorage';
 
 function AppRouter() {
@@ -63,6 +66,18 @@ function AppRouter() {
     // This will be handled by the Login component
   };
 
+  // Navigate from in-app UI (e.g., header) to auth screens
+  const handleNavigateToLogin = () => {
+    // Ensure we exit guest/auth state so unauthenticated branch renders the Login screen
+    logout();
+    setAuthMode('login');
+  };
+
+  const handleNavigateToSignup = () => {
+    logout();
+    setAuthMode('signup');
+  };
+
   // Initialize dummy data on app start
   useEffect(() => {
     initializeDummyData();
@@ -76,7 +91,7 @@ function AppRouter() {
   }, [isAuthenticated, currentUser, location.pathname, success]);
 
   if (!isAuthenticated) {
-      return (
+    return (
         <div className="min-h-screen bg-gray-50">
         {authMode === 'login' && (
             <Login
@@ -112,6 +127,8 @@ function AppRouter() {
       onLogout={handleLogout}
       currentUser={currentUser!}
       isAuthenticated={isAuthenticated}
+      onNavigateToLogin={handleNavigateToLogin}
+      onNavigateToSignup={handleNavigateToSignup}
     >
       <Routes>
         <Route index element={<Navigate to="/home" replace />} />
@@ -133,8 +150,11 @@ function AppRouter() {
         <Route path="notifications" element={<Notifications />} />
         <Route path="search" element={<SearchResults />} />
         <Route path="premium" element={<PremiumPlan />} />
+        <Route path="onboarding/role" element={<RoleSelection />} />
         <Route path="contacts" element={<MyContacts />} />
         <Route path="help-support" element={<HelpSupport />} />
+        <Route path="invite-users" element={<InviteUsers />} />
+        <Route path="profile/:id" element={<UserProfile />} />
       </Routes>
     </Layout>
   );

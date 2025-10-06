@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Plus, MoreHorizontal, Settings, Paperclip, Smile, Send, X, UserPlus, Ban, Trash2, ChevronDown } from 'lucide-react';
+import { Plus, MoreHorizontal, Settings, Paperclip, Smile, Send, X, UserPlus, Ban, Trash2, ChevronDown, User, BellOff } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useModalManager } from '../ModalManager';
 import { AvatarImage } from '../ui/AvatarImage';
 import { useAuth } from '../../contexts/AuthContext';
@@ -8,10 +9,15 @@ import { getInitials } from '../ui/Avatar';
 export const Inbox: React.FC = () => {
   const { openModal, closeModal } = useModalManager();
   const { currentUser } = useAuth();
+  const navigate = useNavigate();
   const [activeConversation, setActiveConversation] = useState('Juliana Wills');
   const [newMessage, setNewMessage] = useState('');
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
+  const [showHeaderMenu, setShowHeaderMenu] = useState(false);
+  const [showBottomMenu, setShowBottomMenu] = useState(false);
   const settingsMenuRef = useRef<HTMLDivElement>(null);
+  const headerMenuRef = useRef<HTMLDivElement>(null);
+  const bottomMenuRef = useRef<HTMLDivElement>(null);
 
   // Sample conversations data
   const conversations = [
@@ -166,6 +172,12 @@ export const Inbox: React.FC = () => {
       if (settingsMenuRef.current && !settingsMenuRef.current.contains(event.target as Node)) {
         setShowSettingsMenu(false);
       }
+      if (headerMenuRef.current && !headerMenuRef.current.contains(event.target as Node)) {
+        setShowHeaderMenu(false);
+      }
+      if (bottomMenuRef.current && !bottomMenuRef.current.contains(event.target as Node)) {
+        setShowBottomMenu(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -177,6 +189,8 @@ export const Inbox: React.FC = () => {
     // Handle the action
     console.log(`Settings action: ${action}`);
   };
+
+  const currentConversation = conversations.find(c => c.name === activeConversation);
 
   return (
     <div className="flex h-full bg-white">
@@ -216,12 +230,23 @@ export const Inbox: React.FC = () => {
             >
               <div className="flex items-center space-x-3">
                 <div className="relative">
-                  <AvatarImage 
-                    src={conversation.image}
-                    alt={conversation.name}
-                    fallback={conversation.avatar}
-                    size="lg"
-                  />
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/profile/${conversation.id}`, {
+                        state: { user: { id: conversation.id, name: conversation.name, image: conversation.image, avatar: conversation.avatar } }
+                      });
+                    }}
+                    className="rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    aria-label={`Open ${conversation.name}'s profile`}
+                  >
+                    <AvatarImage 
+                      src={conversation.image}
+                      alt={conversation.name}
+                      fallback={conversation.avatar}
+                      size="lg"
+                    />
+                  </button>
                   {conversation.isOnline && (
                     <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white "></div>
                   )}
@@ -251,20 +276,72 @@ export const Inbox: React.FC = () => {
         {/* Chat Header */}
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <AvatarImage 
-              src="https://randomuser.me/api/portraits/women/25.jpg"
-              alt="Juliana Wills"
-              fallback="JW"
-              size="lg"
-            />
+            <button
+              onClick={() => {
+                if (currentConversation) {
+                  navigate(`/profile/${currentConversation.id}`, { state: { user: { id: currentConversation.id, name: currentConversation.name, image: currentConversation.image, avatar: currentConversation.avatar } } });
+                }
+              }}
+              className="rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500"
+              aria-label="Open user info"
+            >
+              <AvatarImage 
+                src={currentConversation?.image}
+                alt={currentConversation?.name || 'User'}
+                fallback={currentConversation?.avatar}
+                size="lg"
+              />
+            </button>
             <div>
               <h2 className="font-medium text-gray-900">{activeConversation}</h2>
               <p className="text-sm text-gray-500">2hrs ago</p>
             </div>
           </div>
-          <button className="text-gray-400 hover:text-gray-600">
-            <MoreHorizontal className="w-5 h-5" />
-          </button>
+          <div className="relative" ref={headerMenuRef}>
+            <button
+              onClick={() => setShowHeaderMenu(!showHeaderMenu)}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <MoreHorizontal className="w-5 h-5" />
+            </button>
+            {showHeaderMenu && (
+              <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200  shadow-lg py-2 z-50">
+                <button
+                  onClick={() => {
+                    setShowHeaderMenu(false);
+                    if (currentConversation) {
+                      navigate(`/profile/${currentConversation.id}`, { state: { user: { id: currentConversation.id, name: currentConversation.name, image: currentConversation.image, avatar: currentConversation.avatar } } });
+                    }
+                  }}
+                  className="flex items-center w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
+                >
+                  <User className="w-4 h-4 text-gray-500 mr-2" />
+                  View Profile
+                </button>
+                <button
+                  onClick={() => { setShowHeaderMenu(false); }}
+                  className="flex items-center w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
+                >
+                  <BellOff className="w-4 h-4 text-gray-500 mr-2" />
+                  Mute Notifications
+                </button>
+                <button
+                  onClick={() => { setShowHeaderMenu(false); }}
+                  className="flex items-center w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
+                >
+                  <Ban className="w-4 h-4 text-gray-500 mr-2" />
+                  Block User
+                </button>
+                <button
+                  onClick={() => { setShowHeaderMenu(false); }}
+                  className="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete Chat
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Messages Area */}
@@ -273,13 +350,22 @@ export const Inbox: React.FC = () => {
             <div key={message.id} className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'}`}>
               <div className={`flex space-x-2 max-w-xs lg:max-w-md ${message.isOwn ? 'flex-row-reverse space-x-reverse' : ''}`}>
                 {!message.isOwn && (
-                  <AvatarImage 
-                    src="https://randomuser.me/api/portraits/women/25.jpg"
-                    alt={message.sender}
-                    fallback={message.avatar}
-                    size="md"
-                    className="flex-shrink-0"
-                  />
+                  <button
+                    onClick={() => {
+                      if (currentConversation) {
+                        navigate(`/profile/${currentConversation.id}`, { state: { user: { id: currentConversation.id, name: currentConversation.name, image: currentConversation.image, avatar: currentConversation.avatar } } });
+                      }
+                    }}
+                    className="flex-shrink-0 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    aria-label="Open sender profile"
+                  >
+                    <AvatarImage 
+                      src={currentConversation?.image}
+                      alt={message.sender}
+                      fallback={message.avatar}
+                      size="md"
+                    />
+                  </button>
                 )}
                 <div>
                   <div
@@ -391,9 +477,39 @@ export const Inbox: React.FC = () => {
               )}
             </div>
             
-            <button className="p-3 text-gray-400 hover:text-gray-600">
-              <MoreHorizontal className="w-5 h-5" />
-            </button>
+            <div className="relative" ref={bottomMenuRef}>
+              <button
+                onClick={() => setShowBottomMenu(!showBottomMenu)}
+                className="p-3 text-gray-400 hover:text-gray-600"
+              >
+                <MoreHorizontal className="w-5 h-5" />
+              </button>
+              {showBottomMenu && (
+                <div className="absolute bottom-full right-0 mb-2 w-48 bg-white border border-gray-200  shadow-lg py-2 z-50">
+                  <button
+                    onClick={() => { setShowBottomMenu(false); }}
+                    className="flex items-center w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
+                  >
+                    <Paperclip className="w-4 h-4 text-gray-500 mr-2" />
+                    Attach File
+                  </button>
+                  <button
+                    onClick={() => { setShowBottomMenu(false); }}
+                    className="flex items-center w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
+                  >
+                    <Smile className="w-4 h-4 text-gray-500 mr-2" />
+                    Insert Emoji
+                  </button>
+                  <button
+                    onClick={() => { setShowBottomMenu(false); }}
+                    className="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Clear Chat
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

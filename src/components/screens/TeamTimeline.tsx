@@ -4,6 +4,7 @@ import InviteMembersModal from "../modals/InviteMembersModal";
 import DateFilterDropdown from "../modals/DateFilterDropdown";
 import { CreateTimelineModal } from "../modals/CreateTimelineModal";
 import { useToast } from "../../contexts/ToastContext";
+import { useNavigate } from "react-router-dom";
 
 type TaskDef = {
   id: number;
@@ -26,16 +27,20 @@ const rows = [
 
 
 const tasks: TaskDef[] = [
-  { id: 1, title: "Design UX research for landing page", start: "21 Oct", end: "24 Oct", avatar: "https://i.pravatar.cc/40?img=1", row: 0, leftPx: 200, width: 420, next: 2 },
-  { id: 2, title: "Start UI design once UX is done", start: "21 Oct", end: "24 Oct", avatar: "https://i.pravatar.cc/40?img=1", row: 0, leftPx: 760, width: 420 },
+  // Row 1 with smaller width
+  { id: 1, title: "Design UX research for landing page", start: "21 Oct", end: "24 Oct", avatar: "https://i.pravatar.cc/40?img=1", row: 0, leftPx: 90, width: 270, next: 5 },
+  { id: 2, title: "Start UI design once UX is done", start: "21 Oct", end: "24 Oct", avatar: "https://i.pravatar.cc/40?img=1", row: 0, leftPx: 520, width: 270 },
 
-  { id: 3, title: "Workon Instagram marketing", start: "21 Oct", end: "24 Oct", avatar: "https://i.pravatar.cc/40?img=5", row: 1, leftPx: 260, width: 420, next: 5 },
-  { id: 5, title: "Facebook and instagram ads for new mobile app", start: "21 Oct", end: "24 Oct", avatar: "https://i.pravatar.cc/40?img=5", row: 1, leftPx: 960, width: 520 },
+  // Row 2 starts slightly differently
+  { id: 3, title: "Workon Instagram marketing", start: "21 Oct", end: "24 Oct", avatar: "https://i.pravatar.cc/40?img=5", row: 1, leftPx: 120, width: 270, next: 7 },
+  { id: 5, title: "Facebook and instagram ads for new mobile app", start: "21 Oct", end: "24 Oct", avatar: "https://i.pravatar.cc/40?img=5", row: 1, leftPx: 600, width: 270 },
 
-  { id: 4, title: "Develop Mobile app V1", start: "21 Oct", end: "24 Oct", avatar: "https://i.pravatar.cc/40?img=11", row: 2, leftPx: 240, width: 420, next: 6 },
-  { id: 6, title: "Test mobile app with our customers", start: "21 Oct", end: "24 Oct", avatar: "https://i.pravatar.cc/40?img=11", row: 2, leftPx: 860, width: 420 },
+  // Row 3 starts from another offset
+  { id: 4, title: "Develop Mobile app V1", start: "21 Oct", end: "24 Oct", avatar: "https://i.pravatar.cc/40?img=11", row: 2, leftPx: 80, width: 270 },
+  { id: 6, title: "Test mobile app with our customers", start: "21 Oct", end: "24 Oct", avatar: "https://i.pravatar.cc/40?img=11", row: 2, leftPx: 580, width: 270 },
 
-  { id: 7, title: "Design Marketing Graphics", start: "21 Oct", end: "24 Oct", avatar: "https://i.pravatar.cc/40?img=8", row: 3, leftPx: 980, width: 420 },
+  // Row 4 with a different offset
+  { id: 7, title: "Design Marketing Graphics", start: "21 Oct", end: "24 Oct", avatar: "https://i.pravatar.cc/40?img=8", row: 3, leftPx: 610, width: 270 },
 ];
 
 const TeamTimeline: React.FC = () => {
@@ -50,6 +55,7 @@ const TeamTimeline: React.FC = () => {
   const [selectedMonth, setSelectedMonth] = useState("November");
   const [selectedYear, setSelectedYear] = useState("2022");
   const { success } = useToast();
+  const navigate = useNavigate();
 
   const handleTimelineCreated = (timeline: any) => {
     console.log('Timeline created:', timeline);
@@ -68,6 +74,7 @@ const TeamTimeline: React.FC = () => {
       const cont = containerRef.current;
       if (!cont) return;
       const contRect = cont.getBoundingClientRect();
+      const lineOffset = 10; // push connector lines down uniformly
       const newPaths: {
         d: string;
         cx: number;
@@ -87,20 +94,22 @@ const TeamTimeline: React.FC = () => {
 
 
         const ax = a.right - contRect.left;
-        const ay = a.top + a.height / 2 - contRect.top;
+        const ay = a.top + a.height / 2 - contRect.top + lineOffset;
 
 
         const bx = b.left - contRect.left;
-        const by = b.top + b.height / 2 - contRect.top;
+        const by = b.top + b.height / 2 - contRect.top + lineOffset;
 
 
-        const mx = (ax + bx) / 2;
-        const c1x = mx;
-        const c1y = ay;
-        const c2x = mx;
-        const c2y = by;
-
-        const d = `M ${ax} ${ay} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${bx} ${by}`;
+        // If same row, draw straight; otherwise use a smooth cubic curve like the reference
+        const sameRow = Math.abs(ay - by) < 2;
+        let d: string;
+        if (sameRow) {
+          d = `M ${ax} ${ay} L ${bx} ${by}`;
+        } else {
+          const mx = (ax + bx) / 2;
+          d = `M ${ax} ${ay} C ${mx} ${ay}, ${mx} ${by}, ${bx} ${by}`;
+        }
         newPaths.push({ d, cx: ax, cy: ay, rx: 4, ry: 4 });
         newPaths.push({ d: "", cx: bx, cy: by, rx: 4, ry: 4 });
       });
@@ -122,6 +131,7 @@ const TeamTimeline: React.FC = () => {
 
   return (
     <div className="team-timeline-root">
+      <div className="timeline-inner">
       <header className="timeline-header">
         <div>
           <h2>Team Timeline</h2>
@@ -175,9 +185,14 @@ const TeamTimeline: React.FC = () => {
           {rows.map((name, rowIdx) => (
             <div className="row" key={name}>
               <div className="member-col">
-                <img src={`https://i.pravatar.cc/40?img=${rowIdx + 1}`} alt={name} />
-                <div className="member-name">{name}</div>
-                <div className="kebab">•••</div>
+                <button
+                  onClick={() => navigate(`/profile/${name.split(" ")[0].toLowerCase()}`, { state: { user: { id: name.split(" ")[0].toLowerCase(), name, image: `https://i.pravatar.cc/40?img=${rowIdx + 1}`, avatar: name.split(" ").map(w=>w[0]).join("") } } })}
+                  className="member-btn"
+                  aria-label={`Open ${name} profile`}
+                >
+                  <img src={`https://i.pravatar.cc/40?img=${rowIdx + 1}`} alt={name} />
+                  <div className="member-name">{name}</div>
+                </button>
               </div>
 
               <div className="row-canvas">
@@ -194,12 +209,20 @@ const TeamTimeline: React.FC = () => {
                         width: t.width ? `${t.width}px` : "420px",
                       }}
                     >
-                      <input type="checkbox" className="task-checkbox" />
-                      <div className="task-body">
-                        <div className="task-title">{t.title}</div>
-                        <div className="task-sub">
-                          <img src={t.avatar} alt="" />
-                          <span>{t.start} to {t.end}, 2022</span>
+                      <div className="task-inner" style={{ display:'flex', alignItems:'flex-start', gap:'12px', width:'100%' }}>
+                        <input type="checkbox" className="task-checkbox" />
+                        <div className="task-body">
+                          <div className="task-title">{t.title}</div>
+                          <div className="task-sub">
+                            <button
+                              onClick={() => navigate(`/profile/${rows[t.row].split(" ")[0].toLowerCase()}`, { state: { user: { id: rows[t.row].split(" ")[0].toLowerCase(), name: rows[t.row], image: t.avatar, avatar: rows[t.row].split(" ").map(w=>w[0]).join("") } } })}
+                              className="avatar-btn"
+                              aria-label="Open profile"
+                            >
+                              <img src={t.avatar} alt="" />
+                            </button>
+                            <span>{t.start} to {t.end}, 2022</span>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -229,6 +252,7 @@ const TeamTimeline: React.FC = () => {
           setSelectedYear(year);
         }}
       />
+      </div>
     </div>
   );
 };

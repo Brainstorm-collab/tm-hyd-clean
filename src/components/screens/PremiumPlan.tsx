@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, Zap } from 'lucide-react';
+import { Check, Zap, ShieldCheck, CreditCard, Building, Smartphone, Copy, Download } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription, ModalFooter } from '../ui/Modal';
 import { 
   calculatePricing, 
   createSubscription, 
@@ -404,6 +405,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   const [upiId, setUpiId] = useState('');
   const [showQR, setShowQR] = useState(false);
   const [qrPaymentComplete, setQrPaymentComplete] = useState(false);
+  const [promoCode, setPromoCode] = useState('');
+  const [promoApplied, setPromoApplied] = useState(false);
 
   const handlePayment = () => {
     // Create payment method object
@@ -476,248 +479,164 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
     return qrData;
   };
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Complete Payment</h3>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            ×
-          </button>
-        </div>
+  const taxAmount = Math.round(pricing.actualPrice * 0.18);
+  const discountAmount = promoApplied ? Math.round(pricing.actualPrice * 0.1) : 0;
+  const totalAmount = Math.max(pricing.actualPrice + taxAmount - discountAmount, 0);
 
-        {/* Plan Summary */}
-        <div className="bg-gray-50 rounded-lg p-4 mb-6">
-          <h4 className="font-medium text-gray-900 mb-2">{getPlanDisplayName(plan)}</h4>
-          <div className="flex justify-between text-sm text-gray-600">
-            <span>Price: {pricing.displayPrice}/{billingCycle === 'yearly' ? 'year' : 'month'}</span>
-            <span>Users: {userCount}</span>
+  return (
+    <Modal open={true} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <ModalContent className="max-w-2xl p-0 overflow-hidden">
+        <ModalHeader className="px-6 pt-6">
+          <ModalTitle>Complete Payment</ModalTitle>
+          <ModalDescription>Choose a payment method and finish secure checkout.</ModalDescription>
+        </ModalHeader>
+
+        {/* Body */}
+        <div className="px-6 pb-6">
+          <div className="flex items-center space-x-2 mb-4">
+            <ShieldCheck className="w-4 h-4 text-green-600" />
+            <span className="text-xs text-gray-600">256-bit SSL secured checkout</span>
           </div>
-          <div className="text-sm text-gray-600">
-            Billing: {billingCycle === 'monthly' ? 'Monthly' : 'Yearly'}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Left column */}
+            <div>
+              {/* Method selector */}
+              <div className="inline-flex rounded-md border border-gray-200 overflow-hidden mb-4">
+                <button onClick={() => setSelectedMethod('card')} className={`px-3 py-2 text-sm inline-flex items-center space-x-2 ${selectedMethod==='card' ? 'bg-purple-50 text-purple-700' : 'bg-white text-gray-700 hover:bg-gray-50'}`}>
+                  <CreditCard className="w-4 h-4" />
+                  <span>Card</span>
+                </button>
+                <button onClick={() => setSelectedMethod('netbanking')} className={`px-3 py-2 text-sm inline-flex items-center space-x-2 border-l border-gray-200 ${selectedMethod==='netbanking' ? 'bg-purple-50 text-purple-700' : 'bg-white text-gray-700 hover:bg-gray-50'}`}>
+                  <Building className="w-4 h-4" />
+                  <span>Netbanking</span>
+                </button>
+                <button onClick={() => setSelectedMethod('upi')} className={`px-3 py-2 text-sm inline-flex items-center space-x-2 border-l border-gray-200 ${selectedMethod==='upi' ? 'bg-purple-50 text-purple-700' : 'bg-white text-gray-700 hover:bg-gray-50'}`}>
+                  <Smartphone className="w-4 h-4" />
+                  <span>UPI/QR</span>
+                </button>
+              </div>
+
+              {/* Forms by method */}
+              {selectedMethod === 'card' && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Card Number</label>
+                    <input value={cardDetails.number} onChange={(e)=>setCardDetails({...cardDetails, number:e.target.value})} placeholder="1234 5678 9012 3456" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Expiry</label>
+                      <input value={cardDetails.expiry} onChange={(e)=>setCardDetails({...cardDetails, expiry:e.target.value})} placeholder="MM/YY" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">CVV</label>
+                      <input value={cardDetails.cvv} onChange={(e)=>setCardDetails({...cardDetails, cvv:e.target.value})} placeholder="123" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Cardholder Name</label>
+                    <input value={cardDetails.name} onChange={(e)=>setCardDetails({...cardDetails, name:e.target.value})} placeholder="John Doe" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+                  </div>
+                </div>
+              )}
+
+              {selectedMethod === 'netbanking' && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Select Bank</label>
+                    <select value={netbankingDetails.bank} onChange={(e)=>setNetbankingDetails({...netbankingDetails, bank: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                      <option value="">Select your bank</option>
+                      <option value="sbi">State Bank of India</option>
+                      <option value="hdfc">HDFC Bank</option>
+                      <option value="icici">ICICI Bank</option>
+                      <option value="axis">Axis Bank</option>
+                      <option value="kotak">Kotak Mahindra Bank</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                    <input value={netbankingDetails.username} onChange={(e)=>setNetbankingDetails({...netbankingDetails, username:e.target.value})} placeholder="Enter your username" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input type="password" value={netbankingDetails.password} onChange={(e)=>setNetbankingDetails({...netbankingDetails, password:e.target.value})} placeholder="Enter your password" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+                  </div>
+                </div>
+              )}
+
+              {selectedMethod === 'upi' && !showQR && (
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">UPI ID</label>
+                    <div className="flex items-center space-x-2">
+                      <input value={upiId} onChange={(e)=>setUpiId(e.target.value)} placeholder="UPI ID (name@bank)" className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+                      <button onClick={()=>navigator.clipboard?.writeText(upiId)} className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 hover:bg-gray-50"><Copy className="w-4 h-4" /></button>
+                    </div>
+                  </div>
+                  <button onClick={()=>setShowQR(true)} className="w-full py-2 px-4 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors font-medium">Show QR Code</button>
+                </div>
+              )}
+
+              {selectedMethod === 'upi' && showQR && (
+                <div className="space-y-4">
+                  <div className="text-center">
+                    <h4 className="font-medium text-gray-900 mb-4">Scan QR Code to Pay</h4>
+                    <div className="bg-white border-2 border-gray-300 rounded-lg p-4 mb-4 inline-block">
+                      <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=upi://pay?pn=Superpage&pa=example@upi&am=1" alt="UPI QR" className="w-56 h-56 object-contain" />
+                      <div className="mt-2 text-xs text-gray-500 flex items-center justify-center space-x-2">
+                        <Download className="w-3 h-3" />
+                        <a href="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=upi://pay?pn=Superpage&pa=example@upi&am=1" download>Download QR</a>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-sm text-gray-600 mb-1"><span className="font-medium">Amount:</span> {formatCurrency(pricing.actualPrice)}</p>
+                    <p className="text-sm text-gray-600 mb-1"><span className="font-medium">Users:</span> {userCount}</p>
+                    <p className="text-sm text-gray-600 mb-1"><span className="font-medium">UPI ID:</span> {upiId}</p>
+                    <p className="text-xs text-gray-500 mt-2">Scan this QR code with any UPI app to complete payment</p>
+                  </div>
+                  <div className="flex space-x-3">
+                    <button onClick={handleQRPaymentComplete} className="flex-1 py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">Payment Complete</button>
+                    <button onClick={() => setShowQR(false)} className="flex-1 py-2 px-4 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors font-medium">Back</button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Right column: Order summary */}
+            <div>
+              <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                <h4 className="font-medium text-gray-900 mb-2">{getPlanDisplayName(plan)}</h4>
+                <div className="flex justify-between text-sm text-gray-600 mb-1"><span>Plan Price</span><span>{formatCurrency(pricing.actualPrice)}/{billingCycle==='yearly'?'year':'month'}</span></div>
+                <div className="flex justify-between text-sm text-gray-600 mb-1"><span>Taxes (18%)</span><span>{formatCurrency(taxAmount)}</span></div>
+                {promoApplied && (<div className="flex justify-between text-sm text-green-600 mb-1"><span>Promo Applied</span><span>-{formatCurrency(discountAmount)}</span></div>)}
+                <div className="flex justify-between text-sm font-semibold text-gray-900 pt-2 border-t border-gray-200"><span>Total</span><span>{formatCurrency(totalAmount)}</span></div>
+              </div>
+              <div className="flex items-center space-x-2 mb-3">
+                <input value={promoCode} onChange={(e)=>setPromoCode(e.target.value)} placeholder="Promo code (SAVE10)" className="flex-1 px-3 py-2 border border-gray-300 rounded-lg" />
+                <button onClick={()=>{ if(promoCode.trim().toUpperCase()==='SAVE10') setPromoApplied(true); }} className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm">Apply</button>
+              </div>
+              <div className="text-xs text-gray-500">By completing this purchase you agree to our <a href="#" className="text-purple-600">Terms</a> and <a href="#" className="text-purple-600">Privacy Policy</a>.</div>
+            </div>
           </div>
-          {billingCycle === 'yearly' && (
-            <div className="text-sm text-green-600 font-medium mt-1">
-              You save {formatCurrency(pricing.yearlySavings)} per year
+
+          {/* Error Display */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mt-6">
+              <p className="text-sm text-red-600">{error}</p>
             </div>
           )}
         </div>
 
-        {/* Error Display */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-            <p className="text-sm text-red-600">{error}</p>
-          </div>
-        )}
-
-        {/* Payment Methods */}
-        <div className="mb-6">
-          <h4 className="font-medium text-gray-900 mb-3">Select Payment Method</h4>
-          <div className="space-y-3">
-            <label className="flex items-center space-x-3 cursor-pointer">
-              <input
-                type="radio"
-                name="payment"
-                value="card"
-                checked={selectedMethod === 'card'}
-                onChange={(e) => setSelectedMethod(e.target.value as 'card')}
-                className="w-4 h-4 text-purple-600"
-              />
-              <span className="text-sm">Credit/Debit Card</span>
-            </label>
-            <label className="flex items-center space-x-3 cursor-pointer">
-              <input
-                type="radio"
-                name="payment"
-                value="netbanking"
-                checked={selectedMethod === 'netbanking'}
-                onChange={(e) => setSelectedMethod(e.target.value as 'netbanking')}
-                className="w-4 h-4 text-purple-600"
-              />
-              <span className="text-sm">Net Banking</span>
-            </label>
-            <label className="flex items-center space-x-3 cursor-pointer">
-              <input
-                type="radio"
-                name="payment"
-                value="upi"
-                checked={selectedMethod === 'upi'}
-                onChange={(e) => setSelectedMethod(e.target.value as 'upi')}
-                className="w-4 h-4 text-purple-600"
-              />
-              <span className="text-sm">UPI</span>
-            </label>
-          </div>
-        </div>
-
-        {/* Payment Form */}
-        {selectedMethod === 'card' && (
-          <div className="space-y-4 mb-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Card Number</label>
-              <input
-                type="text"
-                placeholder="1234 5678 9012 3456"
-                value={cardDetails.number}
-                onChange={(e) => setCardDetails({...cardDetails, number: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Expiry</label>
-                <input
-                  type="text"
-                  placeholder="MM/YY"
-                  value={cardDetails.expiry}
-                  onChange={(e) => setCardDetails({...cardDetails, expiry: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">CVV</label>
-                <input
-                  type="text"
-                  placeholder="123"
-                  value={cardDetails.cvv}
-                  onChange={(e) => setCardDetails({...cardDetails, cvv: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Cardholder Name</label>
-              <input
-                type="text"
-                placeholder="John Doe"
-                value={cardDetails.name}
-                onChange={(e) => setCardDetails({...cardDetails, name: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              />
-            </div>
-          </div>
-        )}
-
-        {selectedMethod === 'netbanking' && (
-          <div className="space-y-4 mb-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Select Bank</label>
-              <select
-                value={netbankingDetails.bank}
-                onChange={(e) => setNetbankingDetails({...netbankingDetails, bank: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              >
-                <option value="">Select your bank</option>
-                <option value="sbi">State Bank of India</option>
-                <option value="hdfc">HDFC Bank</option>
-                <option value="icici">ICICI Bank</option>
-                <option value="axis">Axis Bank</option>
-                <option value="kotak">Kotak Mahindra Bank</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
-              <input
-                type="text"
-                placeholder="Enter your username"
-                value={netbankingDetails.username}
-                onChange={(e) => setNetbankingDetails({...netbankingDetails, username: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-              <input
-                type="password"
-                placeholder="Enter your password"
-                value={netbankingDetails.password}
-                onChange={(e) => setNetbankingDetails({...netbankingDetails, password: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              />
-            </div>
-          </div>
-        )}
-
-        {selectedMethod === 'upi' && !showQR && (
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-1">UPI ID</label>
-            <input
-              type="text"
-              placeholder="user@paytm"
-              value={upiId}
-              onChange={(e) => setUpiId(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            />
-          </div>
-        )}
-
-        {selectedMethod === 'upi' && showQR && (
-          <div className="mb-6">
-            <div className="text-center">
-              <h4 className="font-medium text-gray-900 mb-4">Scan QR Code to Pay</h4>
-              <div className="bg-white border-2 border-gray-300 rounded-lg p-6 mb-4">
-                <div className="w-64 h-64 mx-auto bg-white rounded-lg flex items-center justify-center border border-gray-200">
-                  <div className="w-56 h-56 bg-white border-2 border-gray-300 rounded-lg p-2">
-                    {/* Real QR Code Pattern */}
-                    <div className="w-full h-full bg-white" style={{ display: 'grid', gridTemplateColumns: 'repeat(21, 1fr)', gap: '0' }}>
-                      {generateQRCode().map((row, rowIndex) =>
-                        row.map((cell, colIndex) => (
-                          <div
-                            key={`${rowIndex}-${colIndex}`}
-                            className={`w-full h-full ${cell ? 'bg-black' : 'bg-white'}`}
-                          />
-                        ))
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                <p className="text-sm text-gray-600 mb-1">
-                  <span className="font-medium">Amount:</span> {formatCurrency(pricing.actualPrice)}
-                </p>
-                <p className="text-sm text-gray-600 mb-1">
-                  <span className="font-medium">Users:</span> {userCount}
-                </p>
-                <p className="text-sm text-gray-600 mb-1">
-                  <span className="font-medium">UPI ID:</span> {upiId}
-                </p>
-                <p className="text-xs text-gray-500 mt-2">
-                  Scan this QR code with any UPI app to complete payment
-                </p>
-              </div>
-              <div className="flex space-x-3">
-                <button
-                  onClick={handleQRPaymentComplete}
-                  className="flex-1 py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
-                >
-                  Payment Complete
-                </button>
-                <button
-                  onClick={() => setShowQR(false)}
-                  className="flex-1 py-2 px-4 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors font-medium"
-                >
-                  Back
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Payment Button */}
-        {!(selectedMethod === 'upi' && showQR) && (
-          <button
-            onClick={handlePayment}
-            disabled={isProcessing}
-            className="w-full py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium disabled:opacity-50"
-          >
-            {isProcessing ? 'Processing...' : `Pay ${pricing.displayPrice}`}
-          </button>
-        )}
-      </div>
-    </div>
+        <ModalFooter className="px-6 pb-6">
+          {!(selectedMethod === 'upi' && showQR) && (
+            <button onClick={handlePayment} disabled={isProcessing} className="w-full py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium disabled:opacity-50">
+              {isProcessing ? 'Processing...' : `Pay ${formatCurrency(totalAmount)}`}
+            </button>
+          )}
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
   );
 };

@@ -23,6 +23,8 @@ interface Team {
 export const Teams: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [openDropdowns, setOpenDropdowns] = useState<{[key: string]: boolean}>({});
+  // Navigate to invite screen
+  const navigate = require('react-router-dom').useNavigate();
   
   // Refs for dropdowns
   const dropdownRefs = useRef<{[key: string]: HTMLDivElement | null}>({});
@@ -194,8 +196,8 @@ export const Teams: React.FC = () => {
                     <div className="absolute right-0 mt-1 w-40 bg-white  shadow-lg border border-gray-200 py-1 z-50">
                       <button
                         onClick={() => {
-                          // Handle invite user
                           setOpenDropdowns(prev => ({ ...prev, [`team-${team.id}`]: false }));
+                          navigate('/invite-users');
                         }}
                         className="flex items-center w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       >

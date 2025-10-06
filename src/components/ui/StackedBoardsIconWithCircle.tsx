@@ -78,3 +78,4 @@ export const StackedBoardsIconWithCircle: React.FC<StackedBoardsIconWithCirclePr
     </div>
   );
 };
+

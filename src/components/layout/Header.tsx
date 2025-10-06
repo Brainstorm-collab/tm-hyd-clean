@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Search, Bell, Plus, User, ChevronDown, ChevronLeft, Check, UserPlus, FileText, AtSign, HelpCircle, Users, LogOut, Calendar, Grid3X3, Settings, ArrowRight, Crown } from 'lucide-react';
@@ -10,6 +11,7 @@ import { CreateTaskModal } from '../modals/CreateTaskModal';
 import { CreateTeamModal } from '../modals/CreateTeamModal';
 import { CreateBoardModal } from '../modals/CreateBoardModal';
 import { CreateTimelineModal } from '../modals/CreateTimelineModal';
+import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 
 interface HeaderProps {
   onSearch: (query: string) => void;
@@ -32,7 +34,7 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
   const userMenuRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
   const addMenuRef = useRef<HTMLDivElement>(null);
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const debouncedQuery = useDebouncedValue(searchQuery, 500);
 
   // Update user when currentUser prop changes
   useEffect(() => {
@@ -116,6 +118,9 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
   const getPageTitle = () => {
+    if (location.pathname.startsWith('/profile/')) {
+      return 'User info';
+    }
     switch (location.pathname) {
       case '/home':
         return 'Tasks Home';
@@ -134,7 +139,7 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
       case '/settings':
         return 'Settings';
       case '/profile':
-        return 'Profile';
+        return 'User info';
       case '/tasks':
         return 'Tasks';
       case '/projects':
@@ -171,32 +176,24 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchQuery(value);
-
-    // Clear existing timeout
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
-
-    // If input is empty, navigate to home page
     if (!value.trim()) {
-      navigate('/home');
-      return;
+      // Stay on search page when clearing input
+      navigate('/search');
     }
-
-    // Set new timeout for debounced search
-    searchTimeoutRef.current = setTimeout(() => {
-      navigate(`/search?q=${encodeURIComponent(value.trim())}`);
-    }, 500); // 500ms debounce delay
   };
 
-  // Cleanup timeout on unmount
+  // Navigate when debounced query changes, only if it matches latest input
   useEffect(() => {
-    return () => {
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
-      }
-    };
-  }, []);
+    const normalized = debouncedQuery.trim();
+    if (normalized && debouncedQuery === searchQuery) {
+      navigate(`/search?q=${encodeURIComponent(normalized)}`);
+    } else if (!normalized && location.pathname === '/search') {
+      // Keep user on search route with empty query
+      navigate('/search');
+    }
+  }, [debouncedQuery, searchQuery, navigate, location.pathname]);
+
+  // Removed auto-leave behavior to keep user on the same page when query clears
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -249,14 +246,15 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
         </form>
 
         {/* Right side */}
-        <div className="flex items-center space-x-2 flex-shrink-0" style={{ gap: '5px' }}>
+        <div className="flex items-center space-x-2 flex-shrink-0" style={{ gap: '12px' }}>
           {/* Pro Subscription Button */}
           <button 
             onClick={() => navigate('/premium')}
-            className="flex items-center space-x-2 pl-3 pr-4 py-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-lg hover:from-yellow-500 hover:to-orange-600 transition-all duration-200 shadow-sm"
+            className="inline-flex items-center justify-center gap-1 px-3 py-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-lg hover:from-yellow-500 hover:to-orange-600 transition-all duration-200 shadow-sm"
+            style={{ marginRight: 6 }}
           >
             <Crown className="w-4 h-4" />
-            <span className="text-sm font-medium">Pro</span>
+            <span className="text-sm font-medium leading-none">Pro</span>
           </button>
 
           {/* Create New Button with Dropdown */}

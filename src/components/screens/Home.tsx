@@ -81,7 +81,7 @@ export const Home: React.FC = () => {
     setOpenDropdowns(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const tasks = shouldShowData ? [
+  const [tasks, setTasks] = useState(shouldShowData ? [
     {
       id: 1,
       title: "Complete UX for new landing page",
@@ -110,7 +110,7 @@ export const Home: React.FC = () => {
       tag: "Design Tag",
       completed: false
     }
-  ] : [];
+  ] : []);
 
   const announcements = shouldShowData ? [
     {
@@ -398,7 +398,9 @@ export const Home: React.FC = () => {
                   <input
                     type="checkbox"
                     checked={task.completed}
-                    onChange={() => {}}
+                    onChange={() => {
+                      setTasks(prev => prev.map(t => t.id === task.id ? { ...t, completed: !t.completed } : t));
+                    }}
                     className="w-4 h-4 rounded-sm border-gray-300 focus:ring-2"
                     style={{ accentColor: '#6B40ED' }}
                   />

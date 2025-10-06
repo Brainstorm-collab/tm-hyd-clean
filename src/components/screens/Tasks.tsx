@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { 
   Plus, 
@@ -30,6 +30,7 @@ import { getTasks, getTeamMembers, getProjects, setTasks } from '../../utils/loc
 import { useAuth } from '../../contexts/AuthContext';
 import { EmptyTasks } from '../empty-states/EmptyTasks';
 import { useToast } from '../../contexts/ToastContext';
+import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 
 const statusColors = {
   'To Do': 'bg-gray-100 text-gray-800',
@@ -65,6 +66,8 @@ export const Tasks: React.FC = () => {
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
 
+  const debouncedSearch = useDebouncedValue(searchQuery, 400);
+
   const teamMembers = shouldShowData ? getTeamMembers() : [];
   const projects = shouldShowData ? getProjects() : [];
 
@@ -78,14 +81,14 @@ export const Tasks: React.FC = () => {
 
   const filteredTasks = useMemo(() => {
     return tasks.filter(task => {
-      const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           task.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = task.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+                           task.description.toLowerCase().includes(debouncedSearch.toLowerCase());
       const matchesStatus = statusFilter === 'all' || task.status === statusFilter;
       const matchesPriority = priorityFilter === 'all' || task.priority === priorityFilter;
       
       return matchesSearch && matchesStatus && matchesPriority;
     });
-  }, [tasks, searchQuery, statusFilter, priorityFilter]);
+  }, [tasks, debouncedSearch, statusFilter, priorityFilter]);
 
   const getStatusCount = (status: string) => {
     return tasks.filter(task => task.status === status).length;
@@ -130,10 +133,7 @@ export const Tasks: React.FC = () => {
     setTasks(updatedTasks);
   };
 
-  // Show empty state for guest users or when no tasks
-  if (!isAuthenticated || isGuest || tasks.length === 0) {
-    return <EmptyTasks onCreateTask={() => setShowCreateModal(true)} />;
-  }
+  const showEmpty = !isAuthenticated || isGuest || tasks.length === 0;
 
   return (
     <div className="p-6 space-y-6">
@@ -255,10 +255,50 @@ export const Tasks: React.FC = () => {
         </CardContent>
       </Card>
 
+      {/* Radio Filters */}
+      <div className="flex items-center space-x-6">
+        <div className="flex items-center space-x-3">
+          <span className="text-sm text-gray-600">Status:</span>
+          {['all','To Do','In Progress','Done'].map(opt => (
+            <label key={opt} className="flex items-center space-x-1 cursor-pointer">
+              <input
+                type="radio"
+                name="statusFilter"
+                value={opt}
+                checked={statusFilter === opt}
+                onChange={() => setStatusFilter(opt)}
+                className="w-4 h-4"
+                style={{ accentColor: '#6B40ED' }}
+              />
+              <span className="text-sm">{opt}</span>
+            </label>
+          ))}
+        </div>
+        <div className="flex items-center space-x-3">
+          <span className="text-sm text-gray-600">Priority:</span>
+          {['all','Low','Medium','High'].map(opt => (
+            <label key={opt} className="flex items-center space-x-1 cursor-pointer">
+              <input
+                type="radio"
+                name="priorityFilter"
+                value={opt}
+                checked={priorityFilter === opt}
+                onChange={() => setPriorityFilter(opt as 'all' | 'Low' | 'Medium' | 'High')}
+                className="w-4 h-4"
+                style={{ accentColor: '#6B40ED' }}
+              />
+              <span className="text-sm">{opt}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
       {/* Task List */}
       {viewMode === 'list' ? (
         <div className="space-y-4">
-          {filteredTasks.length === 0 ? (
+          {showEmpty ? (
+            <EmptyTasks onCreateTask={() => setShowCreateModal(true)} />
+          ) : filteredTasks.length === 0 ? (
             <Card>
               <CardContent className="p-12 text-center">
                 <CheckSquare className="w-12 h-12 text-gray-300 mx-auto mb-4" />
