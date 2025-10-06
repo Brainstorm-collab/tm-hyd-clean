@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ModalProvider } from './components/ModalManager';
+import { useModalManager } from './components/ModalManager';
 import { ToastProvider, useToast } from './contexts/ToastContext';
 import { ToastContainer } from './components/ui/Toast';
 import { Layout } from './components/layout/Layout';
@@ -37,6 +38,7 @@ function AppRouter() {
   const { currentUser, isAuthenticated, logout } = useAuth();
   const { success } = useToast();
   const location = useLocation();
+  const { openModal, closeModal } = useModalManager();
 
   const handleItemClick = (item: string) => {
     setActiveItem(item);
@@ -75,6 +77,20 @@ function AppRouter() {
     }
   }, [isAuthenticated, currentUser, location.pathname, success]);
 
+  // Open Login as modal (for guest -> login from header)
+  const openLoginModal = () => {
+    const modalContent = (
+      <Login
+        variant="modal"
+        onClose={closeModal}
+        onSwitchToSignup={() => {}}
+        onSwitchToForgotPassword={() => {}}
+        onSwitchToOTP={() => {}}
+      />
+    );
+    openModal(modalContent, closeModal);
+  };
+
   if (!isAuthenticated) {
       return (
         <div className="min-h-screen bg-gray-50">
@@ -112,6 +128,7 @@ function AppRouter() {
       onLogout={handleLogout}
       currentUser={currentUser!}
       isAuthenticated={isAuthenticated}
+      onNavigateToLogin={openLoginModal}
     >
       <Routes>
         <Route index element={<Navigate to="/home" replace />} />
