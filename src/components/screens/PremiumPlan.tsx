@@ -19,7 +19,9 @@ import { validateAndApplyPromo, removePromo, PromoMessageType } from '../../util
 
 export const PremiumPlan: React.FC = () => {
   const navigate = useNavigate();
-  const { currentUser, updateUser } = useAuth();
+  const { currentUser, updateUser, isGuest, checkPremiumAccess } = useAuth();
+  const { warning } = useToast();
+  
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [userCount, setUserCount] = useState(25);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -136,6 +138,21 @@ export const PremiumPlan: React.FC = () => {
     const pricing = getPricing('premium'); // Use premium for discount calculation
     return billingCycle === 'yearly' ? `Save ${formatCurrency(pricing.yearlySavings)}` : '';
   };
+
+  // For guests, show toast and redirect
+  if (isGuest) {
+    warning(
+      'Login Required',
+      'Please sign in to access premium features and billing.',
+      {
+        label: 'Sign In',
+        onClick: () => {
+          navigate('/login');
+        }
+      }
+    );
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-white p-6">

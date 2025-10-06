@@ -76,9 +76,9 @@ export interface User {
 
 export interface Subscription {
   id: string;
-  plan: 'free' | 'starter' | 'premium';
-  billingCycle: 'monthly' | 'yearly';
-  status: 'active' | 'cancelled' | 'expired' | 'trial';
+  plan: 'free' | 'starter' | 'premium' | 'guest';
+  billingCycle: 'monthly' | 'yearly' | 'none';
+  status: 'active' | 'cancelled' | 'expired' | 'trial' | 'guest';
   startDate: string;
   endDate: string;
   nextBillingDate: string;

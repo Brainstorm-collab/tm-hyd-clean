@@ -26,9 +26,9 @@ export const Login: React.FC<LoginProps> = ({
     try {
       const result = await login(email, password);
       if (result.success) {
-        success('Welcome!', `Signed in as ${email}`);
+        success('Welcome!', `Successfully signed in as ${email}`);
       } else {
-        error('Login failed', result.message);
+        error('Login Failed', result.message);
       }
     } finally {
       setIsLoading(false);
@@ -40,9 +40,9 @@ export const Login: React.FC<LoginProps> = ({
     try {
       const result = await socialLogin(provider);
       if (result.success) {
-        success('Welcome!', `Signed in with ${provider}`);
+        success('Welcome!', `Successfully signed in with ${provider}`);
       } else {
-        error('Login failed', result.message);
+        error('Login Failed', result.message);
       }
     } finally {
       setIsLoading(false);
@@ -51,7 +51,7 @@ export const Login: React.FC<LoginProps> = ({
 
   const handleGuest = () => {
     continueAsGuest();
-    success('Welcome, Guest!', 'You are now signed in as a guest.');
+    success('Welcome!', 'Successfully signed in as a guest user.');
   };
 
   return (
@@ -150,7 +150,7 @@ export const Login: React.FC<LoginProps> = ({
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-black hover:bg-gray-800 text-white text-sm font-medium py-2.5 px-4 rounded-lg transition-colors"
+                  className="w-full py-2.5 bg-black text-white hover:bg-gray-800 transition-colors font-medium text-sm rounded-lg"
                 >
                   {isLoading ? 'Signing in...' : 'Login'}
                 </button>

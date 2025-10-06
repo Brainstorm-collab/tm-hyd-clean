@@ -46,7 +46,7 @@ export const EmptyDashboard: React.FC = () => {
             <h2 className="text-lg font-semibold text-gray-900">Hi Guest User!, You are almost done.</h2>
             <p className="text-gray-600">Please complete few steps to setup your account completly.</p>
           </div>
-          <button className="px-4 py-2 rounded-button transition-colors hover:opacity-80" style={{ backgroundColor: '#e3d8ff', color: '#6B40ED' }}>
+          <button className="px-4 py-2 rounded-button transition-colors bg-primary-100 text-primary-700 hover:bg-primary-200">
             Setup Account &gt;
           </button>
         </div>

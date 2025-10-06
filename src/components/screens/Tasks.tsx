@@ -45,15 +45,11 @@ const priorityColors = {
 };
 
 export const Tasks: React.FC = () => {
-  const { currentUser, isAuthenticated } = useAuth();
+  const { currentUser, isAuthenticated, isGuest } = useAuth();
   const { success } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   
-  // Check if user is a guest
-  const isGuest = currentUser?.id === 'guest';
-  const shouldShowData = isAuthenticated && !isGuest;
-  
-  const [tasks, setTasksState] = useState<Task[]>(shouldShowData ? getTasks() : []);
+  const [tasks, setTasksState] = useState<Task[]>(getTasks());
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [showCommentsModal, setShowCommentsModal] = useState(false);
@@ -68,8 +64,8 @@ export const Tasks: React.FC = () => {
 
   const debouncedSearch = useDebouncedValue(searchQuery, 400);
 
-  const teamMembers = shouldShowData ? getTeamMembers() : [];
-  const projects = shouldShowData ? getProjects() : [];
+  const teamMembers = getTeamMembers();
+  const projects = getProjects();
 
   // Check if we should show create modal from URL params
   React.useEffect(() => {
@@ -134,6 +130,11 @@ export const Tasks: React.FC = () => {
   };
 
   const showEmpty = !isAuthenticated || isGuest || tasks.length === 0;
+
+  // For guests, show empty state
+  if (isGuest) {
+    return <EmptyTasks onCreateTask={() => {}} />;
+  }
 
   return (
     <div className="p-6 space-y-6">

@@ -5,11 +5,13 @@ import { useModalManager } from '../ModalManager';
 import { AvatarImage } from '../ui/AvatarImage';
 import { useAuth } from '../../contexts/AuthContext';
 import { getInitials } from '../ui/Avatar';
+import { EmptyInbox } from '../empty-states/EmptyInbox';
 
 export const Inbox: React.FC = () => {
   const { openModal, closeModal } = useModalManager();
-  const { currentUser } = useAuth();
+  const { currentUser, isGuest } = useAuth();
   const navigate = useNavigate();
+  
   const [activeConversation, setActiveConversation] = useState('Juliana Wills');
   const [newMessage, setNewMessage] = useState('');
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
@@ -233,6 +235,11 @@ export const Inbox: React.FC = () => {
   };
 
   const currentConversation = conversations.find(c => c.name === activeConversation);
+
+  // For guests, show empty state
+  if (isGuest) {
+    return <EmptyInbox />;
+  }
 
   return (
     <div className="flex h-full bg-white">

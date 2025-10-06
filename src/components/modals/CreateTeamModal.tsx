@@ -128,8 +128,7 @@ export const CreateTeamModal: React.FC<CreateTeamModalProps> = ({ children, onTe
                 />
                 <button
                   onClick={handleAddMember}
-                  className="px-3 py-2 rounded-button hover:opacity-80"
-                  style={{ backgroundColor: '#e3d8ff', color: '#6B40ED' }}
+                  className="px-3 py-2 rounded-button bg-primary-100 text-primary-700 hover:bg-primary-200"
                 >
                   <Plus className="w-4 h-4" />
                 </button>
@@ -148,8 +147,7 @@ export const CreateTeamModal: React.FC<CreateTeamModalProps> = ({ children, onTe
           </button>
           <button
             onClick={handleCreateTeam}
-            className="px-4 py-2 text-sm font-medium rounded-button hover:opacity-80"
-            style={{ backgroundColor: '#e3d8ff', color: '#6B40ED' }}
+            className="px-4 py-2 text-sm font-medium rounded-button bg-primary-100 text-primary-700 hover:bg-primary-200"
           >
             Create
           </button>

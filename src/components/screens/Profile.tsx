@@ -7,14 +7,25 @@ import { Card, CardContent, CardHeader } from '../ui/Card';
 import { ProfilePictureUpload } from '../ui/ProfilePictureUpload';
 import { useAuth } from '../../contexts/AuthContext';
 
+// Guest user constant data
+const guestData = {
+  name: 'Guest User',
+  firstName: 'Guest',
+  lastName: 'User',
+  email: 'guest@example.com',
+  role: 'Guest',
+  bio: 'This is a guest account with limited access. Sign in to unlock all features and customize your profile.',
+  phone: '+1 (555) 000-0000',
+  location: 'Guest Location',
+  website: 'https://example.com'
+};
+
 export const Profile: React.FC = () => {
   const { success, error } = useToast();
-  const { currentUser, updateUser } = useAuth();
+  const { currentUser, updateUser, isGuest } = useAuth();
   const [user, setUserState] = useState<UserType | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   
-  // Check if user is a guest
-  const isGuest = currentUser?.id === 'guest';
   const [editData, setEditData] = useState({
     name: '',
     firstName: '',
@@ -29,22 +40,50 @@ export const Profile: React.FC = () => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
-    const currentUser = getUser();
-    if (currentUser) {
-      setUserState(currentUser);
-      setEditData({
-        name: currentUser.name || '',
-        firstName: currentUser.firstName || '',
-        lastName: currentUser.lastName || '',
-        email: currentUser.email || '',
-        role: currentUser.role || '',
-        bio: currentUser.bio || '',
-        phone: currentUser.phone || '',
-        location: currentUser.location || '',
-        website: currentUser.website || ''
-      });
+    if (isGuest) {
+      // For guests, use constant data
+      setUserState({
+        id: 'guest',
+        name: guestData.name,
+        email: guestData.email,
+        avatarUrl: '',
+        preferences: {
+          theme: 'light',
+          notifications: false,
+          emailNotifications: false
+        },
+        subscription: {
+          id: 'sub_guest',
+          plan: 'guest',
+          status: 'guest',
+          startDate: new Date().toISOString(),
+          endDate: new Date().toISOString(),
+          billingCycle: 'none',
+          nextBillingDate: new Date().toISOString(),
+          amount: 0,
+          userCount: 1,
+          autoRenew: false
+        }
+      } as UserType);
+      setEditData(guestData);
+    } else {
+      const currentUser = getUser();
+      if (currentUser) {
+        setUserState(currentUser);
+        setEditData({
+          name: currentUser.name || '',
+          firstName: currentUser.firstName || '',
+          lastName: currentUser.lastName || '',
+          email: currentUser.email || '',
+          role: currentUser.role || '',
+          bio: currentUser.bio || '',
+          phone: currentUser.phone || '',
+          location: currentUser.location || '',
+          website: currentUser.website || ''
+        });
+      }
     }
-  }, []);
+  }, [isGuest]);
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -64,6 +103,14 @@ export const Profile: React.FC = () => {
   };
 
   const handleCancel = () => {
+    if (isGuest) {
+      error(
+        'Login Required',
+        'Please login to edit your profile. You can login using the login button in the profile dropdown.'
+      );
+      return;
+    }
+    
     setIsEditing(false);
     if (user) {
       setEditData({
@@ -82,6 +129,14 @@ export const Profile: React.FC = () => {
   };
 
   const handleSave = () => {
+    if (isGuest) {
+      error(
+        'Login Required',
+        'Please login to edit your profile. You can login using the login button in the profile dropdown.'
+      );
+      return;
+    }
+    
     const newErrors: { [key: string]: string } = {};
 
     if (!editData.name.trim()) {
@@ -250,11 +305,12 @@ export const Profile: React.FC = () => {
                     type="text"
                     value={editData.firstName}
                     onChange={(e) => handleInputChange('firstName', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    disabled={isGuest}
+                    className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${isGuest ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                     placeholder="Enter your first name"
                   />
                 ) : (
-                  <p className="text-gray-900 py-2">{user.firstName || 'Not provided'}</p>
+                  <p className="text-gray-900 py-2">{user?.firstName || guestData.firstName}</p>
                 )}
               </div>
 
@@ -269,11 +325,12 @@ export const Profile: React.FC = () => {
                     type="text"
                     value={editData.lastName}
                     onChange={(e) => handleInputChange('lastName', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    disabled={isGuest}
+                    className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${isGuest ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                     placeholder="Enter your last name"
                   />
                 ) : (
-                  <p className="text-gray-900 py-2">{user.lastName || 'Not provided'}</p>
+                  <p className="text-gray-900 py-2">{user?.lastName || guestData.lastName}</p>
                 )}
               </div>
 
@@ -289,9 +346,10 @@ export const Profile: React.FC = () => {
                       type="text"
                       value={editData.name}
                       onChange={(e) => handleInputChange('name', e.target.value)}
+                      disabled={isGuest}
                       className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
                         errors.name ? 'border-red-300' : 'border-gray-300'
-                      }`}
+                      } ${isGuest ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                       placeholder="Enter your full name"
                     />
                     {errors.name && (
@@ -299,7 +357,7 @@ export const Profile: React.FC = () => {
                     )}
                   </div>
                 ) : (
-                  <p className="text-gray-900 py-2">{user.name}</p>
+                  <p className="text-gray-900 py-2">{user?.name || guestData.name}</p>
                 )}
               </div>
 
@@ -315,9 +373,10 @@ export const Profile: React.FC = () => {
                       type="email"
                       value={editData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
+                      disabled={isGuest}
                       className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
                         errors.email ? 'border-red-300' : 'border-gray-300'
-                      }`}
+                      } ${isGuest ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                       placeholder="Enter your email address"
                     />
                     {errors.email && (
@@ -325,7 +384,7 @@ export const Profile: React.FC = () => {
                     )}
                   </div>
                 ) : (
-                  <p className="text-gray-900 py-2">{user.email}</p>
+                  <p className="text-gray-900 py-2">{user?.email || guestData.email}</p>
                 )}
               </div>
 
@@ -340,11 +399,12 @@ export const Profile: React.FC = () => {
                     type="tel"
                     value={editData.phone}
                     onChange={(e) => handleInputChange('phone', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    disabled={isGuest}
+                    className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${isGuest ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                     placeholder="Enter your phone number"
                   />
                 ) : (
-                  <p className="text-gray-900 py-2">{user.phone || 'Not provided'}</p>
+                  <p className="text-gray-900 py-2">{user?.phone || guestData.phone}</p>
                 )}
               </div>
 
@@ -359,11 +419,12 @@ export const Profile: React.FC = () => {
                     type="text"
                     value={editData.location}
                     onChange={(e) => handleInputChange('location', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    disabled={isGuest}
+                    className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${isGuest ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                     placeholder="Enter your location"
                   />
                 ) : (
-                  <p className="text-gray-900 py-2">{user.location || 'Not provided'}</p>
+                  <p className="text-gray-900 py-2">{user?.location || guestData.location}</p>
                 )}
               </div>
 
@@ -378,11 +439,12 @@ export const Profile: React.FC = () => {
                     type="url"
                     value={editData.website}
                     onChange={(e) => handleInputChange('website', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    disabled={isGuest}
+                    className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${isGuest ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                     placeholder="Enter your website URL"
                   />
                 ) : (
-                  <p className="text-gray-900 py-2">{user.website || 'Not provided'}</p>
+                  <p className="text-gray-900 py-2">{user?.website || guestData.website}</p>
                 )}
               </div>
 
@@ -397,11 +459,12 @@ export const Profile: React.FC = () => {
                     value={editData.bio}
                     onChange={(e) => handleInputChange('bio', e.target.value)}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    disabled={isGuest}
+                    className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${isGuest ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                     placeholder="Tell us about yourself"
                   />
                 ) : (
-                  <p className="text-gray-900 py-2">{user.bio || 'No bio provided'}</p>
+                  <p className="text-gray-900 py-2">{user?.bio || guestData.bio}</p>
                 )}
               </div>
 
@@ -416,9 +479,10 @@ export const Profile: React.FC = () => {
                     <select
                       value={editData.role}
                       onChange={(e) => handleInputChange('role', e.target.value)}
+                      disabled={isGuest}
                       className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
                         errors.role ? 'border-red-300' : 'border-gray-300'
-                      }`}
+                      } ${isGuest ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                     >
                       <option value="">Select your role</option>
                       <option value="UI/UX Designer">UI/UX Designer</option>
@@ -437,7 +501,7 @@ export const Profile: React.FC = () => {
                     )}
                   </div>
                 ) : (
-                  <p className="text-gray-900 py-2">{user.role || 'No role assigned'}</p>
+                  <p className="text-gray-900 py-2">{user?.role || guestData.role}</p>
                 )}
               </div>
             </div>

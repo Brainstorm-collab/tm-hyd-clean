@@ -28,7 +28,7 @@ export const EmptyHome: React.FC = () => {
             <h2 className="text-lg font-semibold text-gray-900">Hi Guest User!, You are almost done.</h2>
             <p className="text-gray-600">Please complete few steps to setup your account completly.</p>
           </div>
-          <button className="px-4 py-2  hover:opacity-80 transition-opacity" style={{ backgroundColor: '#e3d8ff', color: '#6B40ED' }}>
+          <button className="px-4 py-2 bg-primary-100 text-primary-700 hover:bg-primary-200 transition-colors">
             Setup Account &gt;
           </button>
         </div>
@@ -104,7 +104,7 @@ export const EmptyHome: React.FC = () => {
                 <p className="text-sm text-gray-600">Team tasks sorted by priority</p>
               </div>
               <div className="flex items-center space-x-2">
-                <button className="px-3 py-1  text-sm hover:opacity-80 transition-opacity" style={{ backgroundColor: '#e3d8ff', color: '#6B40ED' }}>
+                <button className="px-3 py-1 text-sm bg-primary-100 text-primary-700 hover:bg-primary-200 transition-colors">
                   + Task
                 </button>
                 <button className="p-1 hover:bg-gray-100">
@@ -197,7 +197,7 @@ export const EmptyHome: React.FC = () => {
               <p className="text-sm text-gray-600">Teams with assigned tasks</p>
             </div>
             <div className="flex items-center space-x-2">
-              <button className="px-3 py-1  text-sm hover:opacity-80 transition-opacity" style={{ backgroundColor: '#e3d8ff', color: '#6B40ED' }}>
+              <button className="px-3 py-1 text-sm bg-primary-100 text-primary-700 hover:bg-primary-200 transition-colors">
                 + Team
               </button>
               <button className="p-1 hover:bg-gray-100">

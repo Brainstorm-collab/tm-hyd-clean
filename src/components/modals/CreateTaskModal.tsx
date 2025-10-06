@@ -165,8 +165,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ children, onTa
               />
               <button
                 onClick={handleAddTag}
-                className="px-3 py-2 rounded-button hover:opacity-80"
-                style={{ backgroundColor: '#e3d8ff', color: '#6B40ED' }}
+                className="px-3 py-2 rounded-button bg-primary-100 text-primary-700 hover:bg-primary-200"
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -203,8 +202,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ children, onTa
               />
               <button
                 onClick={handleAddAssignee}
-                className="px-3 py-2 rounded-button hover:opacity-80"
-                style={{ backgroundColor: '#e3d8ff', color: '#6B40ED' }}
+                className="px-3 py-2 rounded-button bg-primary-100 text-primary-700 hover:bg-primary-200"
               >
                 <Plus className="w-4 h-4" />
               </button>

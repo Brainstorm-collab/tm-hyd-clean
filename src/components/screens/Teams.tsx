@@ -113,7 +113,7 @@ export const Teams: React.FC = () => {
         
         <div className="flex items-center space-x-2">
           <CreateTeamModal>
-            <button className="px-4 py-2 transition-colors flex items-center space-x-2 hover:opacity-80" style={{ backgroundColor: '#e3d8ff', color: '#6B40ED' }}>
+            <button className="px-4 py-2 transition-colors flex items-center space-x-2 bg-primary-100 text-primary-700 hover:bg-primary-200">
               <Plus className="w-4 h-4" />
               <span>Team</span>
             </button>

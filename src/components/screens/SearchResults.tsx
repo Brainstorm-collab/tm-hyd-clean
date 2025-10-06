@@ -1,55 +1,35 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { 
   Filter,
   ChevronDown,
   ChevronUp,
   Calendar,
-  MoreVertical,
-  Check
+  MoreVertical
 } from 'lucide-react';
-import { useDebouncedValue } from '../../hooks/useDebouncedValue';
+// import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 
 export const SearchResults: React.FC = () => {
   const location = useLocation();
   const urlParams = new URLSearchParams(location.search);
   const searchQuery = urlParams.get('q') || '';
-  const [showFilters, setShowFilters] = useState(true);
+  
+  // Removed console.log to prevent continuous re-rendering
+  
+  // Simplified state management to prevent buffering issues
+  const [showFilters, setShowFilters] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
   const [selectedTag, setSelectedTag] = useState('Design');
   const [selectedDate, setSelectedDate] = useState('Nov 2022');
-  const debouncedQuery = useDebouncedValue(searchQuery, 400);
-
-  // Manage local UI state for search filters and results; routing is handled elsewhere
-
-  // Dropdown state for announcements and teams entries
+  
+  // Simple dropdown state without complex refs
   const [openAnnouncement, setOpenAnnouncement] = useState<string | null>(null);
   const [openTeam, setOpenTeam] = useState<string | null>(null);
-  const announcementRefs = useRef<{[key: string]: HTMLDivElement | null}>({});
-  const teamRefs = useRef<{[key: string]: HTMLDivElement | null}>({});
-  const filtersRef = useRef<HTMLDivElement | null>(null);
+  
+  // Use searchQuery directly instead of debounced version
+  const debouncedQuery = searchQuery;
 
-  useEffect(() => {
-    const onDocClick = (e: MouseEvent) => {
-      if (openAnnouncement) {
-        const el = announcementRefs.current[openAnnouncement];
-        if (el && !el.contains(e.target as Node)) setOpenAnnouncement(null);
-      }
-      if (openTeam) {
-        const el = teamRefs.current[openTeam];
-        if (el && !el.contains(e.target as Node)) setOpenTeam(null);
-      }
-      if (showFilters) {
-        const el = filtersRef.current;
-        if (el && !el.contains(e.target as Node)) setShowFilters(false);
-      }
-    };
-    document.addEventListener('mousedown', onDocClick);
-    return () => document.removeEventListener('mousedown', onDocClick);
-  }, [openAnnouncement, openTeam, showFilters]);
-
-  // Note: This component does not perform navigation on empty queries.
-
+  // Simplified search results without complex state management
   const searchResults = {
     tasks: [
       {
@@ -126,7 +106,7 @@ export const SearchResults: React.FC = () => {
           
           <div className="flex items-center space-x-4">
             {/* Filters Button + Dropdown */}
-            <div className="relative" ref={filtersRef}>
+            <div className="relative">
               <button 
                 onClick={() => setShowFilters(!showFilters)}
                 className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-button hover:bg-gray-50"
@@ -295,7 +275,7 @@ export const SearchResults: React.FC = () => {
                           <span>from {announcement.author}</span>
                         </div>
                       </div>
-                      <div className="relative" ref={el => { announcementRefs.current[announcement.id] = el; }}>
+                      <div className="relative">
                         <button
                           onClick={() => setOpenAnnouncement(prev => prev === announcement.id ? null : announcement.id)}
                           className="p-1 hover:bg-gray-100 rounded"
@@ -333,7 +313,7 @@ export const SearchResults: React.FC = () => {
                           <span>{team.created}</span>
                         </div>
                       </div>
-                      <div className="relative" ref={el => { teamRefs.current[team.id] = el; }}>
+                      <div className="relative">
                         <button
                           onClick={() => setOpenTeam(prev => prev === team.id ? null : team.id)}
                           className="p-1 hover:bg-gray-100 rounded"

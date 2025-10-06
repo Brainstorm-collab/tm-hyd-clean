@@ -223,8 +223,7 @@ export const Home: React.FC = () => {
           </div>
           <button 
             onClick={handleSetupAccount}
-            className="px-4 py-2 rounded-button transition-colors hover:opacity-80" 
-            style={{ backgroundColor: '#e3d8ff', color: '#6B40ED' }}
+            className="px-4 py-2 rounded-button transition-colors bg-primary-100 text-primary-700 hover:bg-primary-200"
           >
             Setup Account &gt;
           </button>
@@ -302,7 +301,7 @@ export const Home: React.FC = () => {
               </div>
               <div className="flex items-center space-x-2">
                 <CreateTaskModal>
-                  <button className="text-white px-3 py-1 text-sm rounded-lg hover:opacity-80 transition-colors" style={{ backgroundColor: '#e3d8ff', color: '#6B40ED' }}>
+                  <button className="px-3 py-1 text-sm rounded-lg bg-primary-100 text-primary-700 hover:bg-primary-200 transition-colors">
                     + Task
                   </button>
                 </CreateTaskModal>
@@ -605,7 +604,7 @@ export const Home: React.FC = () => {
             </div>
             <div className="flex items-center space-x-2">
               <CreateTeamModal>
-                <button className="text-white px-3 py-1 text-sm rounded-lg hover:opacity-80 transition-colors" style={{ backgroundColor: '#e3d8ff', color: '#6B40ED' }}>
+                <button className="px-3 py-1 text-sm rounded-lg bg-primary-100 text-primary-700 hover:bg-primary-200 transition-colors">
                   + Team
                 </button>
               </CreateTeamModal>

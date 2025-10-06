@@ -12,6 +12,8 @@ import { CreateTeamModal } from '../modals/CreateTeamModal';
 import { CreateBoardModal } from '../modals/CreateBoardModal';
 import { CreateTimelineModal } from '../modals/CreateTimelineModal';
 import { useDebouncedValue } from '../../hooks/useDebouncedValue';
+import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
 
 interface HeaderProps {
   onSearch: (query: string) => void;
@@ -31,9 +33,12 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
   const location = useLocation();
   const navigate = useNavigate();
   const [user, setUser] = useState<UserType | null>(currentUser || getUser());
+  const { isGuest } = useAuth();
+  const { warning } = useToast();
   const userMenuRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
   const addMenuRef = useRef<HTMLDivElement>(null);
+  const isNavigatingRef = useRef(false);
   const debouncedQuery = useDebouncedValue(searchQuery, 500);
 
   // Update user when currentUser prop changes
@@ -49,7 +54,7 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
       const urlParams = new URLSearchParams(location.search);
       const query = urlParams.get('q') || '';
       setSearchQuery(query);
-    } else if (location.pathname !== '/search') {
+    } else {
       // Clear search query when not on search page
       setSearchQuery('');
     }
@@ -163,7 +168,8 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
 
   const showBackButton = () => {
     // Show back button for all pages except home page
-    return location.pathname !== '/home';
+    const pathname = location.pathname;
+    return pathname !== '/home' && pathname !== '/';
   };
 
   const handleSearch = (e: React.FormEvent) => {
@@ -179,13 +185,21 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
   };
 
   // Navigate when debounced query changes, only if it matches latest input
+  // Only auto-navigate to search if user is currently typing (not navigating away)
   useEffect(() => {
+    if (isNavigatingRef.current) return; // Prevent navigation during programmatic navigation
+    
     const normalized = debouncedQuery.trim();
-    if (normalized && debouncedQuery === searchQuery) {
+    if (normalized && debouncedQuery === searchQuery && location.pathname !== '/search') {
+      // Only navigate to search if we're not already on search page
+      isNavigatingRef.current = true;
       navigate(`/search?q=${encodeURIComponent(normalized)}`);
+      setTimeout(() => { isNavigatingRef.current = false; }, 100);
     } else if (!normalized && location.pathname === '/search') {
-      // Keep user on search route with empty query
+      // Keep user on search route with empty query only if they're already there
+      isNavigatingRef.current = true;
       navigate('/search');
+      setTimeout(() => { isNavigatingRef.current = false; }, 100);
     }
   }, [debouncedQuery, searchQuery, navigate, location.pathname]);
 
@@ -215,7 +229,12 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
         {/* Page Title */}
         <div className="flex items-center space-x-4 min-w-0 flex-shrink-0">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => {
+              // Navigate back to home page
+              isNavigatingRef.current = true;
+              navigate('/home');
+              setTimeout(() => { isNavigatingRef.current = false; }, 100);
+            }}
             className={`flex items-center space-x-2 transition-colors w-8 h-8 flex-shrink-0 ${
               showBackButton() 
                 ? 'text-gray-600 hover:text-gray-900' 
@@ -245,7 +264,14 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
         <div className="flex items-center space-x-2 flex-shrink-0" style={{ gap: '12px' }}>
           {/* Pro Subscription Button */}
           <button 
-            onClick={() => navigate('/premium')}
+            onClick={() => {
+              if (isGuest) {
+                // Use proper auth navigation instead of route navigation
+                onNavigateToLogin?.();
+              } else {
+                navigate('/premium');
+              }
+            }}
             className="inline-flex items-center justify-center gap-1 px-3 py-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-lg hover:from-yellow-500 hover:to-orange-600 transition-all duration-200 shadow-sm"
             style={{ marginRight: 6 }}
           >
@@ -257,8 +283,7 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
           <div className="relative" ref={addMenuRef}>
             <button 
               onClick={() => setShowAddMenu(!showAddMenu)} 
-              className="w-10 h-10 rounded-button transition-colors flex items-center justify-center"
-              style={{ backgroundColor: '#e3d8ff', color: '#6B40ED' }}
+              className="w-10 h-10 rounded-button transition-colors flex items-center justify-center bg-primary-100 text-primary-700 hover:bg-primary-200"
             >
               <Plus className="w-5 h-5" />
             </button>
@@ -268,7 +293,7 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
               <div className="absolute right-0 mt-2 w-64 bg-white rounded-card shadow-lg border border-gray-300 py-2 z-50">
                 <CreateTaskModal onModalOpen={() => setShowAddMenu(false)}>
                   <button className="flex items-center w-full text-left px-4 py-3 hover:bg-gray-50">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3" style={{ backgroundColor: '#6B40ED' }}>
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3 bg-primary-700">
                       <Check className="w-5 h-5 text-white" />
                     </div>
                     <div>
@@ -279,7 +304,7 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
                 </CreateTaskModal>
                 <CreateTeamModal onModalOpen={() => setShowAddMenu(false)}>
                   <button className="flex items-center w-full text-left px-4 py-3 hover:bg-gray-50">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3" style={{ backgroundColor: '#6B40ED' }}>
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3 bg-primary-700">
                       <Users className="w-5 h-5 text-white" />
                     </div>
                     <div>
@@ -290,7 +315,7 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
                 </CreateTeamModal>
                 <CreateBoardModal onModalOpen={() => setShowAddMenu(false)}>
                   <button className="flex items-center w-full text-left px-4 py-3 hover:bg-gray-50">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3" style={{ backgroundColor: '#6B40ED' }}>
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3 bg-primary-700">
                       <Grid3X3 className="w-5 h-5 text-white" />
                     </div>
                     <div>
@@ -301,7 +326,7 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
                 </CreateBoardModal>
                 <CreateTimelineModal onModalOpen={() => setShowAddMenu(false)}>
                   <button className="flex items-center w-full text-left px-4 py-3 hover:bg-gray-50">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3" style={{ backgroundColor: '#6B40ED' }}>
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3 bg-primary-700">
                       <Calendar className="w-5 h-5 text-white" />
                     </div>
                     <div>
@@ -333,61 +358,14 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
                   <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
                 </div>
                 <div className="max-h-80 overflow-y-auto">
-                  {isAuthenticated ? (
-                    notifications.slice(0, 4).map((notification) => {
-                      const Icon = notification.icon;
-                      return (
-                        <div
-                          key={notification.id}
-                          className="px-4 py-3 border-b border-gray-100 hover:bg-gray-50"
-                        >
-                          <div className="flex items-start space-x-3">
-                            <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#e3d8ff' }}>
-                              <Icon className="w-4 h-4" style={{ color: '#6B40ED' }} />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm text-gray-900">
-                                {notification.message.split('**').map((part, index) => 
-                                  index % 2 === 1 ? (
-                                    <span key={index} className="text-[#6B40ED] font-medium">{part}</span>
-                                  ) : (
-                                    part
-                                  )
-                                )}
-                              </p>
-                              <p className="text-xs text-gray-500 mt-1">{notification.time}</p>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <div className="p-8 text-center">
-                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4.5 19.5a2.5 2.5 0 01-2.5-2.5V6a2.5 2.5 0 012.5-2.5h15a2.5 2.5 0 012.5 2.5v11a2.5 2.5 0 01-2.5 2.5h-15z" />
-                        </svg>
-                      </div>
-                      <p className="text-gray-500 text-lg font-medium">No notifications has founded</p>
-                      <p className="text-gray-400 text-sm mt-1">You'll get notifications soon</p>
+                  <div className="p-8 text-center">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Bell className="w-8 h-8 text-gray-400" />
                     </div>
-                  )}
-                </div>
-                {/* See All Button */}
-                {isAuthenticated && notifications.length > 0 && (
-                  <div className="p-4 border-t border-gray-200">
-                    <button
-                      onClick={() => {
-                        setShowNotifications(false);
-                        navigate('/notifications');
-                      }}
-                      className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gray-100 hover:bg-gray-200  transition-colors"
-                    >
-                      <span className="text-sm font-medium text-gray-900">See all</span>
-                      <ArrowRight className="w-4 h-4 text-gray-900" />
-                    </button>
+                    <p className="text-gray-500 text-lg font-medium">No notifications</p>
+                    <p className="text-gray-400 text-sm mt-1">You'll get notifications soon</p>
                   </div>
-                )}
+                </div>
               </div>
             )}
           </div>
@@ -424,8 +402,8 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
                   }}
                   className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 >
-                  <div className="w-8 h-8 bg-purple-100 rounded-avatar flex items-center justify-center mr-3">
-                    <User className="w-4 h-4 text-[#6B40ED]" />
+                  <div className="w-8 h-8 bg-primary-100 rounded-avatar flex items-center justify-center mr-3">
+                    <User className="w-4 h-4 text-primary-700" />
                   </div>
                   My Profile
                 </button>
@@ -436,8 +414,8 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
                   }}
                   className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 >
-                  <div className="w-8 h-8 bg-gray-100 rounded-avatar flex items-center justify-center mr-3">
-                    <Settings className="w-4 h-4 text-gray-600" />
+                  <div className="w-8 h-8 bg-primary-100 rounded-avatar flex items-center justify-center mr-3">
+                    <Settings className="w-4 h-4 text-primary-700" />
                   </div>
                   Settings
                 </button>
@@ -448,8 +426,8 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
                   }}
                   className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 >
-                  <div className="w-8 h-8 bg-gray-100 rounded-avatar flex items-center justify-center mr-3">
-                    <HelpCircle className="w-4 h-4 text-gray-600" />
+                  <div className="w-8 h-8 bg-primary-100 rounded-avatar flex items-center justify-center mr-3">
+                    <HelpCircle className="w-4 h-4 text-primary-700" />
                   </div>
                   Help and Support
                 </button>
@@ -460,8 +438,8 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
                   }}
                   className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 >
-                  <div className="w-8 h-8 bg-blue-100 rounded-avatar flex items-center justify-center mr-3">
-                    <Users className="w-4 h-4 text-blue-600" />
+                  <div className="w-8 h-8 bg-primary-100 rounded-avatar flex items-center justify-center mr-3">
+                    <Users className="w-4 h-4 text-primary-700" />
                   </div>
                   Invite Friends
                 </button>
@@ -504,8 +482,7 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
               </button>
               <button
                 onClick={onNavigateToSignup}
-                className="px-4 py-2 rounded-button hover:opacity-80 transition-opacity"
-                style={{ backgroundColor: '#e3d8ff', color: '#6B40ED' }}
+                className="px-4 py-2 rounded-button bg-primary-100 text-primary-700 hover:bg-primary-200 transition-colors"
               >
                 Sign Up
               </button>

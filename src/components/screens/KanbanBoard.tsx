@@ -9,6 +9,8 @@ import {
 import { Button } from '../ui/Button';
 import { Card, CardContent } from '../ui/Card';
 import { Avatar, AvatarFallback } from '../ui/Avatar';
+import { useAuth } from '../../contexts/AuthContext';
+import { EmptyBoards } from '../empty-states/EmptyBoards';
 
 interface KanbanTask {
   id: string;
@@ -103,6 +105,7 @@ const priorityColors = {
 };
 
 export const KanbanBoard: React.FC = () => {
+  const { isGuest } = useAuth();
   const [tasks, setTasks] = useState<KanbanTask[]>(mockTasks);
 
   const getTasksByStatus = (status: string) => {
@@ -128,6 +131,11 @@ export const KanbanBoard: React.FC = () => {
     const taskId = e.dataTransfer.getData('taskId');
     moveTask(taskId, newStatus);
   };
+
+  // For guests, show empty state
+  if (isGuest) {
+    return <EmptyBoards />;
+  }
 
   return (
     <div className="p-6 space-y-6">

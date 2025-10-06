@@ -9,6 +9,8 @@ import {
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Card, CardContent, CardHeader } from '../ui/Card';
+import { useAuth } from '../../contexts/AuthContext';
+import { EmptyCalendar } from '../empty-states/EmptyCalendar';
 
 interface CalendarTask {
   id: string;
@@ -59,6 +61,7 @@ const statusColors = {
 };
 
 export const Calendar: React.FC = () => {
+  const { isGuest } = useAuth();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
 
@@ -117,6 +120,11 @@ export const Calendar: React.FC = () => {
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  // For guests, show empty state
+  if (isGuest) {
+    return <EmptyCalendar />;
+  }
 
   return (
     <div className="p-6 space-y-6">

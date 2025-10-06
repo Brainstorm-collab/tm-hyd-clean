@@ -30,25 +30,25 @@ export const Signup: React.FC<SignupProps> = ({
       return;
     }
     if (!acceptTerms) {
-      error('Accept Terms', 'Please accept the terms and privacy policy');
+      error('Terms Required', 'Please accept the terms and privacy policy');
       return;
     }
     const trimmedPassword = password.trim();
     const hasLetter = /[A-Za-z]/.test(trimmedPassword);
     const hasNumber = /\d/.test(trimmedPassword);
     if (trimmedPassword.length < 8 || !(hasLetter && hasNumber)) {
-      error('Weak Password', 'Use at least 8 characters with letters and numbers.');
+      error('Password Too Weak', 'Use at least 8 characters with letters and numbers.');
       return;
     }
     setIsLoading(true);
     try {
       const result = await signup(username || 'User', email, trimmedPassword, { receiveTips });
       if (result.success) {
-        success('Welcome!', `Account created for ${username || email}`);
+        success('Welcome!', `Successfully created account for ${username || email}`);
         // After successful signup, go to onboarding role selection
         navigate('/onboarding/role');
       } else {
-        error('Signup failed', result.message);
+        error('Signup Failed', result.message);
       }
     } finally {
       setIsLoading(false);
@@ -183,7 +183,7 @@ export const Signup: React.FC<SignupProps> = ({
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-2.5 bg-black text-white hover:bg-gray-800 transition-colors font-medium text-sm"
+                className="w-full py-2.5 bg-black text-white hover:bg-gray-800 transition-colors font-medium text-sm rounded-lg"
               >
                 {isLoading ? 'Creating...' : 'Register Now'}
               </button>

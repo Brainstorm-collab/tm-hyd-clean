@@ -1,9 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Check, UserPlus, User, FileText, AtSign } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { EmptyNotifications } from '../empty-states/EmptyNotifications';
 
 export const Notifications: React.FC = () => {
   const navigate = useNavigate();
+  const { isGuest } = useAuth();
 
   // Sample notifications data - same as in Header.tsx
   const notifications = [
@@ -65,6 +68,11 @@ export const Notifications: React.FC = () => {
     }
   ];
 
+
+  // For guests, show empty state
+  if (isGuest) {
+    return <EmptyNotifications />;
+  }
 
   return (
     <div className="p-6">

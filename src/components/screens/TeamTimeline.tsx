@@ -5,6 +5,8 @@ import DateFilterDropdown from "../modals/DateFilterDropdown";
 import { CreateTimelineModal } from "../modals/CreateTimelineModal";
 import { useToast } from "../../contexts/ToastContext";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import { EmptyTimeline } from "../empty-states/EmptyTimeline";
 
 type TaskDef = {
   id: number;
@@ -61,6 +63,7 @@ const tasks: TaskDef[] = [
 ];
 
 const TeamTimeline: React.FC = () => {
+  const { isGuest } = useAuth();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const taskRefs = useRef<Record<number, HTMLDivElement | null>>({});
@@ -145,6 +148,11 @@ const TeamTimeline: React.FC = () => {
       clearTimeout(t);
     };
   }, []);
+
+  // For guests, show empty state
+  if (isGuest) {
+    return <EmptyTimeline />;
+  }
 
   return (
     <div className="team-timeline-root">

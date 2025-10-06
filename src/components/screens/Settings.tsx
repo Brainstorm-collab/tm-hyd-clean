@@ -495,8 +495,7 @@ export const Settings: React.FC = () => {
                       }`}
                     />
                     <Button 
-                      className={`${isGuest ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-80'}`}
-                      style={{ backgroundColor: '#e3d8ff', color: '#6B40ED' }}
+                      className={`bg-primary-100 text-primary-700 hover:bg-primary-200 ${isGuest ? 'opacity-50 cursor-not-allowed' : ''}`}
                       disabled={isGuest}
                     >
                       {isGuest ? 'Login to Update' : 'Update'}
@@ -524,8 +523,7 @@ export const Settings: React.FC = () => {
                       }`}
                     />
                     <Button 
-                      className={`${isGuest ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-80'}`}
-                      style={{ backgroundColor: '#e3d8ff', color: '#6B40ED' }}
+                      className={`bg-primary-100 text-primary-700 hover:bg-primary-200 ${isGuest ? 'opacity-50 cursor-not-allowed' : ''}`}
                       onClick={handleProfileUpdate}
                       disabled={isGuest}
                     >

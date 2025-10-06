@@ -5,6 +5,7 @@ interface AuthContextType {
   currentUser: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isGuest: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
   signup: (name: string, email: string, password: string, options?: { receiveTips?: boolean }) => Promise<{ success: boolean; message: string }>;
   logout: () => void;
@@ -15,6 +16,7 @@ interface AuthContextType {
   resetPassword: (token: string, newPassword: string) => Promise<{ success: boolean; message: string }>;
   verifyOTP: (email: string, otp: string) => Promise<{ success: boolean; message: string }>;
   resendOTP: (email: string) => Promise<{ success: boolean; message: string }>;
+  checkPremiumAccess: () => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -45,6 +47,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } catch (error) {
         console.error('Error parsing saved user:', error);
         localStorage.removeItem('currentUser');
+        localStorage.removeItem('isGuest');
       }
     }
     setIsLoading(false);
@@ -149,6 +152,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = () => {
     setCurrentUser(null);
     localStorage.removeItem('currentUser');
+    localStorage.removeItem('isGuest');
   };
 
   const continueAsGuest = () => {
@@ -159,25 +163,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       avatarUrl: '',
       preferences: {
         theme: 'light',
-        notifications: true,
-        emailNotifications: true
+        notifications: false,
+        emailNotifications: false
       },
       subscription: {
         id: 'sub_guest',
-        plan: 'free',
-        status: 'active',
+        plan: 'guest',
+        status: 'guest',
         startDate: new Date().toISOString(),
-        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        billingCycle: 'monthly',
-        nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        endDate: new Date().toISOString(),
+        billingCycle: 'none',
+        nextBillingDate: new Date().toISOString(),
         amount: 0,
         userCount: 1,
-        autoRenew: true
+        autoRenew: false
       }
     };
     
     setCurrentUser(guestUser);
     localStorage.setItem('currentUser', JSON.stringify(guestUser));
+    localStorage.setItem('isGuest', 'true');
   };
 
   const socialLogin = async (provider: 'google' | 'facebook'): Promise<{ success: boolean; message: string }> => {
@@ -305,10 +310,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const checkPremiumAccess = (): boolean => {
+    if (!currentUser) return false;
+    if (currentUser.id === 'guest') return false;
+    if (currentUser.subscription?.plan === 'guest') return false;
+    return true;
+  };
+
+  const isGuest = currentUser?.id === 'guest' || localStorage.getItem('isGuest') === 'true';
+
   const value: AuthContextType = {
     currentUser,
     isAuthenticated: !!currentUser,
     isLoading,
+    isGuest,
     login,
     signup,
     logout,
@@ -318,7 +333,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     forgotPassword,
     resetPassword,
     verifyOTP,
-    resendOTP
+    resendOTP,
+    checkPremiumAccess
   };
 
   return (

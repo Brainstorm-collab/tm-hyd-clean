@@ -19,14 +19,10 @@ import { getUserDisplayName } from '../../utils/userDisplay';
 import { useToast } from '../../contexts/ToastContext';
 
 export const Dashboard: React.FC = () => {
-  const { currentUser, isAuthenticated } = useAuth();
+  const { currentUser, isAuthenticated, isGuest } = useAuth();
   const navigate = useNavigate();
   const { error } = useToast();
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
-  
-  // Check if user is a guest
-  const isGuest = currentUser?.id === 'guest';
-  const shouldShowData = isAuthenticated && !isGuest;
 
   const handleSetupAccount = () => {
     if (isGuest) {
@@ -122,10 +118,10 @@ export const Dashboard: React.FC = () => {
     : [];
   
   // Only load data for authenticated non-guest users
-  const tasks = shouldShowData ? getTasks() : [];
-  const projects = shouldShowData ? getProjects() : [];
-  const activities = shouldShowData ? getActivities() : [];
-  const teamMembers = shouldShowData ? getTeamMembers() : [];
+  const tasks = !isGuest ? getTasks() : [];
+  const projects = !isGuest ? getProjects() : [];
+  const activities = !isGuest ? getActivities() : [];
+  const teamMembers = !isGuest ? getTeamMembers() : [];
 
   // Calculate statistics to match the image
   const stats = useMemo(() => {
@@ -212,8 +208,8 @@ export const Dashboard: React.FC = () => {
       });
   }, [tasks, projects]);
 
-  // Show empty state for guest users or unauthenticated users
-  if (!isAuthenticated || isGuest) {
+  // For guests, show empty state
+  if (isGuest) {
     return <EmptyDashboard />;
   }
 

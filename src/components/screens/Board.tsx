@@ -12,6 +12,8 @@ import {
 import { Card, CardContent, CardHeader } from '../ui/Card';
 import { Avatar, AvatarFallback } from '../ui/Avatar';
 import { CreateBoardTaskModal } from '../modals/CreateBoardTaskModal';
+import { useAuth } from '../../contexts/AuthContext';
+import { EmptyBoards } from '../empty-states/EmptyBoards';
 
 interface Task {
   id: string;
@@ -25,6 +27,7 @@ interface Task {
 }
 
 export const Board: React.FC = () => {
+  const { isGuest } = useAuth();
   const [selectedColumn, setSelectedColumn] = useState<string | null>(null);
   const [tasks, setTasks] = useState<Task[]>([
     {
@@ -150,6 +153,11 @@ export const Board: React.FC = () => {
     setSelectedColumn(null);
   };
 
+  // For guests, show empty state
+  if (isGuest) {
+    return <EmptyBoards />;
+  }
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -160,7 +168,7 @@ export const Board: React.FC = () => {
         </div>
         
         <CreateBoardTaskModal>
-          <button className="px-6 py-3 rounded-button transition-colors flex items-center space-x-2 hover:opacity-80" style={{ backgroundColor: '#e3d8ff', color: '#6B40ED' }}>
+          <button className="px-6 py-3 rounded-button transition-colors flex items-center space-x-2 bg-primary-100 text-primary-700 hover:bg-primary-200">
             <Plus className="w-4 h-4" />
             <span>Add Board</span>
           </button>
