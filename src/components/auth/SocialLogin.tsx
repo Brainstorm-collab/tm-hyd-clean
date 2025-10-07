@@ -128,8 +128,14 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
       return;
     }
 
+     console.log('Starting Facebook login...');
+    
     window.FB.login((response: any) => {
+      console.log('Facebook login response:', response);
+      
       if (response.authResponse) {
+        console.log('Facebook auth response:', response.authResponse);
+        
         // Get user info with more detailed fields
         window.FB.api('/me', { 
           fields: 'id,name,first_name,last_name,email,picture.width(200).height(200)' 
@@ -143,24 +149,45 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
             return;
           }
           
+          // Create a clean user data object with all the information we need
           const userData = {
-            ...response.authResponse,
-            ...userInfo, // Spread user info directly instead of nesting under 'user'
-            picture: userInfo.picture?.data?.url || userInfo.picture, // Handle picture data structure
-            id: userInfo.id || response.authResponse.userID // Ensure we have the user ID
+            id: userInfo.id || response.authResponse.userID,
+            name: userInfo.name,
+            first_name: userInfo.first_name,
+            last_name: userInfo.last_name,
+            email: userInfo.email || `fb_${userInfo.id}@facebook.local`, // Fallback email if not provided
+            picture: userInfo.picture?.data?.url || userInfo.picture,
+            // Include auth response data
+            accessToken: response.authResponse.accessToken,
+            userID: response.authResponse.userID,
+            expiresIn: response.authResponse.expiresIn,
+            signedRequest: response.authResponse.signedRequest
           };
           
-          console.log('Final Facebook user data:', userData);
+          console.log('Final Facebook user data being sent to AuthContext:', userData);
           console.log('User data validation:', {
             hasName: !!userData.name,
             hasEmail: !!userData.email,
             hasId: !!userData.id,
-            hasPicture: !!userData.picture
+            hasPicture: !!userData.picture,
+            hasAccessToken: !!userData.accessToken,
+            emailSource: userInfo.email ? 'Facebook API' : 'Generated fallback'
           });
+          
+          // Additional validation
+          if (!userData.name) {
+            console.warn('No name from Facebook, using fallback');
+            userData.name = userData.first_name || 'Facebook User';
+          }
+          
+          if (!userData.email || userData.email.includes('facebook.local')) {
+            console.warn('No email from Facebook, using generated fallback');
+          }
           
           handleFacebookResponse(userData);
         });
       } else {
+        console.log('Facebook login failed or cancelled');
         error('Login Failed', 'Facebook login was cancelled or failed.');
       }
     }, { scope: 'email,public_profile' }); // Request both email and public profile permissions

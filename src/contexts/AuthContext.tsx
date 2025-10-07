@@ -342,6 +342,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       // Extract user data based on provider
       let name = `${provider.charAt(0).toUpperCase() + provider.slice(1)} User`;
+      let firstName = '';
+      let lastName = '';
       let email = `user@${provider}.com`;
       let avatarUrl = '';
       let userId = Date.now().toString();
@@ -350,23 +352,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (provider === 'google') {
           // For Google, userData now contains the decoded JWT token data
           name = userData.name || name;
+          firstName = userData.given_name || '';
+          lastName = userData.family_name || '';
           email = userData.email || email;
           avatarUrl = userData.picture || avatarUrl;
           userId = userData.sub || userId;
         } else if (provider === 'facebook') {
           // For Facebook, userData contains the response object with user info spread directly
           console.log('Facebook userData received in AuthContext:', userData);
+          console.log('Facebook userData keys:', Object.keys(userData || {}));
           
           // Extract Facebook user data with proper fallbacks
           name = userData.name || 
                  (userData.first_name && userData.last_name ? `${userData.first_name} ${userData.last_name}` : null) ||
                  userData.first_name || 
-                 name;
-          email = userData.email || email;
-          avatarUrl = userData.picture || (userData.picture?.data?.url) || avatarUrl;
-          userId = userData.id || userData.userID || userId;
+                 'Facebook User';
+          firstName = userData.first_name || '';
+          lastName = userData.last_name || '';
+          email = userData.email || `fb_${userData.id || Date.now()}@facebook.local`;
+          avatarUrl = userData.picture || (userData.picture?.data?.url) || '';
+          userId = userData.id || userData.userID || Date.now().toString();
           
-          console.log('Extracted Facebook data:', { name, email, avatarUrl, userId });
+          console.log('Extracted Facebook data:', { name, firstName, lastName, email, avatarUrl, userId });
+          console.log('Facebook data validation:', {
+            hasName: !!name && name !== 'Facebook User',
+            hasFirstName: !!firstName,
+            hasLastName: !!lastName,
+            hasEmail: !!email && email !== 'user@facebook.com',
+            hasAvatar: !!avatarUrl,
+            hasUserId: !!userId && userId !== Date.now().toString()
+          });
           
           // Validate that we have essential data
           if (!email || email === `user@${provider}.com`) {
@@ -390,9 +405,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const newUser = {
           id: userId,
           name: name,
+          firstName: firstName,
+          lastName: lastName,
           email: email,
           password: '', // No password for social login
           avatarUrl: avatarUrl,
+          provider: provider,
           preferences: {
             theme: 'light' as const,
             notifications: true,
@@ -410,7 +428,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             userCount: 1,
             autoRenew: true
           },
-          socialProvider: provider,
           createdAt: new Date().toISOString()
         };
         
@@ -429,14 +446,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const currentUser: User = {
         id: existingUser.id,
         name: existingUser.name,
+        firstName: existingUser.firstName,
+        lastName: existingUser.lastName,
         email: existingUser.email,
         avatarUrl: existingUser.avatarUrl,
+        provider: existingUser.provider,
         preferences: existingUser.preferences,
         subscription: existingUser.subscription
       };
       
+      console.log('Final currentUser object being set:', currentUser);
+      console.log('User data before localStorage:', {
+        id: currentUser.id,
+        name: currentUser.name,
+        firstName: currentUser.firstName,
+        lastName: currentUser.lastName,
+        email: currentUser.email,
+        avatarUrl: currentUser.avatarUrl,
+        provider: currentUser.provider
+      });
+      
       setCurrentUser(currentUser);
       localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      
+      // Verify the user was stored correctly
+      const storedUser = localStorage.getItem('currentUser');
+      console.log('User stored in localStorage:', storedUser ? JSON.parse(storedUser) : 'No user found');
+      
       return { success: true, message: `Login with ${provider} successful` };
     } catch (error) {
       return { success: false, message: `${provider} login failed. Please try again.` };
