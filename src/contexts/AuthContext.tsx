@@ -344,6 +344,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       let name = `${provider.charAt(0).toUpperCase() + provider.slice(1)} User`;
       let email = `user@${provider}.com`;
       let avatarUrl = '';
+      let userId = Date.now().toString();
       
       if (userData) {
         if (provider === 'google') {
@@ -351,13 +352,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           name = userData.name || name;
           email = userData.email || email;
           avatarUrl = userData.picture || avatarUrl;
+          userId = userData.sub || userId;
         } else if (provider === 'facebook') {
           // For Facebook, userData contains the response object with user info spread directly
           console.log('Facebook userData received in AuthContext:', userData);
-          name = userData.name || name;
+          
+          // Extract Facebook user data with proper fallbacks
+          name = userData.name || 
+                 (userData.first_name && userData.last_name ? `${userData.first_name} ${userData.last_name}` : null) ||
+                 userData.first_name || 
+                 name;
           email = userData.email || email;
-          avatarUrl = userData.picture || avatarUrl;
-          console.log('Extracted Facebook data:', { name, email, avatarUrl });
+          avatarUrl = userData.picture || (userData.picture?.data?.url) || avatarUrl;
+          userId = userData.id || userData.userID || userId;
+          
+          console.log('Extracted Facebook data:', { name, email, avatarUrl, userId });
+          
+          // Validate that we have essential data
+          if (!email || email === `user@${provider}.com`) {
+            console.warn('Facebook login: No email provided, using fallback');
+          }
+          if (!name || name === `${provider.charAt(0).toUpperCase() + provider.slice(1)} User`) {
+            console.warn('Facebook login: No name provided, using fallback');
+          }
         }
       }
       
@@ -371,7 +388,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (!existingUser) {
         // Create new user for social login
         const newUser = {
-          id: userData?.sub || Date.now().toString(),
+          id: userId,
           name: name,
           email: email,
           password: '', // No password for social login

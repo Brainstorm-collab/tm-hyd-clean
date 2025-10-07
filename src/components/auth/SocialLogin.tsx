@@ -130,19 +130,40 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
 
     window.FB.login((response: any) => {
       if (response.authResponse) {
-        // Get user info
-        window.FB.api('/me', { fields: 'name,email,picture' }, (userInfo: any) => {
+        // Get user info with more detailed fields
+        window.FB.api('/me', { 
+          fields: 'id,name,first_name,last_name,email,picture.width(200).height(200)' 
+        }, (userInfo: any) => {
+          console.log('Facebook API response:', userInfo);
+          
+          // Validate that we received user data
+          if (!userInfo || userInfo.error) {
+            console.error('Facebook API error:', userInfo?.error);
+            error('Login Failed', 'Failed to fetch user information from Facebook.');
+            return;
+          }
+          
           const userData = {
             ...response.authResponse,
             ...userInfo, // Spread user info directly instead of nesting under 'user'
-            picture: userInfo.picture?.data?.url || userInfo.picture // Handle picture data structure
+            picture: userInfo.picture?.data?.url || userInfo.picture, // Handle picture data structure
+            id: userInfo.id || response.authResponse.userID // Ensure we have the user ID
           };
+          
+          console.log('Final Facebook user data:', userData);
+          console.log('User data validation:', {
+            hasName: !!userData.name,
+            hasEmail: !!userData.email,
+            hasId: !!userData.id,
+            hasPicture: !!userData.picture
+          });
+          
           handleFacebookResponse(userData);
         });
       } else {
         error('Login Failed', 'Facebook login was cancelled or failed.');
       }
-    }, { scope: 'email' });
+    }, { scope: 'email,public_profile' }); // Request both email and public profile permissions
   };
 
 
