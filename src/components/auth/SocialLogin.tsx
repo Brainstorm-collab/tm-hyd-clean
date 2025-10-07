@@ -1,21 +1,29 @@
 import React from "react";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
-import FacebookLogin from "react-facebook-login";
 import { useAuth } from "../../contexts/AuthContext";
 import { useToast } from "../../contexts/ToastContext";
 import { FacebookIcon } from "../ui/FacebookIcon";
 import { GoogleIcon } from "../ui/GoogleIcon";
 
+// Facebook and Google SDK types
+declare global {
+  interface Window {
+    FB: any;
+    fbAsyncInit: () => void;
+    google: any;
+  }
+}
+
 /**
  * SocialLogin Component
  * 
- * Integrates Facebook and Google OAuth login functionality.
- * Uses the provided Google Client ID and Facebook App ID from the reference code.
+ * Integrates Facebook and Google OAuth login functionality with custom styled buttons.
+ * Uses Google Identity Services and Facebook SDK for authentication.
  * 
  * Features:
- * - Google OAuth login using @react-oauth/google
- * - Facebook login using react-facebook-login
+ * - Custom styled Google OAuth login button matching Facebook button design
+ * - Facebook login using Facebook SDK
  * - Integrated with existing AuthContext for user management
  * - Toast notifications for success/error states
  * - Disabled state support for loading states
@@ -30,7 +38,7 @@ import { GoogleIcon } from "../ui/GoogleIcon";
  * - REACT_APP_FACEBOOK_APP_ID
  * - REACT_APP_BASE_URL (optional, defaults to window.location.origin)
  * 
- * Note: Facebook login requires HTTPS in production. The warning about HTTP pages
+ * Note: Both Google and Facebook login require HTTPS in production. The warning about HTTP pages
  * is expected in development and will not appear in production with HTTPS.
  */
 
@@ -56,36 +64,23 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
   const facebookCallbackUrl = `${baseUrl}/auth/facebook/callback`;
   
   // Handle Google Login Success
-  const handleGoogleSuccess = async (credentialResponse: any) => {
+  const handleGoogleSuccess = async (response: any) => {
     try {
       console.log('Google OAuth Callback URL:', googleCallbackUrl);
-      console.log('Google credential response:', credentialResponse);
+      console.log('Google response:', response);
       
-      // Decode the JWT token to get user information
-      if (credentialResponse.credential) {
-        const decodedToken: any = jwtDecode(credentialResponse.credential);
-        
-        // Extract user data from the decoded token
-        const userData = {
-          name: decodedToken.name,
-          email: decodedToken.email,
-          picture: decodedToken.picture,
-          sub: decodedToken.sub, // Google user ID
-          email_verified: decodedToken.email_verified
-        };
-        
-        console.log('Decoded Google user data:', userData);
-        
-        const result = await socialLogin('google', userData);
-        
-        if (result.success) {
-          success('Welcome!', `Successfully signed in with Google as ${userData.name}`);
-          onSuccess?.();
-        } else {
-          error('Login Failed', result.message);
-        }
+      // Extract user data from the response
+      const userData = response.userData || response;
+      
+      console.log('Google user data:', userData);
+      
+      const result = await socialLogin('google', userData);
+      
+      if (result.success) {
+        success('Welcome!', `Successfully signed in with Google as ${userData.name}`);
+        onSuccess?.();
       } else {
-        error('Login Failed', 'No credential received from Google');
+        error('Login Failed', result.message);
       }
     } catch (err) {
       console.error('Google login error:', err);
@@ -118,6 +113,33 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
     }
   };
 
+  // Handle Facebook Login with SDK
+  const handleFacebookLogin = () => {
+    if (disabled) return;
+    
+    // Check if Facebook SDK is loaded
+    if (typeof window.FB === 'undefined') {
+      error('Facebook SDK Error', 'Facebook SDK is not loaded. Please refresh the page and try again.');
+      return;
+    }
+
+    window.FB.login((response: any) => {
+      if (response.authResponse) {
+        // Get user info
+        window.FB.api('/me', { fields: 'name,email,picture' }, (userInfo: any) => {
+          const userData = {
+            ...response.authResponse,
+            user: userInfo
+          };
+          handleFacebookResponse(userData);
+        });
+      } else {
+        error('Login Failed', 'Facebook login was cancelled or failed.');
+      }
+    }, { scope: 'email' });
+  };
+
+
   return (
     <div className="space-y-2">
       <GoogleOAuthProvider clientId={googleClientId}>
@@ -138,32 +160,13 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
 
       <button
         type="button"
-        onClick={() => {
-          if (!disabled) {
-            // Trigger Facebook login programmatically
-            const fbLogin = document.querySelector('.fb-login-button') as HTMLElement;
-            if (fbLogin) {
-              fbLogin.click();
-            }
-          }
-        }}
+        onClick={handleFacebookLogin}
         disabled={disabled}
         className="w-full flex items-center justify-start px-3 py-2.5 border border-gray-300 hover:bg-gray-50 transition-colors text-sm bg-white text-gray-700 font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <FacebookIcon size={16} className="mr-2 flex-shrink-0" />
         <span className="flex-1 text-center">Sign in with Facebook</span>
       </button>
-      
-      <div style={{ display: 'none' }}>
-        <FacebookLogin
-          appId={facebookAppId}
-          autoLoad={false}
-          fields="name,email,picture"
-          callback={handleFacebookResponse}
-          isDisabled={disabled}
-          cssClass="fb-login-button"
-        />
-      </div>
     </div>
   );
 };

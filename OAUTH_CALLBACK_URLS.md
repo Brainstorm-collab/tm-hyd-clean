@@ -32,10 +32,18 @@ https://yourdomain.com/auth/facebook/callback
 ```
 
 ### Facebook App Setup:
-1. Go to [Facebook Developers](https://developers.facebook.com/)
+1. Go to [Facebook Developers](https://developers.facebook.com/apps/839782072858430)
 2. Select your app
 3. Go to "Facebook Login" > "Settings"
-4. Add the callback URLs above to "Valid OAuth Redirect URIs"
+4. **IMPORTANT**: Toggle "Log in with JavaScript SDK" to **Yes** (this fixes the JSSDK error)
+5. Add the callback URLs above to "Valid OAuth Redirect URIs"
+6. Save changes
+
+### Facebook SDK Integration:
+The app now uses the Facebook JavaScript SDK directly:
+- Facebook SDK is loaded in `public/index.html`
+- Login is handled via `window.FB.login()` API
+- User data is fetched via `window.FB.api('/me')`
 
 ### Environment Variables:
 ```env
@@ -76,3 +84,32 @@ const facebookCallbackUrl = `${baseUrl}/auth/facebook/callback`;
 ```
 
 The URLs are logged to console for debugging purposes when OAuth flows are triggered.
+
+---
+
+## Troubleshooting
+
+### Facebook Login Issues
+
+1. **"JSSDK option is not toggled"**: 
+   - Go to Facebook App settings
+   - Enable "Log in with JavaScript SDK" option
+   - This is the most common cause of Facebook login failures
+
+2. **"App Not Setup"**: 
+   - Ensure your Facebook App is properly configured
+   - Check that the App ID is correct
+
+3. **"Invalid OAuth Redirect URI"**: 
+   - Add your domain to Valid OAuth Redirect URIs in Facebook App settings
+   - Include both development and production URLs
+
+4. **"Facebook SDK not loaded"**: 
+   - Check browser console for script loading errors
+   - Ensure the Facebook SDK script is loaded in `public/index.html`
+
+### Development vs Production
+
+- **Development**: Use `http://localhost:3000` or your local development URL
+- **Production**: Use your actual domain with HTTPS
+- **HTTPS Required**: Facebook requires HTTPS in production environments

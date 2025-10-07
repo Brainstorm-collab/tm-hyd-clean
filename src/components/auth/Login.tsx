@@ -23,14 +23,19 @@ export const Login: React.FC<LoginProps> = ({
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Login attempt with:', { email, password: '***' });
     setIsLoading(true);
     try {
       const result = await login(email, password);
+      console.log('Login result:', result);
       if (result.success) {
         success('Welcome!', `Successfully signed in as ${email}`);
       } else {
         error('Login Failed', result.message);
       }
+    } catch (err) {
+      console.error('Login error:', err);
+      error('Login Failed', 'An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -117,7 +122,8 @@ export const Login: React.FC<LoginProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>                  <input
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                  <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
