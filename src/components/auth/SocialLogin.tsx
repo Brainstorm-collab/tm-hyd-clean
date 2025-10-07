@@ -9,9 +9,9 @@ import { GoogleIcon } from "../ui/GoogleIcon";
 // Facebook and Google SDK types
 declare global {
   interface Window {
-    FB: any;
+    FB: facebook.FacebookStatic;
     fbAsyncInit: () => void;
-    google: any;
+    google: typeof gapi;
   }
 }
 

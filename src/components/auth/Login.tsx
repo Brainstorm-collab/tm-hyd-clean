@@ -23,7 +23,9 @@ export const Login: React.FC<LoginProps> = ({
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login attempt with:', { email, password: '***' });
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Login attempt with:', { email, password: '***' });
+    }
     setIsLoading(true);
     try {
       const result = await login(email, password);
@@ -34,7 +36,9 @@ export const Login: React.FC<LoginProps> = ({
         error('Login Failed', result.message);
       }
     } catch (err) {
-      console.error('Login error:', err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Login error:', err);
+      }
       error('Login Failed', 'An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
