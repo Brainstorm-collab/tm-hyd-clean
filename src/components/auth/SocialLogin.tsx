@@ -1,10 +1,10 @@
 import React from "react";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
+import { jwtDecode } from "jwt-decode";
 import FacebookLogin from "react-facebook-login";
 import { useAuth } from "../../contexts/AuthContext";
 import { useToast } from "../../contexts/ToastContext";
 import { FacebookIcon } from "../ui/FacebookIcon";
-import { GoogleIcon } from "../ui/GoogleIcon";
 
 /**
  * SocialLogin Component
@@ -32,24 +32,39 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
   const { socialLogin } = useAuth();
   const { success, error } = useToast();
   
-  // Google and Facebook App IDs from your reference code
-  const googleClientId = "419183498411-aco9polgjn5va01kbg3legvvmq6ibq1h.apps.googleusercontent.com";
-  const facebookAppId = "839782072858430";
+  // Google and Facebook App IDs - using environment variables for better security
+  const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID || "686577563593-mh7cf2lbm69qc730r1v2bkio3ks92lcv.apps.googleusercontent.com";
+  const facebookAppId = process.env.REACT_APP_FACEBOOK_APP_ID || "839782072858430";
   
   // Handle Google Login Success
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
       console.log("Google Login Success:", credentialResponse);
       
-      // In a real app, you would decode the JWT token here to get user info
-      // For now, we'll pass the credential response to the auth context
-      const result = await socialLogin('google', credentialResponse);
-      
-      if (result.success) {
-        success('Welcome!', 'Successfully signed in with Google');
-        onSuccess?.();
+      // Decode the JWT token to get user information
+      if (credentialResponse.credential) {
+        const decodedToken: any = jwtDecode(credentialResponse.credential);
+        console.log("Decoded Google token:", decodedToken);
+        
+        // Extract user data from the decoded token
+        const userData = {
+          name: decodedToken.name,
+          email: decodedToken.email,
+          picture: decodedToken.picture,
+          sub: decodedToken.sub, // Google user ID
+          email_verified: decodedToken.email_verified
+        };
+        
+        const result = await socialLogin('google', userData);
+        
+        if (result.success) {
+          success('Welcome!', `Successfully signed in with Google as ${userData.name}`);
+          onSuccess?.();
+        } else {
+          error('Login Failed', result.message);
+        }
       } else {
-        error('Login Failed', result.message);
+        error('Login Failed', 'No credential received from Google');
       }
     } catch (err) {
       console.error('Google login error:', err);
@@ -59,7 +74,7 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
 
   const handleGoogleError = () => {
     console.log("Google Login Failed");
-    error('Login Failed', 'Google login was cancelled or failed.');
+    error('Login Failed', 'Google login was cancelled or failed. Please try again.');
   };
 
   // Handle Facebook Login
@@ -86,36 +101,15 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
     <div className="space-y-2">
       <GoogleOAuthProvider clientId={googleClientId}>
         <div style={{ opacity: disabled ? 0.5 : 1, pointerEvents: disabled ? 'none' : 'auto' }}>
-          <button
-            type="button"
-            onClick={() => {
-              if (!disabled) {
-                // Trigger Google login programmatically
-                const googleLogin = document.querySelector('[data-testid="google-login-button"]') as HTMLElement;
-                if (googleLogin) {
-                  googleLogin.click();
-                }
-              }
-            }}
-            disabled={disabled}
-            className="w-full flex items-center justify-start px-3 py-2.5 border border-gray-300 hover:bg-gray-50 transition-colors text-sm bg-white text-gray-700 font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <GoogleIcon size={16} className="mr-2 flex-shrink-0" />
-            <span className="flex-1 text-center">Sign in with Google</span>
-          </button>
-          
-          <div style={{ display: 'none' }}>
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={handleGoogleError}
-              theme="outline"
-              size="large"
-              width="100%"
-              text="signin_with"
-              shape="rectangular"
-              data-testid="google-login-button"
-            />
-          </div>
+          <GoogleLogin
+            onSuccess={disabled ? () => {} : handleGoogleSuccess}
+            onError={disabled ? () => {} : handleGoogleError}
+            theme="outline"
+            size="large"
+            width="100%"
+            text="signin_with"
+            shape="rectangular"
+          />
         </div>
       </GoogleOAuthProvider>
 

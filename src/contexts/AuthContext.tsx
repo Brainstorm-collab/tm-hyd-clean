@@ -199,8 +199,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       if (userData) {
         if (provider === 'google') {
-          // For Google, userData would contain the credential response
-          // In a real app, you'd decode the JWT token to get user info
+          // For Google, userData now contains the decoded JWT token data
           name = userData.name || name;
           email = userData.email || email;
           avatarUrl = userData.picture || avatarUrl;
@@ -213,7 +212,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       
       const user: User = {
-        id: Date.now().toString(),
+        id: userData?.sub || Date.now().toString(), // Use Google user ID if available
         name: name,
         email: email,
         avatarUrl: avatarUrl,
