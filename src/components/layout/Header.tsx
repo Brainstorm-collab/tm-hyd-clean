@@ -45,7 +45,6 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
   useEffect(() => {
     const newUser = currentUser || getUser();
     setUser(newUser);
-    console.log('Header: User updated:', newUser?.avatarUrl ? 'Has avatar' : 'No avatar');
   }, [currentUser]);
 
   // Update search query when on search results page

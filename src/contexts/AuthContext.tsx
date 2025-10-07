@@ -122,6 +122,37 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
    * it restores the user state. If parsing fails, it cleans up invalid data.
    */
   useEffect(() => {
+    // Initialize demo user if no users exist
+    const storedUsers = localStorage.getItem('registeredUsers');
+    if (!storedUsers) {
+      const demoUser = {
+        id: 'demo-1',
+        name: 'Demo User',
+        email: 'demo@example.com',
+        password: 'password',
+        avatarUrl: '',
+        preferences: {
+          theme: 'light' as const,
+          notifications: true,
+          emailNotifications: true
+        },
+        subscription: {
+          id: 'sub_1',
+          plan: 'free' as const,
+          status: 'active' as const,
+          startDate: new Date().toISOString(),
+          endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          billingCycle: 'monthly' as const,
+          nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          amount: 0,
+          userCount: 1,
+          autoRenew: true
+        },
+        createdAt: new Date().toISOString()
+      };
+      localStorage.setItem('registeredUsers', JSON.stringify([demoUser]));
+    }
+
     // Check for existing session on app load
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
@@ -145,25 +176,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Mock validation - in real app, this would be an API call
-      if (email === 'demo@example.com' && password === 'password') {
-        const user: User = {
-          id: '1',
-          name: 'Demo User',
-          email: email,
-          avatarUrl: '',
-          preferences: {
-            theme: 'light',
+      // Get stored users from localStorage
+      const storedUsers = localStorage.getItem('registeredUsers');
+      const users = storedUsers ? JSON.parse(storedUsers) : [];
+      
+      // Check if user exists and password matches
+      const user = users.find((u: any) => u.email === email && u.password === password);
+      
+      if (user) {
+        // Create user object for current session
+        const currentUser: User = {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          avatarUrl: user.avatarUrl || '',
+          preferences: user.preferences || {
+            theme: 'light' as const,
             notifications: true,
             emailNotifications: true
           },
-          subscription: {
+          subscription: user.subscription || {
             id: 'sub_1',
-            plan: 'free',
-            status: 'active',
+            plan: 'free' as const,
+            status: 'active' as const,
             startDate: new Date().toISOString(),
             endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-            billingCycle: 'monthly',
+            billingCycle: 'monthly' as const,
             nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
             amount: 0,
             userCount: 1,
@@ -171,8 +209,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           }
         };
         
-        setCurrentUser(user);
-        localStorage.setItem('currentUser', JSON.stringify(user));
+        setCurrentUser(currentUser);
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
         return { success: true, message: 'Login successful' };
       } else {
         return { success: false, message: 'Invalid email or password' };
@@ -191,42 +229,66 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Mock validation - in real app, this would be an API call
-      if (email && password && name) {
-        const user: User = {
-          id: Date.now().toString(),
-          name: name,
-          email: email,
-          avatarUrl: '',
-          preferences: {
-            theme: 'light',
-            notifications: true,
-            emailNotifications: true
-          },
-          subscription: {
-            id: 'sub_1',
-            plan: 'free',
-            status: 'active',
-            startDate: new Date().toISOString(),
-            endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-            billingCycle: 'monthly',
-            nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-            amount: 0,
-            userCount: 1,
-            autoRenew: true
-          }
-        };
-        // Optionally store marketing preference locally for demo purposes
-        if (options?.receiveTips) {
-          // no-op persistence stub for now
-        }
-        
-        setCurrentUser(user);
-        localStorage.setItem('currentUser', JSON.stringify(user));
-        return { success: true, message: 'Account created successfully' };
-      } else {
+      // Validate input
+      if (!email || !password || !name) {
         return { success: false, message: 'Please fill in all fields' };
       }
+      
+      // Get existing users from localStorage
+      const storedUsers = localStorage.getItem('registeredUsers');
+      const users = storedUsers ? JSON.parse(storedUsers) : [];
+      
+      // Check if user already exists
+      const existingUser = users.find((u: any) => u.email === email);
+      if (existingUser) {
+        return { success: false, message: 'An account with this email already exists' };
+      }
+      
+      // Create new user
+      const newUser = {
+        id: Date.now().toString(),
+        name: name,
+        email: email,
+        password: password, // In production, this should be hashed
+        avatarUrl: '',
+        preferences: {
+          theme: 'light' as const,
+          notifications: true,
+          emailNotifications: true
+        },
+        subscription: {
+          id: 'sub_1',
+          plan: 'free' as const,
+          status: 'active' as const,
+          startDate: new Date().toISOString(),
+          endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          billingCycle: 'monthly' as const,
+          nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          amount: 0,
+          userCount: 1,
+          autoRenew: true
+        },
+        receiveTips: options?.receiveTips || false,
+        createdAt: new Date().toISOString()
+      };
+      
+      // Add new user to stored users
+      users.push(newUser);
+      localStorage.setItem('registeredUsers', JSON.stringify(users));
+      
+      // Create current user object (without password)
+      const currentUser: User = {
+        id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        avatarUrl: newUser.avatarUrl,
+        preferences: newUser.preferences,
+        subscription: newUser.subscription
+      };
+      
+      setCurrentUser(currentUser);
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      return { success: true, message: 'Account created successfully' };
     } catch (error) {
       return { success: false, message: 'Signup failed. Please try again.' };
     } finally {
@@ -238,6 +300,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setCurrentUser(null);
     localStorage.removeItem('currentUser');
     localStorage.removeItem('isGuest');
+    // Note: We keep 'registeredUsers' in localStorage so users can log back in
   };
 
   const continueAsGuest = () => {
@@ -247,17 +310,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       email: 'guest@example.com',
       avatarUrl: '',
       preferences: {
-        theme: 'light',
+        theme: 'light' as const,
         notifications: false,
         emailNotifications: false
       },
       subscription: {
         id: 'sub_guest',
-        plan: 'guest',
-        status: 'guest',
+        plan: 'guest' as const,
+        status: 'guest' as const,
         startDate: new Date().toISOString(),
         endDate: new Date().toISOString(),
-        billingCycle: 'none',
+        billingCycle: 'none' as const,
         nextBillingDate: new Date().toISOString(),
         amount: 0,
         userCount: 1,
@@ -296,32 +359,65 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       }
       
-      const user: User = {
-        id: userData?.sub || Date.now().toString(), // Use Google user ID if available
-        name: name,
-        email: email,
-        avatarUrl: avatarUrl,
-        preferences: {
-          theme: 'light',
-          notifications: true,
-          emailNotifications: true
-        },
-        subscription: {
-          id: 'sub_1',
-          plan: 'free',
-          status: 'active',
-          startDate: new Date().toISOString(),
-          endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-          billingCycle: 'monthly',
-          nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-          amount: 0,
-          userCount: 1,
-          autoRenew: true
+      // Get existing users from localStorage
+      const storedUsers = localStorage.getItem('registeredUsers');
+      const users = storedUsers ? JSON.parse(storedUsers) : [];
+      
+      // Check if user already exists
+      let existingUser = users.find((u: any) => u.email === email);
+      
+      if (!existingUser) {
+        // Create new user for social login
+        const newUser = {
+          id: userData?.sub || Date.now().toString(),
+          name: name,
+          email: email,
+          password: '', // No password for social login
+          avatarUrl: avatarUrl,
+          preferences: {
+            theme: 'light' as const,
+            notifications: true,
+            emailNotifications: true
+          },
+          subscription: {
+            id: 'sub_1',
+            plan: 'free' as const,
+            status: 'active' as const,
+            startDate: new Date().toISOString(),
+            endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+            billingCycle: 'monthly' as const,
+            nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+            amount: 0,
+            userCount: 1,
+            autoRenew: true
+          },
+          socialProvider: provider,
+          createdAt: new Date().toISOString()
+        };
+        
+        users.push(newUser);
+        localStorage.setItem('registeredUsers', JSON.stringify(users));
+        existingUser = newUser;
+      } else {
+        // Update existing user's avatar if it's different
+        if (avatarUrl && existingUser.avatarUrl !== avatarUrl) {
+          existingUser.avatarUrl = avatarUrl;
+          localStorage.setItem('registeredUsers', JSON.stringify(users));
         }
+      }
+      
+      // Create current user object (without password)
+      const currentUser: User = {
+        id: existingUser.id,
+        name: existingUser.name,
+        email: existingUser.email,
+        avatarUrl: existingUser.avatarUrl,
+        preferences: existingUser.preferences,
+        subscription: existingUser.subscription
       };
       
-      setCurrentUser(user);
-      localStorage.setItem('currentUser', JSON.stringify(user));
+      setCurrentUser(currentUser);
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
       return { success: true, message: `Login with ${provider} successful` };
     } catch (error) {
       return { success: false, message: `${provider} login failed. Please try again.` };

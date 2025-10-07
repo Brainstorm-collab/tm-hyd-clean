@@ -1,3 +1,38 @@
+/**
+ * Dashboard Component - Main Analytics and Overview Page
+ * 
+ * This component provides a comprehensive dashboard view with analytics, charts,
+ * and key metrics for project management. It displays task completion statistics,
+ * team performance data, project timelines, and activity charts. The dashboard
+ * adapts based on user authentication status and provides different views for
+ * guest users and authenticated users.
+ * 
+ * Key Features:
+ * - Interactive charts and data visualizations using Recharts
+ * - Task completion statistics and progress tracking
+ * - Team performance metrics and member overview
+ * - Project timeline and activity monitoring
+ * - Responsive design with grid layouts
+ * - Guest user restrictions with appropriate messaging
+ * - Real-time data updates and filtering capabilities
+ * 
+ * Charts and Analytics:
+ * - Line charts for task completion trends
+ * - Pie charts for project distribution
+ * - Activity timelines and progress bars
+ * - Team member performance metrics
+ * 
+ * State Management:
+ * - Handles authentication state and guest restrictions
+ * - Manages team selection and filtering
+ * - Tracks dashboard data and chart interactions
+ * - Provides empty state handling for new users
+ * 
+ * @component
+ * @example
+ * <Dashboard />
+ */
+
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -18,12 +53,27 @@ import { EmptyDashboard } from '../empty-states/EmptyDashboard';
 import { getUserDisplayName } from '../../utils/userDisplay';
 import { useToast } from '../../contexts/ToastContext';
 
+/**
+ * Dashboard Component Implementation
+ * 
+ * Main dashboard component that renders analytics, charts, and key metrics
+ * for project management with support for both authenticated and guest users.
+ */
 export const Dashboard: React.FC = () => {
+  // Authentication and navigation hooks
   const { currentUser, isAuthenticated, isGuest } = useAuth();
   const navigate = useNavigate();
   const { error } = useToast();
-  const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
+  
+  // Component state management
+  const [selectedTeam, setSelectedTeam] = useState<string | null>(null); // Currently selected team for filtering
 
+  /**
+   * Handles account setup navigation with guest user restrictions
+   * 
+   * If the user is a guest, it shows a restriction message. Otherwise, it navigates
+   * to the profile page for account setup.
+   */
   const handleSetupAccount = () => {
     if (isGuest) {
       handleGuestRestriction();
@@ -32,6 +82,12 @@ export const Dashboard: React.FC = () => {
     }
   };
 
+  /**
+   * Handles guest user restrictions by showing appropriate error message
+   * 
+   * This function is called when a guest user tries to access features that require
+   * authentication. It displays a toast notification prompting the user to login.
+   */
   const handleGuestRestriction = () => {
     error(
       'Login Required',
@@ -39,6 +95,11 @@ export const Dashboard: React.FC = () => {
     );
   };
 
+  /**
+   * Handles team selection for filtering dashboard data
+   * 
+   * @param {string} teamName - The name of the team to select for filtering
+   */
   const handleTeamClick = (teamName: string) => {
     if (isGuest) {
       handleGuestRestriction();

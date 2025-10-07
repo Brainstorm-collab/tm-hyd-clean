@@ -19,6 +19,16 @@ import { GoogleIcon } from "../ui/GoogleIcon";
  * - Integrated with existing AuthContext for user management
  * - Toast notifications for success/error states
  * - Disabled state support for loading states
+ * - Callback URL logging for debugging
+ * 
+ * OAuth Callback URLs:
+ * - Google: {baseUrl}/auth/google/callback
+ * - Facebook: {baseUrl}/auth/facebook/callback
+ * 
+ * Environment Variables Required:
+ * - REACT_APP_GOOGLE_CLIENT_ID
+ * - REACT_APP_FACEBOOK_APP_ID
+ * - REACT_APP_BASE_URL (optional, defaults to window.location.origin)
  * 
  * Note: Facebook login requires HTTPS in production. The warning about HTTP pages
  * is expected in development and will not appear in production with HTTPS.
@@ -40,9 +50,17 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
   const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID || "419183498411-aco9polgjn5va01kbg3legvvmq6ibq1h.apps.googleusercontent.com";
   const facebookAppId = process.env.REACT_APP_FACEBOOK_APP_ID || "839782072858430";
   
+  // Callback URLs for OAuth providers
+  const baseUrl = process.env.REACT_APP_BASE_URL || window.location.origin;
+  const googleCallbackUrl = `${baseUrl}/auth/google/callback`;
+  const facebookCallbackUrl = `${baseUrl}/auth/facebook/callback`;
+  
   // Handle Google Login Success
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
+      console.log('Google OAuth Callback URL:', googleCallbackUrl);
+      console.log('Google credential response:', credentialResponse);
+      
       // Decode the JWT token to get user information
       if (credentialResponse.credential) {
         const decodedToken: any = jwtDecode(credentialResponse.credential);
@@ -56,6 +74,8 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
           email_verified: decodedToken.email_verified
         };
         
+        console.log('Decoded Google user data:', userData);
+        
         const result = await socialLogin('google', userData);
         
         if (result.success) {
@@ -68,6 +88,7 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
         error('Login Failed', 'No credential received from Google');
       }
     } catch (err) {
+      console.error('Google login error:', err);
       error('Login Failed', 'Google login failed. Please try again.');
     }
   };
@@ -79,6 +100,9 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
   // Handle Facebook Login
   const handleFacebookResponse = async (response: any) => {
     try {
+      console.log('Facebook OAuth Callback URL:', facebookCallbackUrl);
+      console.log('Facebook response:', response);
+      
       // Pass the Facebook response data to the auth context
       const result = await socialLogin('facebook', response);
       
@@ -89,6 +113,7 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
         error('Login Failed', result.message);
       }
     } catch (err) {
+      console.error('Facebook login error:', err);
       error('Login Failed', 'Facebook login failed. Please try again.');
     }
   };

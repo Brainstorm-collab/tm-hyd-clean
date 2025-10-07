@@ -1,30 +1,95 @@
+/**
+ * CreateTaskModal Component - Task Creation Interface
+ * 
+ * This modal component provides a comprehensive interface for creating new tasks
+ * with detailed configuration options. It includes task naming, due dates, tags,
+ * assignees, and other task management features. The modal integrates with the
+ * modal management system and provides real-time feedback through toast notifications.
+ * 
+ * Features:
+ * - Task name and description input
+ * - Due date and time selection
+ * - Dynamic tag management (add/remove tags)
+ * - Assignee management (add/remove team members)
+ * - Form validation and error handling
+ * - Integration with modal management system
+ * - Toast notifications for user feedback
+ * - Responsive design with proper accessibility
+ * 
+ * Task Configuration:
+ * - Basic task information (name, description)
+ * - Scheduling (due date, due time)
+ * - Organization (tags, categories)
+ * - Assignment (team members, responsibilities)
+ * 
+ * State Management:
+ * - Form field state management
+ * - Dynamic list management for tags and assignees
+ * - Modal visibility and interaction states
+ * - Validation and error state handling
+ * 
+ * @component
+ * @example
+ * <CreateTaskModal onTaskCreated={handleTaskCreated}>
+ *   <Button>Create Task</Button>
+ * </CreateTaskModal>
+ */
+
 import React, { useState } from 'react';
 import { Input } from '../ui/Input';
 import { X, Plus, Calendar, Clock } from 'lucide-react';
 import { useModalManager } from '../ModalManager';
 import { useToast } from '../../contexts/ToastContext';
 
+/**
+ * Props interface for the CreateTaskModal component
+ * 
+ * @interface CreateTaskModalProps
+ * @property {React.ReactNode} children - Trigger element for opening the modal
+ * @property {(task: any) => void} [onTaskCreated] - Callback function called when task is created
+ * @property {() => void} [onModalOpen] - Callback function called when modal is opened
+ */
 interface CreateTaskModalProps {
   children: React.ReactNode;
   onTaskCreated?: (task: any) => void;
   onModalOpen?: () => void;
 }
 
+/**
+ * CreateTaskModal Component Implementation
+ * 
+ * Renders a comprehensive task creation modal with form fields, dynamic lists,
+ * and integration with the modal management system.
+ */
 export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ children, onTaskCreated, onModalOpen }) => {
+  // Modal and notification management
   const { openModal, closeModal } = useModalManager();
   const { success } = useToast();
-  const [taskName, setTaskName] = useState('Design new draft');
-  const [dueDate, setDueDate] = useState('20-10-2022');
-  const [dueTime, setDueTime] = useState('11:30 AM');
-  const [taskTags, setTaskTags] = useState(['User Experience Design', 'UI Design']);
-  const [assignedTo, setAssignedTo] = useState(['@Johnsonwils']);
-  const [newTag, setNewTag] = useState('');
-  const [newAssignee, setNewAssignee] = useState('');
+  
+  // Form state management
+  const [taskName, setTaskName] = useState('Design new draft');           // Task name input
+  const [dueDate, setDueDate] = useState('20-10-2022');                  // Due date input
+  const [dueTime, setDueTime] = useState('11:30 AM');                    // Due time input
+  const [taskTags, setTaskTags] = useState(['User Experience Design', 'UI Design']); // Task tags list
+  const [assignedTo, setAssignedTo] = useState(['@Johnsonwils']);         // Assigned team members
+  const [newTag, setNewTag] = useState('');                              // New tag input
+  const [newAssignee, setNewAssignee] = useState('');                    // New assignee input
 
+  /**
+   * Removes a tag from the task tags list
+   * 
+   * @param {string} tagToRemove - The tag to remove from the list
+   */
   const handleRemoveTag = (tagToRemove: string) => {
     setTaskTags(tags => tags.filter(tag => tag !== tagToRemove));
   };
 
+  /**
+   * Adds a new tag to the task tags list
+   * 
+   * Validates the tag input and ensures no duplicates are added.
+   * Shows success notification when tag is added.
+   */
   const handleAddTag = () => {
     if (newTag.trim() && !taskTags.includes(newTag.trim())) {
       setTaskTags([...taskTags, newTag.trim()]);
@@ -33,10 +98,21 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ children, onTa
     }
   };
 
+  /**
+   * Removes an assignee from the assigned team members list
+   * 
+   * @param {string} assigneeToRemove - The assignee to remove from the list
+   */
   const handleRemoveAssignee = (assigneeToRemove: string) => {
     setAssignedTo(assignees => assignees.filter(assignee => assignee !== assigneeToRemove));
   };
 
+  /**
+   * Adds a new assignee to the assigned team members list
+   * 
+   * Validates the assignee input and ensures no duplicates are added.
+   * Shows success notification when assignee is added.
+   */
   const handleAddAssignee = () => {
     if (newAssignee.trim() && !assignedTo.includes(newAssignee.trim())) {
       setAssignedTo([...assignedTo, newAssignee.trim()]);
