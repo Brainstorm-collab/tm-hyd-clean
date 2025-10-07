@@ -46,20 +46,20 @@ function createProfileNavigation(name: string, image: string) {
 
 
 const tasks: TaskDef[] = [
-  // Row 1 with smaller width
-  { id: 1, title: "Design UX research for landing page", start: "21 Oct", end: "24 Oct", avatar: "https://i.pravatar.cc/40?img=1", row: 0, leftPx: 90, width: 270, next: 5 },
-  { id: 2, title: "Start UI design once UX is done", start: "21 Oct", end: "24 Oct", avatar: "https://i.pravatar.cc/40?img=1", row: 0, leftPx: 520, width: 270 },
+  // Row 1 with proper spacing from walls
+  { id: 1, title: "Design UX research for landing page", start: "21 Oct", end: "24 Oct", avatar: "https://i.pravatar.cc/40?img=1", row: 0, leftPx: 20, width: 250, next: 5 },
+  { id: 2, title: "Start UI design once UX is done", start: "21 Oct", end: "24 Oct", avatar: "https://i.pravatar.cc/40?img=1", row: 0, leftPx: 300, width: 250 },
 
-  // Row 2 starts slightly differently
-  { id: 3, title: "Workon Instagram marketing", start: "21 Oct", end: "24 Oct", avatar: "https://i.pravatar.cc/40?img=5", row: 1, leftPx: 120, width: 270, next: 7 },
-  { id: 5, title: "Facebook and instagram ads for new mobile app", start: "21 Oct", end: "24 Oct", avatar: "https://i.pravatar.cc/40?img=5", row: 1, leftPx: 600, width: 270 },
+  // Row 2 with proper spacing
+  { id: 3, title: "Workon Instagram marketing", start: "21 Oct", end: "24 Oct", avatar: "https://i.pravatar.cc/40?img=5", row: 1, leftPx: 50, width: 250, next: 7 },
+  { id: 5, title: "Facebook and instagram ads for new mobile app", start: "21 Oct", end: "24 Oct", avatar: "https://i.pravatar.cc/40?img=5", row: 1, leftPx: 350, width: 250 },
 
-  // Row 3 starts from another offset
-  { id: 4, title: "Develop Mobile app V1", start: "21 Oct", end: "24 Oct", avatar: "https://i.pravatar.cc/40?img=11", row: 2, leftPx: 80, width: 270 },
-  { id: 6, title: "Test mobile app with our customers", start: "21 Oct", end: "24 Oct", avatar: "https://i.pravatar.cc/40?img=11", row: 2, leftPx: 580, width: 270 },
+  // Row 3 with proper spacing
+  { id: 4, title: "Develop Mobile app V1", start: "21 Oct", end: "24 Oct", avatar: "https://i.pravatar.cc/40?img=11", row: 2, leftPx: 20, width: 250 },
+  { id: 6, title: "Test mobile app with our customers", start: "21 Oct", end: "24 Oct", avatar: "https://i.pravatar.cc/40?img=11", row: 2, leftPx: 300, width: 250 },
 
-  // Row 4 with a different offset
-  { id: 7, title: "Design Marketing Graphics", start: "21 Oct", end: "24 Oct", avatar: "https://i.pravatar.cc/40?img=8", row: 3, leftPx: 610, width: 270 },
+  // Row 4 with proper spacing
+  { id: 7, title: "Design Marketing Graphics", start: "21 Oct", end: "24 Oct", avatar: "https://i.pravatar.cc/40?img=8", row: 3, leftPx: 350, width: 250 },
 ];
 
 const TeamTimeline: React.FC = () => {
