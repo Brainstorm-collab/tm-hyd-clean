@@ -1,3 +1,32 @@
+/**
+ * Home Component - Main Dashboard Page
+ * 
+ * This is the primary dashboard component that serves as the central hub for users to view
+ * their tasks, announcements, teams, and overall project statistics. The component provides
+ * a comprehensive overview of the user's workspace with interactive elements for task
+ * management, team collaboration, and project tracking.
+ * 
+ * Key Features:
+ * - Welcome section with user-specific messaging and account setup prompts
+ * - Statistics cards showing completed tasks, assigned tasks, boards, and scheduled tasks
+ * - Task priorities section with filtering, sorting, and management capabilities
+ * - Announcements feed with team updates and project notifications
+ * - My Teams section displaying team memberships and collaboration tools
+ * - Guest user support with appropriate restrictions and upgrade prompts
+ * - Responsive design with dropdown menus and interactive elements
+ * - Real-time state management for tasks, teams, and user interactions
+ * 
+ * State Management:
+ * - Handles authentication state and guest user restrictions
+ * - Manages dropdown visibility and interaction states
+ * - Tracks task completion and filtering states
+ * - Provides empty state components for better UX
+ * 
+ * @component
+ * @example
+ * <Home />
+ */
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -31,20 +60,35 @@ import { EmptyTeams } from '../empty-states/EmptyTeams';
 import { getUserDisplayName } from '../../utils/userDisplay';
 import { useToast } from '../../contexts/ToastContext';
 
+/**
+ * Home Component Implementation
+ * 
+ * Main dashboard component that renders the user's workspace overview with interactive
+ * elements for task management, team collaboration, and project tracking.
+ */
 export const Home: React.FC = () => {
+  // Authentication and navigation hooks
   const { currentUser, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const { error } = useToast();
-  const [activeTab, setActiveTab] = useState('');
-  const [openDropdowns, setOpenDropdowns] = useState<{[key: string]: boolean}>({});
   
-  // Check if user is a guest or not authenticated
-  const isGuest = currentUser?.id === 'guest';
-  const shouldShowData = isAuthenticated && !isGuest;
+  // Component state management
+  const [activeTab, setActiveTab] = useState(''); // Currently active tab in task priorities section
+  const [openDropdowns, setOpenDropdowns] = useState<{[key: string]: boolean}>({}); // Dropdown visibility states
   
-  // Get display name for the user
-  const displayName = getUserDisplayName(currentUser);
+  // User authentication and access control
+  const isGuest = currentUser?.id === 'guest'; // Check if current user is a guest
+  const shouldShowData = isAuthenticated && !isGuest; // Determine if user data should be displayed
+  
+  // User display utilities
+  const displayName = getUserDisplayName(currentUser); // Get formatted display name for user
 
+  /**
+   * Handles guest user restrictions by showing appropriate error message
+   * 
+   * This function is called when a guest user tries to access features that require
+   * authentication. It displays a toast notification prompting the user to login.
+   */
   const handleGuestRestriction = () => {
     error(
       'Login Required',
@@ -52,6 +96,12 @@ export const Home: React.FC = () => {
     );
   };
 
+  /**
+   * Handles account setup navigation with guest user restrictions
+   * 
+   * If the user is a guest, it shows a restriction message. Otherwise, it navigates
+   * to the profile page for account setup.
+   */
   const handleSetupAccount = () => {
     if (isGuest) {
       handleGuestRestriction();
@@ -60,10 +110,16 @@ export const Home: React.FC = () => {
     }
   };
   
-  // Refs for dropdowns
+  // Dropdown management with refs for click-outside detection
   const dropdownRefs = useRef<{[key: string]: HTMLDivElement | null}>({});
 
-  // Close dropdowns when clicking outside
+  /**
+   * Effect hook to handle clicking outside dropdowns
+   * 
+   * This effect adds a global click listener that closes any open dropdowns
+   * when the user clicks outside of them. It properly cleans up the event
+   * listener when the component unmounts.
+   */
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       Object.keys(dropdownRefs.current).forEach(key => {
@@ -77,10 +133,16 @@ export const Home: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  /**
+   * Toggles the visibility of a specific dropdown
+   * 
+   * @param {string} key - The unique identifier for the dropdown to toggle
+   */
   const toggleDropdown = (key: string) => {
     setOpenDropdowns(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
+  // Mock data for tasks - only shown to authenticated non-guest users
   const [tasks, setTasks] = useState(shouldShowData ? [
     {
       id: 1,
@@ -112,6 +174,7 @@ export const Home: React.FC = () => {
     }
   ] : []);
 
+  // Mock data for announcements - team updates and project notifications
   const announcements = shouldShowData ? [
     {
       id: 1,
@@ -154,6 +217,7 @@ export const Home: React.FC = () => {
     }
   ] : [];
 
+  // Mock data for teams - user's team memberships and collaboration groups
   const teams = shouldShowData ? [
     {
       id: 1,
@@ -190,6 +254,15 @@ export const Home: React.FC = () => {
     }
   ] : [];
 
+  /**
+   * Returns appropriate CSS classes for task tag styling based on tag type
+   * 
+   * This utility function provides consistent color coding for different task tags,
+   * making it easier for users to visually categorize and identify task types.
+   * 
+   * @param {string} tag - The task tag to get styling for
+   * @returns {string} CSS classes for background and text color
+   */
   const getTagColor = (tag: string) => {
     switch (tag) {
       case 'UX':
@@ -203,6 +276,18 @@ export const Home: React.FC = () => {
     }
   };
 
+  /**
+   * Renders the complete Home dashboard layout
+   * 
+   * The dashboard includes:
+   * - Welcome section with user-specific messaging and account setup
+   * - Statistics cards showing key metrics (tasks, boards, etc.)
+   * - Task priorities section with filtering and management
+   * - Announcements feed with team updates
+   * - My Teams section with collaboration tools
+   * - Responsive grid layout with proper spacing
+   * - Interactive dropdowns and modals
+   */
   return (
     <div className="p-6 space-y-6 min-h-screen">
       {/* Welcome Section */}

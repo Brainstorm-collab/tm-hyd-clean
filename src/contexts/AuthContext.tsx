@@ -1,26 +1,85 @@
+/**
+ * AuthContext - Authentication State Management
+ * 
+ * This context provides comprehensive authentication functionality for the entire application.
+ * It manages user authentication state, handles login/logout operations, supports social
+ * authentication, and provides guest user functionality. The context also manages user
+ * preferences, subscription status, and provides utility functions for authentication
+ * state checking.
+ * 
+ * Key Features:
+ * - User authentication and session management
+ * - Social login integration (Google, Facebook)
+ * - Guest user support with appropriate restrictions
+ * - Password reset and OTP verification
+ * - User profile management and updates
+ * - Premium access checking and subscription management
+ * - Persistent session storage with localStorage
+ * - Loading states and error handling
+ * 
+ * Authentication Methods:
+ * - Email/password login and signup
+ * - Social OAuth (Google, Facebook)
+ * - Guest mode for limited access
+ * - Password reset via email
+ * - OTP verification for enhanced security
+ * 
+ * State Management:
+ * - Current user information and preferences
+ * - Authentication status and loading states
+ * - Guest user identification and restrictions
+ * - Session persistence across browser refreshes
+ * 
+ * @context
+ * @example
+ * const { currentUser, login, logout, isAuthenticated } = useAuth();
+ */
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, Subscription } from '../types';
 
+/**
+ * Authentication context type definition
+ * 
+ * Defines all available authentication methods, state properties, and utility functions
+ * that can be accessed through the useAuth hook.
+ * 
+ * @interface AuthContextType
+ */
 interface AuthContextType {
-  currentUser: User | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  isGuest: boolean;
+  currentUser: User | null;                    // Currently authenticated user or null
+  isAuthenticated: boolean;                    // Whether user is authenticated
+  isLoading: boolean;                          // Loading state for auth operations
+  isGuest: boolean;                            // Whether current user is a guest
   login: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
   signup: (name: string, email: string, password: string, options?: { receiveTips?: boolean }) => Promise<{ success: boolean; message: string }>;
-  logout: () => void;
-  continueAsGuest: () => void;
+  logout: () => void;                          // Logout current user
+  continueAsGuest: () => void;                 // Switch to guest mode
   socialLogin: (provider: 'google' | 'facebook', userData?: any) => Promise<{ success: boolean; message: string }>;
   updateUser: (updates: Partial<User>) => Promise<void>;
   forgotPassword: (email: string) => Promise<{ success: boolean; message: string }>;
   resetPassword: (token: string, newPassword: string) => Promise<{ success: boolean; message: string }>;
   verifyOTP: (email: string, otp: string) => Promise<{ success: boolean; message: string }>;
   resendOTP: (email: string) => Promise<{ success: boolean; message: string }>;
-  checkPremiumAccess: () => boolean;
+  checkPremiumAccess: () => boolean;           // Check if user has premium access
 }
 
+// Create the authentication context with undefined default value
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * Custom hook to access authentication context
+ * 
+ * This hook provides access to all authentication functionality and state.
+ * It includes error handling to ensure the hook is only used within the
+ * AuthProvider component tree.
+ * 
+ * @returns {AuthContextType} The authentication context value
+ * @throws {Error} If used outside of AuthProvider
+ * 
+ * @example
+ * const { currentUser, login, logout } = useAuth();
+ */
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
@@ -29,14 +88,39 @@ export const useAuth = () => {
   return context;
 };
 
+/**
+ * Props interface for the AuthProvider component
+ * 
+ * @interface AuthProviderProps
+ * @property {ReactNode} children - Child components to be wrapped by the provider
+ */
 interface AuthProviderProps {
   children: ReactNode;
 }
 
+/**
+ * AuthProvider Component - Authentication Context Provider
+ * 
+ * This provider component wraps the application and provides authentication state
+ * and functionality to all child components. It manages user sessions, handles
+ * authentication operations, and persists user data across browser sessions.
+ * 
+ * The provider initializes with session restoration from localStorage and provides
+ * all authentication methods including login, signup, social authentication,
+ * password reset, and guest mode functionality.
+ */
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // Core authentication state
+  const [currentUser, setCurrentUser] = useState<User | null>(null);  // Current authenticated user
+  const [isLoading, setIsLoading] = useState(true);                   // Loading state for auth operations
 
+  /**
+   * Effect hook for session restoration on app initialization
+   * 
+   * This effect runs once when the component mounts to check for existing
+   * user sessions stored in localStorage. If a valid session is found,
+   * it restores the user state. If parsing fails, it cleans up invalid data.
+   */
   useEffect(() => {
     // Check for existing session on app load
     const savedUser = localStorage.getItem('currentUser');
@@ -46,6 +130,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setCurrentUser(user);
       } catch (error) {
         console.error('Error parsing saved user:', error);
+        // Clean up invalid session data
         localStorage.removeItem('currentUser');
         localStorage.removeItem('isGuest');
       }
