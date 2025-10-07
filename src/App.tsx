@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ModalProvider } from './components/ModalManager';
 import { ToastProvider, useToast } from './contexts/ToastContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 import { ToastContainer } from './components/ui/Toast';
 import { Layout } from './components/layout/Layout';
 import { Login } from './components/auth/Login';
@@ -171,12 +172,14 @@ function App() {
   return (
     <AuthProvider>
       <ToastProvider>
-        <ModalProvider>
-          <Router>
-            <AppRouter />
-            <ToastContainerWrapper />
-          </Router>
-        </ModalProvider>
+        <NotificationProvider>
+          <ModalProvider>
+            <Router>
+              <AppRouter />
+              <ToastContainerWrapper />
+            </Router>
+          </ModalProvider>
+        </NotificationProvider>
       </ToastProvider>
     </AuthProvider>
   );

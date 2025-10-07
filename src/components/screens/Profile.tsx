@@ -6,6 +6,7 @@ import { useToast } from '../../contexts/ToastContext';
 import { Card, CardContent, CardHeader } from '../ui/Card';
 import { ProfilePictureUpload } from '../ui/ProfilePictureUpload';
 import { useAuth } from '../../contexts/AuthContext';
+import { getUserDisplayName, getProviderInfo, hasSocialLoginData, getProfileCompleteness } from '../../utils/userDisplay';
 
 // Guest user constant data
 const guestData = {
@@ -25,6 +26,7 @@ export const Profile: React.FC = () => {
   const { currentUser, updateUser, isGuest } = useAuth();
   const [userState, setUserState] = useState<UserType | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [profileUpdated, setProfileUpdated] = useState(false);
   
   // Alias for easier reference
   const user = userState;
@@ -70,18 +72,63 @@ export const Profile: React.FC = () => {
       } as UserType);
       setEditData(guestData);
     } else if (currentUser) {
+      // Update user state with current user data
       setUserState(currentUser);
-      setEditData({
+      
+      // Auto-set role based on login method if no role is set
+      let defaultRole = currentUser.role || '';
+      if (!defaultRole) {
+        if (currentUser.provider === 'google') {
+          defaultRole = 'Google User';
+        } else if (currentUser.provider === 'facebook') {
+          defaultRole = 'Facebook User';
+        } else {
+          defaultRole = 'Email User';
+        }
+      }
+      
+      // Extract and populate edit data with all available user information
+      const extractedData = {
         name: currentUser.name || '',
         firstName: currentUser.firstName || '',
         lastName: currentUser.lastName || '',
         email: currentUser.email || '',
-        role: currentUser.role || '',
+        role: defaultRole,
         bio: currentUser.bio || '',
         phone: currentUser.phone || '',
         location: currentUser.location || '',
         website: currentUser.website || ''
+      };
+      
+      setEditData(extractedData);
+      
+      // Log extracted information for debugging
+      console.log('Profile: User data extracted and positioned:', {
+        hasName: !!extractedData.name,
+        hasFirstName: !!extractedData.firstName,
+        hasLastName: !!extractedData.lastName,
+        hasEmail: !!extractedData.email,
+        hasRole: !!extractedData.role,
+        hasBio: !!extractedData.bio,
+        hasPhone: !!extractedData.phone,
+        hasLocation: !!extractedData.location,
+        hasWebsite: !!extractedData.website,
+        provider: currentUser.provider,
+        avatarUrl: currentUser.avatarUrl
       });
+      
+      // Show success message if user has social login data and profile was auto-filled
+      if (hasSocialLoginData(currentUser)) {
+        const providerInfo = getProviderInfo(currentUser);
+        setProfileUpdated(true);
+        success(
+          'Profile Updated',
+          `Your profile information has been automatically updated from ${providerInfo.name}. You can edit any details as needed.`
+        );
+        
+        // Reset the profile updated flag after 3 seconds
+        setTimeout(() => setProfileUpdated(false), 3000);
+      }
     } else {
       const storedUser = getUser();
       if (storedUser) {
@@ -246,6 +293,22 @@ export const Profile: React.FC = () => {
               : 'Manage your personal information and preferences'
             }
           </p>
+          {!isGuest && user && (
+            <div className="mt-3">
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-600">Profile Completeness:</span>
+                <div className="flex-1 max-w-xs">
+                  <div className="bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-primary-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${getProfileCompleteness(user)}%` }}
+                    ></div>
+                  </div>
+                </div>
+                <span className="text-sm font-medium text-gray-700">{getProfileCompleteness(user)}%</span>
+              </div>
+            </div>
+          )}
         </div>
         {!isEditing ? (
           <button
@@ -299,6 +362,22 @@ export const Profile: React.FC = () => {
               <p className="text-gray-600">
                 {isEditing ? editData.role : user.role || 'No role assigned'}
               </p>
+              {hasSocialLoginData(user) && (
+                <div className="mt-2 flex items-center justify-center space-x-2">
+                  <span className="text-xs text-gray-500">Connected via</span>
+                  {(() => {
+                    const providerInfo = getProviderInfo(user);
+                    return (
+                      <span className={`flex items-center space-x-1 px-2 py-1 ${providerInfo.bgColor} ${providerInfo.textColor} rounded-full text-xs`}>
+                        <span className={`w-3 h-3 ${providerInfo.iconBg} rounded-full flex items-center justify-center`}>
+                          <span className="text-white text-xs font-bold">{providerInfo.icon}</span>
+                        </span>
+                        <span>{providerInfo.name}</span>
+                      </span>
+                    );
+                  })()}
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -306,7 +385,25 @@ export const Profile: React.FC = () => {
         {/* Personal Information */}
         <Card className="lg:col-span-2">
           <CardHeader>
-            <h3 className="text-lg font-semibold text-gray-900">Personal Information</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">Personal Information</h3>
+              {hasSocialLoginData(user) && (
+                <div className="flex items-center space-x-2">
+                  <span className="text-xs text-gray-500">Auto-filled from</span>
+                  {(() => {
+                    const providerInfo = getProviderInfo(user);
+                    return (
+                      <span className={`flex items-center space-x-1 px-2 py-1 ${providerInfo.bgColor} ${providerInfo.textColor} rounded-full text-xs`}>
+                        <span className={`w-3 h-3 ${providerInfo.iconBg} rounded-full flex items-center justify-center`}>
+                          <span className="text-white text-xs font-bold">{providerInfo.icon}</span>
+                        </span>
+                        <span>{providerInfo.name}</span>
+                      </span>
+                    );
+                  })()}
+                </div>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -524,6 +621,39 @@ export const Profile: React.FC = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Account Information Section */}
+      <Card>
+        <CardHeader>
+          <h3 className="text-lg font-semibold text-gray-900">Account Information</h3>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <span className="text-sm font-medium text-gray-700">Login Method</span>
+              <span className="text-sm text-gray-600 capitalize">
+                {(() => {
+                  const providerInfo = getProviderInfo(user);
+                  return (
+                    <span className="flex items-center space-x-2">
+                      <span className={`w-4 h-4 ${providerInfo.iconBg} rounded-full flex items-center justify-center`}>
+                        <span className="text-white text-xs font-bold">{providerInfo.icon}</span>
+                      </span>
+                      <span>{providerInfo.name}</span>
+                    </span>
+                  );
+                })()}
+              </span>
+            </div>
+            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <span className="text-sm font-medium text-gray-700">Account Status</span>
+              <span className="text-sm text-gray-600">
+                {user.subscription?.plan === 'guest' ? 'Guest' : 'Active'}
+              </span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Preferences Section */}
       <Card>

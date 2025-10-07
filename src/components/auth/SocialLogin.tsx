@@ -3,8 +3,10 @@ import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import { useAuth } from "../../contexts/AuthContext";
 import { useToast } from "../../contexts/ToastContext";
+import { useNotifications } from "../../contexts/NotificationContext";
 import { FacebookIcon } from "../ui/FacebookIcon";
 import { GoogleIcon } from "../ui/GoogleIcon";
+import { User } from "lucide-react";
 
 // Facebook and Google SDK types
 declare global {
@@ -52,7 +54,8 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
   disabled = false 
 }) => {
   const { socialLogin } = useAuth();
-  const { success, error } = useToast();
+  const { success, error, successWithUser } = useToast();
+  const { addNotification } = useNotifications();
   
   // Google and Facebook App IDs - using environment variables for better security
   const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID || "419183498411-aco9polgjn5va01kbg3legvvmq6ibq1h.apps.googleusercontent.com";
@@ -69,19 +72,45 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
       console.log('Google OAuth Callback URL:', googleCallbackUrl);
       console.log('Google response:', response);
       
-      // Extract user data from the response
-      const userData = response.userData || response;
-      
-      console.log('Google user data:', userData);
+      // Decode the JWT token to extract user data
+      let userData;
+      if (response.credential) {
+        // Decode the JWT token from Google
+        userData = jwtDecode(response.credential);
+        console.log('Decoded Google JWT:', userData);
+        console.log('Google JWT picture field:');
+        console.log('  picture:', (userData as any).picture);
+        console.log('  pictureType:', typeof (userData as any).picture);
+        console.log('  pictureLength:', (userData as any).picture?.length);
+        console.log('  allFields:', Object.keys(userData));
+      } else {
+        // Fallback to response data if no credential
+        userData = response.userData || response;
+        console.log('Google user data (fallback):', userData);
+      }
       
       const result = await socialLogin('google', userData);
       
       if (result.success) {
-        // Show success toast with Google-specific message
-        success(
-          'Welcome to Task Manager! 🎉', 
+        // Show success toast with user's name
+        const userName = userData.name || userData.given_name || 'User';
+        successWithUser(
+          'Welcome {userName}! 🎉', 
+          userName,
           `You have successfully logged in with Google! We're happy to have you here. Enjoy using the app!`
         );
+        
+        // Add notification about profile image
+        if ((userData as any).picture) {
+          addNotification({
+            icon: User,
+            message: `Your Google profile picture has been automatically imported!`,
+            time: 'Just now',
+            isRead: false,
+            type: 'success'
+          });
+        }
+        
         onSuccess?.();
       } else {
         // Show failure toast
@@ -112,9 +141,11 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
       const result = await socialLogin('facebook', response);
       
       if (result.success) {
-        // Show success toast with Facebook-specific message
-        success(
-          'Welcome to Task Manager! 🎉', 
+        // Show success toast with user's name
+        const userName = response.name || response.first_name || 'User';
+        successWithUser(
+          'Welcome {userName}! 🎉', 
+          userName,
           `You have successfully logged in with Facebook! We're happy to have you here. Enjoy using the app!`
         );
         onSuccess?.();
@@ -148,7 +179,7 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
         
         // Get user info with more detailed fields
         window.FB.api('/me', { 
-          fields: 'id,name,first_name,last_name,email,picture.width(200).height(200)' 
+          fields: 'id,name,first_name,last_name,email,picture.width(200).height(200),location,website,bio' 
         }, (userInfo: any) => {
           console.log('Facebook API response:', userInfo);
           
@@ -167,6 +198,9 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
             last_name: userInfo.last_name,
             email: userInfo.email || `fb_${userInfo.id}@facebook.local`, // Fallback email if not provided
             picture: userInfo.picture?.data?.url || userInfo.picture,
+            location: userInfo.location,
+            website: userInfo.website,
+            bio: userInfo.bio,
             // Include auth response data
             accessToken: response.authResponse.accessToken,
             userID: response.authResponse.userID,
@@ -180,6 +214,9 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
             hasEmail: !!userData.email,
             hasId: !!userData.id,
             hasPicture: !!userData.picture,
+            hasLocation: !!userData.location,
+            hasWebsite: !!userData.website,
+            hasBio: !!userData.bio,
             hasAccessToken: !!userData.accessToken,
             emailSource: userInfo.email ? 'Facebook API' : 'Generated fallback'
           });
@@ -200,7 +237,7 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
         console.log('Facebook login failed or cancelled');
         error('Facebook Login Failed', 'You are not logged in via Facebook. Login was cancelled or failed.');
       }
-    }, { scope: 'email,public_profile' }); // Request both email and public profile permissions
+    }, { scope: 'email,public_profile,user_location,user_website' }); // Request email, public profile, location, and website permissions
   };
 
 

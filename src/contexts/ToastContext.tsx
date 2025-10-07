@@ -24,6 +24,10 @@ interface ToastContextType {
   error: (title: string, message?: string, action?: ToastAction) => void;
   warning: (title: string, message?: string, action?: ToastAction) => void;
   info: (title: string, message?: string, action?: ToastAction) => void;
+  successWithUser: (title: string, userName: string, message?: string, action?: ToastAction) => void;
+  errorWithUser: (title: string, userName: string, message?: string, action?: ToastAction) => void;
+  warningWithUser: (title: string, userName: string, message?: string, action?: ToastAction) => void;
+  infoWithUser: (title: string, userName: string, message?: string, action?: ToastAction) => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -82,6 +86,27 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     addToast({ type: 'info', title, message, action });
   }, [addToast]);
 
+  // User-aware toast functions
+  const successWithUser = useCallback((title: string, userName: string, message?: string, action?: ToastAction) => {
+    const personalizedTitle = title.includes('{userName}') ? title.replace('{userName}', userName) : `${title} ${userName}`;
+    addToast({ type: 'success', title: personalizedTitle, message, action });
+  }, [addToast]);
+
+  const errorWithUser = useCallback((title: string, userName: string, message?: string, action?: ToastAction) => {
+    const personalizedTitle = title.includes('{userName}') ? title.replace('{userName}', userName) : `${title} ${userName}`;
+    addToast({ type: 'error', title: personalizedTitle, message, action });
+  }, [addToast]);
+
+  const warningWithUser = useCallback((title: string, userName: string, message?: string, action?: ToastAction) => {
+    const personalizedTitle = title.includes('{userName}') ? title.replace('{userName}', userName) : `${title} ${userName}`;
+    addToast({ type: 'warning', title: personalizedTitle, message, action });
+  }, [addToast]);
+
+  const infoWithUser = useCallback((title: string, userName: string, message?: string, action?: ToastAction) => {
+    const personalizedTitle = title.includes('{userName}') ? title.replace('{userName}', userName) : `${title} ${userName}`;
+    addToast({ type: 'info', title: personalizedTitle, message, action });
+  }, [addToast]);
+
   return (
     <ToastContext.Provider value={{
       toasts,
@@ -92,6 +117,10 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       error,
       warning,
       info,
+      successWithUser,
+      errorWithUser,
+      warningWithUser,
+      infoWithUser,
     }}>
       {children}
     </ToastContext.Provider>

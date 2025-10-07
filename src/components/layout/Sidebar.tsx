@@ -12,6 +12,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { getUserInitials, getUserDisplayName, getUserAvatarUrl } from '../../utils/userDisplay';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/Avatar';
 import { getInitials } from '../ui/Avatar';
 import { Logo } from '../ui/Logo';
@@ -140,10 +141,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <Avatar className={cn(
             isCollapsed ? 'w-10 h-10' : 'w-8 h-8'
           )}>
-            {user?.avatarUrl ? (
+            {getUserAvatarUrl(user) ? (
               <AvatarImage 
-                src={user.avatarUrl} 
-                alt={user.name || 'User'} 
+                src={getUserAvatarUrl(user)} 
+                alt={getUserDisplayName(user)} 
                 className={cn(
                   isCollapsed ? 'w-10 h-10' : 'w-8 h-8',
                   'object-cover'
@@ -154,13 +155,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
               'bg-primary-100 text-primary-700',
               isCollapsed ? 'text-base' : 'text-sm'
             )}>
-              {user ? getInitials(user.name) : 'AU'}
+              {getUserInitials(user)}
             </AvatarFallback>
           </Avatar>
           {!isCollapsed && (
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 truncate">
-                {user?.name || 'Admin User'}
+                {getUserDisplayName(user)}
               </p>
               <p className="text-xs text-gray-500 truncate">
                 {user?.email || 'admin@example.com'}

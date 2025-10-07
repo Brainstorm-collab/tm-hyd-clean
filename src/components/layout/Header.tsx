@@ -6,6 +6,7 @@ import { Button } from '../ui/Button';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/Avatar';
 import { getInitials } from '../ui/Avatar';
 import { getUser } from '../../utils/localStorage';
+import { getUserInitials, getUserDisplayName, getUserAvatarUrl } from '../../utils/userDisplay';
 import { User as UserType } from '../../types';
 import { CreateTaskModal } from '../modals/CreateTaskModal';
 import { CreateTeamModal } from '../modals/CreateTeamModal';
@@ -14,6 +15,7 @@ import { CreateTimelineModal } from '../modals/CreateTimelineModal';
 import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
+import { useNotifications } from '../../contexts/NotificationContext';
 
 interface HeaderProps {
   onSearch: (query: string) => void;
@@ -35,6 +37,7 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
   const [user, setUser] = useState<UserType | null>(currentUser || getUser());
   const { isGuest } = useAuth();
   const { warning } = useToast();
+  const { notifications, markAsRead, markAllAsRead, getUnreadCount } = useNotifications();
   const userMenuRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
   const addMenuRef = useRef<HTMLDivElement>(null);
@@ -44,6 +47,12 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
   // Update user when currentUser prop changes
   useEffect(() => {
     const newUser = currentUser || getUser();
+    console.log('Header: User updated:');
+    console.log('  userId:', newUser?.id);
+    console.log('  userName:', newUser?.name);
+    console.log('  avatarUrl:', newUser?.avatarUrl);
+    console.log('  provider:', newUser?.provider);
+    console.log('  hasAvatar:', !!newUser?.avatarUrl);
     setUser(newUser);
   }, [currentUser]);
 
@@ -59,67 +68,15 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
     }
   }, [location.pathname, location.search]);
 
-  // Sample notifications data matching the image - only show for authenticated users
-  const notifications = isAuthenticated ? [
-    {
-      id: '1',
-      icon: Check,
-      message: "Johnson complete **Development team's** all tasks",
-      time: "Just now",
-      isRead: true
-    },
-    {
-      id: '2',
-      icon: UserPlus,
-      message: "Willamson requested to join in **Design team**",
-      time: "2hrs ago",
-      isRead: true
-    },
-    {
-      id: '3',
-      icon: User,
-      message: "Olivia accepted **UI/UX Team's** request",
-      time: "a day ago",
-      isRead: true
-    },
-    {
-      id: '4',
-      icon: FileText,
-      message: "We have shared your monthly activities report in PDF format",
-      time: "2days ago",
-      isRead: true
-    },
-    {
-      id: '5',
-      icon: AtSign,
-      message: "Elizabeth mentioned you in **Samantha's** sub task",
-      time: "a week ago",
-      isRead: true
-    },
-    {
-      id: '6',
-      icon: Check,
-      message: "You completed **Marketing team's** task",
-      time: "3weeks ago",
-      isRead: true
-    },
-    {
-      id: '7',
-      icon: FileText,
-      message: "Johnson complete **Development team's** all tasks",
-      time: "a month ago",
-      isRead: true
-    },
-    {
-      id: '8',
-      icon: AtSign,
-      message: "Ryan mentioned you in **Design team's** sub task",
-      time: "4months ago",
-      isRead: true
-    }
-  ] : [];
+  // Get unread count from notification context
+  const unreadCount = getUnreadCount();
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  // Handle notification click
+  const handleNotificationClick = (notificationId: string) => {
+    console.log('Notification clicked:', notificationId);
+    markAsRead(notificationId);
+    setShowNotifications(false);
+  };
 
   const getPageTitle = () => {
     if (location.pathname.startsWith('/profile/')) {
@@ -251,6 +208,9 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
           <h1 className="text-lg font-semibold text-gray-900 whitespace-nowrap">{getPageTitle()}</h1>
         </div>
 
+
+
+
         {/* Search */}
         <form onSubmit={handleSearch} className="flex-1 max-w-md mx-8">
           <div className="relative">
@@ -363,14 +323,60 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
                   <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
                 </div>
                 <div className="max-h-80 overflow-y-auto">
-                  <div className="p-8 text-center">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Bell className="w-8 h-8 text-gray-400" />
+                  {notifications.length > 0 ? (
+                    <div className="py-2">
+                      {notifications.map((notification) => {
+                        const IconComponent = notification.icon;
+                        return (
+                          <div
+                            key={notification.id}
+                            onClick={() => handleNotificationClick(notification.id)}
+                            className="flex items-start space-x-3 p-4 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 cursor-pointer transition-colors"
+                          >
+                            <div className="flex-shrink-0">
+                              <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
+                                <IconComponent className="w-4 h-4 text-primary-700" />
+                              </div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p 
+                                className="text-sm text-gray-900"
+                                dangerouslySetInnerHTML={{ __html: notification.message }}
+                              />
+                              <p className="text-xs text-gray-500 mt-1">{notification.time}</p>
+                            </div>
+                            {!notification.isRead && (
+                              <div className="flex-shrink-0">
+                                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
-                    <p className="text-gray-500 text-lg font-medium">No notifications</p>
-                    <p className="text-gray-400 text-sm mt-1">You'll get notifications soon</p>
-                  </div>
+                  ) : (
+                    <div className="p-8 text-center">
+                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Bell className="w-8 h-8 text-gray-400" />
+                      </div>
+                      <p className="text-gray-500 text-lg font-medium">No notifications</p>
+                      <p className="text-gray-400 text-sm mt-1">You'll get notifications soon</p>
+                    </div>
+                  )}
                 </div>
+                {notifications.length > 0 && (
+                  <div className="p-3 border-t border-gray-200">
+                    <button
+                      onClick={() => {
+                        markAllAsRead();
+                        setShowNotifications(false);
+                      }}
+                      className="w-full text-center text-sm text-primary-700 hover:text-primary-800 font-medium"
+                    >
+                      Mark all as read
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -383,15 +389,15 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
                 className="flex items-center space-x-2 p-1  hover:bg-gray-100 transition-colors"
               >
                 <Avatar className="w-8 h-8">
-                  {user?.avatarUrl ? (
+                  {getUserAvatarUrl(user) ? (
                     <AvatarImage 
-                      src={user.avatarUrl} 
-                      alt={user.name || 'User'} 
+                      src={getUserAvatarUrl(user)} 
+                      alt={getUserDisplayName(user)} 
                       className="w-8 h-8 object-cover"
                     />
                   ) : null}
                   <AvatarFallback className="bg-primary-100 text-primary-700 text-sm">
-                    {user ? getInitials(user.name) : 'M'}
+                    {getUserInitials(user)}
                   </AvatarFallback>
                 </Avatar>
                 <ChevronDown className="w-4 h-4 text-gray-400" />

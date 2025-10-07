@@ -209,9 +209,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           }
         };
         
-        setCurrentUser(currentUser);
-        localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        return { success: true, message: 'Login successful' };
+      setCurrentUser(currentUser);
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      
+      // Log successful login with user data
+      console.log('AuthContext: User logged in successfully:', {
+        id: currentUser.id,
+        name: currentUser.name,
+        email: currentUser.email,
+        hasAvatar: !!currentUser.avatarUrl
+      });
+      
+      return { success: true, message: 'Login successful' };
       } else {
         return { success: false, message: 'Invalid email or password' };
       }
@@ -288,6 +297,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       setCurrentUser(currentUser);
       localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      
+      // Log successful signup with user data
+      console.log('AuthContext: User signed up successfully:', {
+        id: currentUser.id,
+        name: currentUser.name,
+        email: currentUser.email
+      });
+      
       return { success: true, message: 'Account created successfully' };
     } catch (error) {
       return { success: false, message: 'Signup failed. Please try again.' };
@@ -347,6 +364,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       let email = `user@${provider}.com`;
       let avatarUrl = '';
       let userId = Date.now().toString();
+      let phone = '';
+      let location = '';
+      let website = '';
+      let bio = '';
       
       if (userData) {
         if (provider === 'google') {
@@ -358,17 +379,53 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           firstName = userData.given_name || '';
           lastName = userData.family_name || '';
           email = userData.email || email;
-          avatarUrl = userData.picture || avatarUrl;
+          // Handle Google profile picture with proper URL processing
+          const googlePicture = (userData as any).picture;
+          if (googlePicture) {
+            console.log('Processing Google picture URL:', googlePicture);
+            
+            // If it's a Google profile image, ensure it has proper parameters
+            if (googlePicture.includes('googleusercontent.com')) {
+              // Check if URL already has size parameters
+              if (googlePicture.includes('=')) {
+                // URL already has parameters, use as is
+                avatarUrl = googlePicture;
+              } else {
+                // Add size parameter for better image quality
+                avatarUrl = `${googlePicture}=s200-c`;
+              }
+            } else {
+              // Not a Google URL, use as is
+              avatarUrl = googlePicture;
+            }
+            
+            console.log('Processed avatar URL:', avatarUrl);
+          } else {
+            console.log('No Google picture found in userData');
+            avatarUrl = avatarUrl;
+          }
           userId = userData.sub || userId;
           
-          console.log('Extracted Google data:', { name, firstName, lastName, email, avatarUrl, userId });
+          console.log('Google picture URL details:');
+          console.log('  originalPicture:', (userData as any).picture);
+          console.log('  finalAvatarUrl:', avatarUrl);
+          console.log('  pictureType:', typeof (userData as any).picture);
+          console.log('  pictureLength:', (userData as any).picture?.length);
+          
+          // Extract additional Google profile data if available
+          if (userData.locale) {
+            location = userData.locale;
+          }
+          
+          console.log('Extracted Google data:', { name, firstName, lastName, email, avatarUrl, userId, location });
           console.log('Google data validation:', {
             hasName: !!name && name !== 'Google User',
             hasFirstName: !!firstName,
             hasLastName: !!lastName,
             hasEmail: !!email && email !== 'user@google.com',
             hasAvatar: !!avatarUrl,
-            hasUserId: !!userId && userId !== Date.now().toString()
+            hasUserId: !!userId && userId !== Date.now().toString(),
+            hasLocation: !!location
           });
         } else if (provider === 'facebook') {
           // For Facebook, userData contains the response object with user info spread directly
@@ -386,14 +443,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           avatarUrl = userData.picture || (userData.picture?.data?.url) || '';
           userId = userData.id || userData.userID || Date.now().toString();
           
-          console.log('Extracted Facebook data:', { name, firstName, lastName, email, avatarUrl, userId });
+          // Extract additional Facebook profile data if available
+          if (userData.location) {
+            location = userData.location.name || userData.location;
+          }
+          if (userData.website) {
+            website = userData.website;
+          }
+          if (userData.bio) {
+            bio = userData.bio;
+          }
+          
+          console.log('Extracted Facebook data:', { name, firstName, lastName, email, avatarUrl, userId, location, website, bio });
           console.log('Facebook data validation:', {
             hasName: !!name && name !== 'Facebook User',
             hasFirstName: !!firstName,
             hasLastName: !!lastName,
             hasEmail: !!email && email !== 'user@facebook.com',
             hasAvatar: !!avatarUrl,
-            hasUserId: !!userId && userId !== Date.now().toString()
+            hasUserId: !!userId && userId !== Date.now().toString(),
+            hasLocation: !!location,
+            hasWebsite: !!website,
+            hasBio: !!bio
           });
           
           // Validate that we have essential data
@@ -414,6 +485,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       let existingUser = users.find((u: any) => u.email === email);
       
       if (!existingUser) {
+        // Auto-set role based on provider
+        let defaultRole = '';
+        if (provider === 'google') {
+          defaultRole = 'Google User';
+        } else if (provider === 'facebook') {
+          defaultRole = 'Facebook User';
+        } else {
+          defaultRole = 'Email User';
+        }
+        
         // Create new user for social login
         const newUser = {
           id: userId,
@@ -424,6 +505,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           password: '', // No password for social login
           avatarUrl: avatarUrl,
           provider: provider,
+          role: defaultRole,
+          phone: phone,
+          location: location,
+          website: website,
+          bio: bio,
           preferences: {
             theme: 'light' as const,
             notifications: true,
@@ -448,9 +534,57 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.setItem('registeredUsers', JSON.stringify(users));
         existingUser = newUser;
       } else {
-        // Update existing user's avatar if it's different
+        // Update existing user's profile data if it's different or missing
+        let userUpdated = false;
+        
         if (avatarUrl && existingUser.avatarUrl !== avatarUrl) {
           existingUser.avatarUrl = avatarUrl;
+          userUpdated = true;
+        }
+        
+        if (firstName && existingUser.firstName !== firstName) {
+          existingUser.firstName = firstName;
+          userUpdated = true;
+        }
+        
+        if (lastName && existingUser.lastName !== lastName) {
+          existingUser.lastName = lastName;
+          userUpdated = true;
+        }
+        
+        if (name && existingUser.name !== name) {
+          existingUser.name = name;
+          userUpdated = true;
+        }
+        
+        if (location && existingUser.location !== location) {
+          existingUser.location = location;
+          userUpdated = true;
+        }
+        
+        if (website && existingUser.website !== website) {
+          existingUser.website = website;
+          userUpdated = true;
+        }
+        
+        if (bio && existingUser.bio !== bio) {
+          existingUser.bio = bio;
+          userUpdated = true;
+        }
+        
+        // Set role if missing
+        if (!existingUser.role) {
+          if (provider === 'google') {
+            existingUser.role = 'Google User';
+          } else if (provider === 'facebook') {
+            existingUser.role = 'Facebook User';
+          } else {
+            existingUser.role = 'Email User';
+          }
+          userUpdated = true;
+        }
+        
+        if (userUpdated) {
           localStorage.setItem('registeredUsers', JSON.stringify(users));
         }
       }
@@ -464,20 +598,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         email: existingUser.email,
         avatarUrl: existingUser.avatarUrl,
         provider: existingUser.provider,
+        role: existingUser.role,
+        phone: existingUser.phone,
+        location: existingUser.location,
+        website: existingUser.website,
+        bio: existingUser.bio,
         preferences: existingUser.preferences,
         subscription: existingUser.subscription
       };
       
       console.log('Final currentUser object being set:', currentUser);
-      console.log('User data before localStorage:', {
-        id: currentUser.id,
-        name: currentUser.name,
-        firstName: currentUser.firstName,
-        lastName: currentUser.lastName,
-        email: currentUser.email,
-        avatarUrl: currentUser.avatarUrl,
-        provider: currentUser.provider
-      });
+      console.log('User data before localStorage:');
+      console.log('  id:', currentUser.id);
+      console.log('  name:', currentUser.name);
+      console.log('  firstName:', currentUser.firstName);
+      console.log('  lastName:', currentUser.lastName);
+      console.log('  email:', currentUser.email);
+      console.log('  avatarUrl:', currentUser.avatarUrl);
+      console.log('  provider:', currentUser.provider);
+      console.log('  role:', currentUser.role);
+      console.log('  phone:', currentUser.phone);
+      console.log('  location:', currentUser.location);
+      console.log('  website:', currentUser.website);
+      console.log('  bio:', currentUser.bio);
       
       setCurrentUser(currentUser);
       localStorage.setItem('currentUser', JSON.stringify(currentUser));
@@ -512,6 +655,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const updatedUser = { ...currentUser, ...updates };
       setCurrentUser(updatedUser);
       localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+      
+      // Also update the user in the registeredUsers array if they exist
+      const storedUsers = localStorage.getItem('registeredUsers');
+      if (storedUsers) {
+        const users = JSON.parse(storedUsers);
+        const userIndex = users.findIndex((u: any) => u.id === currentUser.id);
+        if (userIndex !== -1) {
+          users[userIndex] = { ...users[userIndex], ...updates };
+          localStorage.setItem('registeredUsers', JSON.stringify(users));
+        }
+      }
+      
+      console.log('AuthContext: User updated successfully:', {
+        id: updatedUser.id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        updatedFields: Object.keys(updates)
+      });
     }
   };
 
