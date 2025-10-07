@@ -97,12 +97,17 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
     try {
       console.log('Facebook OAuth Callback URL:', facebookCallbackUrl);
       console.log('Facebook response:', response);
+      console.log('Facebook user data being sent to auth:', {
+        name: response.name,
+        email: response.email,
+        picture: response.picture
+      });
       
       // Pass the Facebook response data to the auth context
       const result = await socialLogin('facebook', response);
       
       if (result.success) {
-        success('Welcome!', 'Successfully signed in with Facebook');
+        success('Welcome!', `Successfully signed in with Facebook as ${response.name || 'User'}`);
         onSuccess?.();
       } else {
         error('Login Failed', result.message);
@@ -129,7 +134,8 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
         window.FB.api('/me', { fields: 'name,email,picture' }, (userInfo: any) => {
           const userData = {
             ...response.authResponse,
-            user: userInfo
+            ...userInfo, // Spread user info directly instead of nesting under 'user'
+            picture: userInfo.picture?.data?.url || userInfo.picture // Handle picture data structure
           };
           handleFacebookResponse(userData);
         });

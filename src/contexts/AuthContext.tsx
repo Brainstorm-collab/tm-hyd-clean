@@ -352,10 +352,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           email = userData.email || email;
           avatarUrl = userData.picture || avatarUrl;
         } else if (provider === 'facebook') {
-          // For Facebook, userData contains the response object
+          // For Facebook, userData contains the response object with user info spread directly
+          console.log('Facebook userData received in AuthContext:', userData);
           name = userData.name || name;
           email = userData.email || email;
-          avatarUrl = userData.picture?.data?.url || avatarUrl;
+          avatarUrl = userData.picture || avatarUrl;
+          console.log('Extracted Facebook data:', { name, email, avatarUrl });
         }
       }
       
