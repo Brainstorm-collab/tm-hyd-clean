@@ -6,16 +6,12 @@ import { useToast } from "../../contexts/ToastContext";
 import { FacebookIcon } from "../ui/FacebookIcon";
 import { GoogleIcon } from "../ui/GoogleIcon";
 
-// Import SDK types
-/// <reference types="facebook-js-sdk" />
-/// <reference types="gapi" />
-
 // Facebook and Google SDK types
 declare global {
   interface Window {
-    FB: typeof FB;
+    FB: any;
     fbAsyncInit: () => void;
-    google: typeof gapi;
+    google: any;
   }
 }
 
