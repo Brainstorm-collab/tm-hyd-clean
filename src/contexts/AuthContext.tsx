@@ -351,12 +351,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (userData) {
         if (provider === 'google') {
           // For Google, userData now contains the decoded JWT token data
+          console.log('Google userData received in AuthContext:', userData);
+          console.log('Google userData keys:', Object.keys(userData || {}));
+          
           name = userData.name || name;
           firstName = userData.given_name || '';
           lastName = userData.family_name || '';
           email = userData.email || email;
           avatarUrl = userData.picture || avatarUrl;
           userId = userData.sub || userId;
+          
+          console.log('Extracted Google data:', { name, firstName, lastName, email, avatarUrl, userId });
+          console.log('Google data validation:', {
+            hasName: !!name && name !== 'Google User',
+            hasFirstName: !!firstName,
+            hasLastName: !!lastName,
+            hasEmail: !!email && email !== 'user@google.com',
+            hasAvatar: !!avatarUrl,
+            hasUserId: !!userId && userId !== Date.now().toString()
+          });
         } else if (provider === 'facebook') {
           // For Facebook, userData contains the response object with user info spread directly
           console.log('Facebook userData received in AuthContext:', userData);
@@ -476,6 +489,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Provide specific success message based on provider
       const successMessage = provider === 'facebook' 
         ? 'Facebook login successful! Welcome to Task Manager!'
+        : provider === 'google'
+        ? 'Google login successful! Welcome to Task Manager!'
         : `Login with ${provider} successful`;
       
       return { success: true, message: successMessage };
@@ -483,6 +498,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.error(`${provider} login error:`, error);
       const errorMessage = provider === 'facebook' 
         ? 'You are not logged in via Facebook. Facebook login failed. Please try again.'
+        : provider === 'google'
+        ? 'You are not logged in via Google. Google login failed. Please try again.'
         : `${provider} login failed. Please try again.`;
       return { success: false, message: errorMessage };
     } finally {

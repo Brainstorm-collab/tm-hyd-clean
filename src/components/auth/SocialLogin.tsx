@@ -77,19 +77,24 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
       const result = await socialLogin('google', userData);
       
       if (result.success) {
-        success('Welcome!', `Successfully signed in with Google as ${userData.name}`);
+        // Show success toast with Google-specific message
+        success(
+          'Welcome to Task Manager! 🎉', 
+          `You have successfully logged in with Google! We're happy to have you here. Enjoy using the app!`
+        );
         onSuccess?.();
       } else {
-        error('Login Failed', result.message);
+        // Show failure toast
+        error('Google Login Failed', 'You are not logged in via Google. Please try again or use another login method.');
       }
     } catch (err) {
       console.error('Google login error:', err);
-      error('Login Failed', 'Google login failed. Please try again.');
+      error('Google Login Failed', 'You are not logged in via Google. Login failed. Please try again.');
     }
   };
 
   const handleGoogleError = () => {
-    error('Login Failed', 'Google login was cancelled or failed. Please try again.');
+    error('Google Login Failed', 'You are not logged in via Google. Google login was cancelled or failed. Please try again.');
   };
 
   // Handle Facebook Login
