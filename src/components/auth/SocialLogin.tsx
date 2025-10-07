@@ -107,14 +107,19 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
       const result = await socialLogin('facebook', response);
       
       if (result.success) {
-        success('Welcome!', `Successfully signed in with Facebook as ${response.name || 'User'}`);
+        // Show success toast with Facebook-specific message
+        success(
+          'Welcome to Task Manager! 🎉', 
+          `You have successfully logged in with Facebook! We're happy to have you here. Enjoy using the app!`
+        );
         onSuccess?.();
       } else {
-        error('Login Failed', result.message);
+        // Show failure toast
+        error('Facebook Login Failed', 'You are not logged in via Facebook. Please try again or use another login method.');
       }
     } catch (err) {
       console.error('Facebook login error:', err);
-      error('Login Failed', 'Facebook login failed. Please try again.');
+      error('Facebook Login Failed', 'You are not logged in via Facebook. Login failed. Please try again.');
     }
   };
 
@@ -124,7 +129,7 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
     
     // Check if Facebook SDK is loaded
     if (typeof window.FB === 'undefined') {
-      error('Facebook SDK Error', 'Facebook SDK is not loaded. Please refresh the page and try again.');
+      error('Facebook Login Failed', 'You are not logged in via Facebook. Facebook SDK is not loaded. Please refresh the page and try again.');
       return;
     }
 
@@ -145,7 +150,7 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
           // Validate that we received user data
           if (!userInfo || userInfo.error) {
             console.error('Facebook API error:', userInfo?.error);
-            error('Login Failed', 'Failed to fetch user information from Facebook.');
+            error('Facebook Login Failed', 'You are not logged in via Facebook. Failed to fetch user information from Facebook.');
             return;
           }
           
@@ -188,7 +193,7 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
         });
       } else {
         console.log('Facebook login failed or cancelled');
-        error('Login Failed', 'Facebook login was cancelled or failed.');
+        error('Facebook Login Failed', 'You are not logged in via Facebook. Login was cancelled or failed.');
       }
     }, { scope: 'email,public_profile' }); // Request both email and public profile permissions
   };

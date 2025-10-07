@@ -473,9 +473,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const storedUser = localStorage.getItem('currentUser');
       console.log('User stored in localStorage:', storedUser ? JSON.parse(storedUser) : 'No user found');
       
-      return { success: true, message: `Login with ${provider} successful` };
+      // Provide specific success message based on provider
+      const successMessage = provider === 'facebook' 
+        ? 'Facebook login successful! Welcome to Task Manager!'
+        : `Login with ${provider} successful`;
+      
+      return { success: true, message: successMessage };
     } catch (error) {
-      return { success: false, message: `${provider} login failed. Please try again.` };
+      console.error(`${provider} login error:`, error);
+      const errorMessage = provider === 'facebook' 
+        ? 'You are not logged in via Facebook. Facebook login failed. Please try again.'
+        : `${provider} login failed. Please try again.`;
+      return { success: false, message: errorMessage };
     } finally {
       setIsLoading(false);
     }
