@@ -54,7 +54,6 @@ export const getUserDisplayName = (user: User | null): string => {
  */
 export const getUserAvatarUrl = (user: User | null): string => {
   if (!user) {
-    console.log('getUserAvatarUrl: No user provided');
     return '';
   }
   
@@ -71,76 +70,9 @@ export const getUserAvatarUrl = (user: User | null): string => {
     }
   }
   
-  console.log('getUserAvatarUrl:');
-  console.log('  userId:', user.id);
-  console.log('  userName:', user.name);
-  console.log('  originalAvatarUrl:', user.avatarUrl);
-  console.log('  processedAvatarUrl:', avatarUrl);
-  console.log('  hasAvatar:', !!avatarUrl);
-  console.log('  provider:', user.provider);
-  
   return avatarUrl;
 };
 
-/**
- * Debug function to check user data - can be called from browser console
- * Usage: window.debugUserData()
- */
-export const debugUserData = () => {
-  const userData = localStorage.getItem('currentUser');
-  if (userData) {
-    const user = JSON.parse(userData);
-    console.log('=== USER DATA DEBUG ===');
-    console.log('Raw localStorage data:', user);
-    console.log('Avatar URL:', user.avatarUrl);
-    console.log('Provider:', user.provider);
-    console.log('Name:', user.name);
-    console.log('Email:', user.email);
-    
-    if (user.avatarUrl) {
-      console.log('Testing image accessibility...');
-      testImageAccessibility(user.avatarUrl).then(accessible => {
-        console.log('Image accessible:', accessible);
-      });
-    }
-    
-    return user;
-  } else {
-    console.log('No user data found in localStorage');
-    return null;
-  }
-};
-
-// Make debug function available globally
-if (typeof window !== 'undefined') {
-  (window as any).debugUserData = debugUserData;
-  (window as any).testGoogleImage = (url: string) => {
-    console.log('Testing Google image URL:', url);
-    const img = new Image();
-    img.onload = () => console.log('✅ Image loaded successfully');
-    img.onerror = () => console.log('❌ Image failed to load');
-    img.src = url;
-  };
-}
-
-/**
- * Test if an image URL is accessible
- * @param url - Image URL to test
- * @returns Promise<boolean> - Whether the image is accessible
- */
-export const testImageAccessibility = async (url: string): Promise<boolean> => {
-  if (!url) return false;
-  
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => resolve(true);
-    img.onerror = () => resolve(false);
-    img.src = url;
-    
-    // Timeout after 5 seconds
-    setTimeout(() => resolve(false), 5000);
-  });
-};
 
 /**
  * Get provider display information

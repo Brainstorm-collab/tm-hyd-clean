@@ -190,7 +190,6 @@ export const Inbox: React.FC = () => {
   const handleSettingsAction = (action: string) => {
     setShowSettingsMenu(false);
     // Handle the action
-    console.log(`Settings action: ${action}`);
   };
 
   const getCurrentChatId = () => currentConversation?.id || '';
@@ -201,7 +200,6 @@ export const Inbox: React.FC = () => {
       // TODO: call API to mute notifications for chatId
       await new Promise(r => setTimeout(r, 400));
     } catch (e) {
-      console.error('Mute failed', e);
     } finally {
       setIsActionLoading(null);
       setShowHeaderMenu(false);
@@ -214,7 +212,6 @@ export const Inbox: React.FC = () => {
       // TODO: call API to block user for chatId
       await new Promise(r => setTimeout(r, 400));
     } catch (e) {
-      console.error('Block failed', e);
     } finally {
       setIsActionLoading(null);
       setShowHeaderMenu(false);
@@ -227,7 +224,6 @@ export const Inbox: React.FC = () => {
       // TODO: call API to delete chatId and optimistically update UI
       await new Promise(r => setTimeout(r, 400));
     } catch (e) {
-      console.error('Delete failed', e);
     } finally {
       setIsActionLoading(null);
       setShowHeaderMenu(false);

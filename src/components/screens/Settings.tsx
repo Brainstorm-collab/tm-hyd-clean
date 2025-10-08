@@ -782,12 +782,9 @@ export const Settings: React.FC = () => {
                         );
                         return;
                       }
-                      console.log('Upgrade Plan button clicked, navigating to /premium');
                       try {
                         navigate('/premium');
-                        console.log('Navigation called successfully');
                       } catch (error) {
-                        console.error('Navigation error:', error);
                       }
                     }}
                     className="hover:opacity-80"

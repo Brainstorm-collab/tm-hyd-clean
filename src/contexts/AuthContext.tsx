@@ -212,13 +212,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setCurrentUser(currentUser);
       localStorage.setItem('currentUser', JSON.stringify(currentUser));
       
-      // Log successful login with user data
-      console.log('AuthContext: User logged in successfully:', {
-        id: currentUser.id,
-        name: currentUser.name,
-        email: currentUser.email,
-        hasAvatar: !!currentUser.avatarUrl
-      });
       
       return { success: true, message: 'Login successful' };
       } else {
@@ -299,11 +292,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem('currentUser', JSON.stringify(currentUser));
       
       // Log successful signup with user data
-      console.log('AuthContext: User signed up successfully:', {
-        id: currentUser.id,
-        name: currentUser.name,
-        email: currentUser.email
-      });
       
       return { success: true, message: 'Account created successfully' };
     } catch (error) {
@@ -372,8 +360,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (userData) {
         if (provider === 'google') {
           // For Google, userData now contains the decoded JWT token data
-          console.log('Google userData received in AuthContext:', userData);
-          console.log('Google userData keys:', Object.keys(userData || {}));
           
           name = userData.name || name;
           firstName = userData.given_name || '';
@@ -382,7 +368,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           // Handle Google profile picture with proper URL processing
           const googlePicture = (userData as any).picture;
           if (googlePicture) {
-            console.log('Processing Google picture URL:', googlePicture);
             
             // If it's a Google profile image, ensure it has proper parameters
             if (googlePicture.includes('googleusercontent.com')) {
@@ -399,38 +384,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               avatarUrl = googlePicture;
             }
             
-            console.log('Processed avatar URL:', avatarUrl);
           } else {
-            console.log('No Google picture found in userData');
             avatarUrl = avatarUrl;
           }
           userId = userData.sub || userId;
           
-          console.log('Google picture URL details:');
-          console.log('  originalPicture:', (userData as any).picture);
-          console.log('  finalAvatarUrl:', avatarUrl);
-          console.log('  pictureType:', typeof (userData as any).picture);
-          console.log('  pictureLength:', (userData as any).picture?.length);
           
           // Extract additional Google profile data if available
           if (userData.locale) {
             location = userData.locale;
           }
           
-          console.log('Extracted Google data:', { name, firstName, lastName, email, avatarUrl, userId, location });
-          console.log('Google data validation:', {
-            hasName: !!name && name !== 'Google User',
-            hasFirstName: !!firstName,
-            hasLastName: !!lastName,
-            hasEmail: !!email && email !== 'user@google.com',
-            hasAvatar: !!avatarUrl,
-            hasUserId: !!userId && userId !== Date.now().toString(),
-            hasLocation: !!location
-          });
         } else if (provider === 'facebook') {
           // For Facebook, userData contains the response object with user info spread directly
-          console.log('Facebook userData received in AuthContext:', userData);
-          console.log('Facebook userData keys:', Object.keys(userData || {}));
           
           // Extract Facebook user data with proper fallbacks
           name = userData.name || 
@@ -454,25 +420,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             bio = userData.bio;
           }
           
-          console.log('Extracted Facebook data:', { name, firstName, lastName, email, avatarUrl, userId, location, website, bio });
-          console.log('Facebook data validation:', {
-            hasName: !!name && name !== 'Facebook User',
-            hasFirstName: !!firstName,
-            hasLastName: !!lastName,
-            hasEmail: !!email && email !== 'user@facebook.com',
-            hasAvatar: !!avatarUrl,
-            hasUserId: !!userId && userId !== Date.now().toString(),
-            hasLocation: !!location,
-            hasWebsite: !!website,
-            hasBio: !!bio
-          });
           
           // Validate that we have essential data
           if (!email || email === `user@${provider}.com`) {
-            console.warn('Facebook login: No email provided, using fallback');
           }
           if (!name || name === `${provider.charAt(0).toUpperCase() + provider.slice(1)} User`) {
-            console.warn('Facebook login: No name provided, using fallback');
           }
         }
       }
@@ -607,27 +559,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         subscription: existingUser.subscription
       };
       
-      console.log('Final currentUser object being set:', currentUser);
-      console.log('User data before localStorage:');
-      console.log('  id:', currentUser.id);
-      console.log('  name:', currentUser.name);
-      console.log('  firstName:', currentUser.firstName);
-      console.log('  lastName:', currentUser.lastName);
-      console.log('  email:', currentUser.email);
-      console.log('  avatarUrl:', currentUser.avatarUrl);
-      console.log('  provider:', currentUser.provider);
-      console.log('  role:', currentUser.role);
-      console.log('  phone:', currentUser.phone);
-      console.log('  location:', currentUser.location);
-      console.log('  website:', currentUser.website);
-      console.log('  bio:', currentUser.bio);
       
       setCurrentUser(currentUser);
       localStorage.setItem('currentUser', JSON.stringify(currentUser));
       
       // Verify the user was stored correctly
       const storedUser = localStorage.getItem('currentUser');
-      console.log('User stored in localStorage:', storedUser ? JSON.parse(storedUser) : 'No user found');
       
       // Provide specific success message based on provider
       const successMessage = provider === 'facebook' 
@@ -667,12 +604,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       }
       
-      console.log('AuthContext: User updated successfully:', {
-        id: updatedUser.id,
-        name: updatedUser.name,
-        email: updatedUser.email,
-        updatedFields: Object.keys(updates)
-      });
     }
   };
 

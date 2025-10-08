@@ -89,7 +89,6 @@ export const MoreOptions: React.FC = () => {
   ];
 
   const handleOptionClick = (optionId: string) => {
-    console.log(`Clicked on ${optionId}`);
     setSelectedOption(optionId);
     // Handle option clicks here - you can add navigation logic later
   };

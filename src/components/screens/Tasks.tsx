@@ -512,7 +512,6 @@ export const Tasks: React.FC = () => {
         isOpen={showFileUploadModal}
         onClose={() => setShowFileUploadModal(false)}
         onUpload={(files) => {
-          console.log('Files uploaded:', files);
           success('Files Uploaded', `${files.length} files uploaded successfully!`);
         }}
       />

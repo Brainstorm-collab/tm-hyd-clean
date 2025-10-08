@@ -93,7 +93,6 @@ export const HelpSupport: React.FC = () => {
     }
 
     // Handle newsletter subscription
-    console.log('Subscribing with email:', email);
     
     // Show success toast
     success(
@@ -127,7 +126,6 @@ export const HelpSupport: React.FC = () => {
     }
 
     // Handle question submission
-    console.log('Submitting question:', questionText);
     
     // Show success toast
     success(

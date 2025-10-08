@@ -255,7 +255,6 @@ export const InboxPage: React.FC = () => {
               <span className="text-xs text-red-500">{showTopDropdown ? 'OPEN' : 'CLOSED'}</span>
               <button 
                 onClick={() => {
-                  console.log('Test button clicked');
                   setShowMessageDropdown(!showMessageDropdown);
                 }}
                 className="px-2 py-1 bg-red-500 text-white text-xs rounded"
@@ -267,9 +266,7 @@ export const InboxPage: React.FC = () => {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('Top dropdown clicked, current state:', showTopDropdown);
                     setShowTopDropdown(prev => {
-                      console.log('Setting top dropdown to:', !prev);
                       return !prev;
                     });
                   }}
@@ -281,7 +278,6 @@ export const InboxPage: React.FC = () => {
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-300 py-1" style={{ zIndex: 9999 }}>
                     <button 
                       onClick={() => {
-                        console.log('Mute notifications clicked');
                         setShowTopDropdown(false);
                       }}
                       className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -291,7 +287,6 @@ export const InboxPage: React.FC = () => {
                     </button>
                     <button 
                       onClick={() => {
-                        console.log('Block clicked');
                         setShowTopDropdown(false);
                       }}
                       className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -301,7 +296,6 @@ export const InboxPage: React.FC = () => {
                     </button>
                     <button 
                       onClick={() => {
-                        console.log('Chat settings clicked');
                         setShowTopDropdown(false);
                       }}
                       className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -340,7 +334,6 @@ export const InboxPage: React.FC = () => {
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  console.log('Top Messages dropdown clicked');
                   setShowTopMessagesDropdown(!showTopMessagesDropdown);
                 }}
                 className="p-1 hover:bg-gray-100 rounded"
@@ -351,7 +344,6 @@ export const InboxPage: React.FC = () => {
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-300 py-1" style={{ zIndex: 9999 }}>
                   <button 
                     onClick={() => {
-                      console.log('Mark all as read clicked');
                       setShowTopMessagesDropdown(false);
                     }}
                     className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -361,7 +353,6 @@ export const InboxPage: React.FC = () => {
                   </button>
                   <button 
                     onClick={() => {
-                      console.log('Archive all clicked');
                       setShowTopMessagesDropdown(false);
                     }}
                     className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -371,7 +362,6 @@ export const InboxPage: React.FC = () => {
                   </button>
                   <button 
                     onClick={() => {
-                      console.log('Delete all clicked');
                       setShowTopMessagesDropdown(false);
                     }}
                     className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
@@ -435,7 +425,6 @@ export const InboxPage: React.FC = () => {
                 <button 
                   onClick={(e) => {
                     e.stopPropagation();
-                    console.log('Conversation dropdown clicked for:', conversation.sender);
                     setShowConversationDropdown(showConversationDropdown === conversation.id ? null : conversation.id);
                   }}
                   className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded"
@@ -449,7 +438,6 @@ export const InboxPage: React.FC = () => {
                     <button 
                       onClick={(e) => {
                         e.stopPropagation();
-                        console.log('Mark as read clicked for:', conversation.sender);
                         setShowConversationDropdown(null);
                       }}
                       className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -460,7 +448,6 @@ export const InboxPage: React.FC = () => {
                     <button 
                       onClick={(e) => {
                         e.stopPropagation();
-                        console.log('Archive clicked for:', conversation.sender);
                         setShowConversationDropdown(null);
                       }}
                       className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -471,7 +458,6 @@ export const InboxPage: React.FC = () => {
                     <button 
                       onClick={(e) => {
                         e.stopPropagation();
-                        console.log('Delete clicked for:', conversation.sender);
                         setShowConversationDropdown(null);
                       }}
                       className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50"
@@ -515,7 +501,6 @@ export const InboxPage: React.FC = () => {
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      console.log('Chat header dropdown clicked');
                       setShowChatHeaderDropdown(!showChatHeaderDropdown);
                     }}
                     className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded"
@@ -526,7 +511,6 @@ export const InboxPage: React.FC = () => {
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-300 py-1" style={{ zIndex: 9999 }}>
                       <button 
                         onClick={() => {
-                          console.log('Mute notifications clicked');
                           setShowChatHeaderDropdown(false);
                         }}
                         className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -536,7 +520,6 @@ export const InboxPage: React.FC = () => {
                       </button>
                       <button 
                         onClick={() => {
-                          console.log('Block user clicked');
                           setShowChatHeaderDropdown(false);
                         }}
                         className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -546,7 +529,6 @@ export const InboxPage: React.FC = () => {
                       </button>
                       <button 
                         onClick={() => {
-                          console.log('Chat settings clicked');
                           setShowChatHeaderDropdown(false);
                         }}
                         className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -556,7 +538,6 @@ export const InboxPage: React.FC = () => {
                       </button>
                       <button 
                         onClick={() => {
-                          console.log('Delete chat clicked');
                           setShowChatHeaderDropdown(false);
                         }}
                         className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
@@ -588,9 +569,7 @@ export const InboxPage: React.FC = () => {
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            console.log('Juliana message dropdown clicked, current state:', showMessageDropdown);
                             setShowMessageDropdown(prev => {
-                              console.log('Setting message dropdown to:', !prev);
                               return !prev;
                             });
                           }}
@@ -606,7 +585,6 @@ export const InboxPage: React.FC = () => {
                           <div className="absolute right-0 top-full mt-2 w-40 bg-yellow-100 rounded-lg shadow-xl border-2 border-red-500 py-1" style={{ zIndex: 9999 }}>
                             <button 
                               onClick={() => {
-                                console.log('Edit Juliana message clicked');
                                 setShowMessageDropdown(false);
                               }}
                               className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -616,7 +594,6 @@ export const InboxPage: React.FC = () => {
                             </button>
                             <button 
                               onClick={() => {
-                                console.log('Delete Juliana message clicked');
                                 setShowMessageDropdown(false);
                               }}
                               className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50"
@@ -626,7 +603,6 @@ export const InboxPage: React.FC = () => {
                             </button>
                             <button 
                               onClick={() => {
-                                console.log('Copy Juliana message clicked');
                                 setShowMessageDropdown(false);
                               }}
                               className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -715,7 +691,6 @@ export const InboxPage: React.FC = () => {
                   {/* Image Upload Button */}
                   <button
                     onClick={() => {
-                      console.log('Image upload clicked');
                       // TODO: Implement image upload functionality
                     }}
                     className="absolute right-10 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-primary-700 transition-colors"
@@ -739,9 +714,7 @@ export const InboxPage: React.FC = () => {
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      console.log('Upload dropdown clicked, current state:', showUploadDropdown);
                       setShowUploadDropdown(prev => {
-                        console.log('Setting upload dropdown to:', !prev);
                         return !prev;
                       });
                     }}
@@ -753,7 +726,6 @@ export const InboxPage: React.FC = () => {
                     <div className="absolute right-0 bottom-full mb-2 w-48 bg-white rounded-lg shadow-xl border border-gray-300 py-1" style={{ zIndex: 9999 }}>
                       <button 
                         onClick={() => {
-                          console.log('Upload image clicked');
                           setShowUploadDropdown(false);
                         }}
                         className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -763,7 +735,6 @@ export const InboxPage: React.FC = () => {
                       </button>
                       <button 
                         onClick={() => {
-                          console.log('Upload video clicked');
                           setShowUploadDropdown(false);
                         }}
                         className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -773,7 +744,6 @@ export const InboxPage: React.FC = () => {
                       </button>
                       <button 
                         onClick={() => {
-                          console.log('Upload audio clicked');
                           setShowUploadDropdown(false);
                         }}
                         className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -790,9 +760,9 @@ export const InboxPage: React.FC = () => {
               <ConversationSettingsPopup
                 isOpen={showSettingsPopup}
                 onClose={() => setShowSettingsPopup(false)}
-                onInviteToTeam={() => console.log('Invite to team')}
-                onBlockUser={() => console.log('Block user')}
-                onDeleteChat={() => console.log('Delete chat')}
+                onInviteToTeam={() => {}}
+                onBlockUser={() => {}}
+                onDeleteChat={() => {}}
               />
             </div>
           </>

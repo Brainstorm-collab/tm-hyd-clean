@@ -33,6 +33,7 @@ import { MyContacts } from './components/screens/MyContacts';
 import { HelpSupport } from './components/screens/HelpSupport';
 import { UserProfile } from './components/screens/UserProfile';
 import InviteUsers from './components/screens/InviteUsers';
+import { ExploreFeatures } from './components/screens/ExploreFeatures';
 import { initializeDummyData } from './utils/localStorage';
 
 function AppRouter() {
@@ -93,33 +94,38 @@ function AppRouter() {
 
   if (!isAuthenticated) {
     return (
-        <div className="min-h-screen bg-gray-50">
-        {authMode === 'login' && (
-            <Login
-            onSwitchToSignup={() => setAuthMode('signup')}
-            onSwitchToForgotPassword={() => setAuthMode('forgot')}
-            onSwitchToOTP={() => setAuthMode('otp')}
-          />
-        )}
-        {authMode === 'signup' && (
-          <Signup
-            onSwitchToLogin={() => setAuthMode('login')}
-            onSwitchToOTP={() => setAuthMode('otp')}
-          />
-        )}
-        {authMode === 'forgot' && (
-          <ForgotPassword
-            onSwitchToLogin={() => setAuthMode('login')}
-          />
-        )}
-        {authMode === 'otp' && (
-          <OTPVerification
-            onSwitchToLogin={() => setAuthMode('login')}
-          />
-        )}
-        </div>
-      );
-    }
+      <Routes>
+        <Route path="/explore" element={<ExploreFeatures />} />
+        <Route path="*" element={
+          <div className="min-h-screen bg-gray-50">
+            {authMode === 'login' && (
+              <Login
+                onSwitchToSignup={() => setAuthMode('signup')}
+                onSwitchToForgotPassword={() => setAuthMode('forgot')}
+                onSwitchToOTP={() => setAuthMode('otp')}
+              />
+            )}
+            {authMode === 'signup' && (
+              <Signup
+                onSwitchToLogin={() => setAuthMode('login')}
+                onSwitchToOTP={() => setAuthMode('otp')}
+              />
+            )}
+            {authMode === 'forgot' && (
+              <ForgotPassword
+                onSwitchToLogin={() => setAuthMode('login')}
+              />
+            )}
+            {authMode === 'otp' && (
+              <OTPVerification
+                onSwitchToLogin={() => setAuthMode('login')}
+              />
+            )}
+          </div>
+        } />
+      </Routes>
+    );
+  }
     
     return (
     <Layout 

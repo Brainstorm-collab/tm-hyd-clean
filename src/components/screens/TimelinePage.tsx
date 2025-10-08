@@ -17,20 +17,25 @@ import {
 import { Avatar, AvatarFallback } from '../ui/Avatar';
 import { CreateTimelineModal } from '../modals/CreateTimelineModal';
 import { useToast } from '../../contexts/ToastContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 export const TimelinePage: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date(2022, 9, 21)); // October 2022
   const { success } = useToast();
+  const { currentUser } = useAuth();
+  
+  // Check if user is a guest
+  const isGuest = currentUser?.id === 'guest';
 
   const handleTimelineCreated = (timeline: any) => {
-    console.log('Timeline created:', timeline);
     success(
       'Timeline Created',
       `${timeline.name} has been added to your timelines.`
     );
   };
 
-  const teamMembers = [
+  // For guest users, show empty data but keep the same structure
+  const teamMembers = isGuest ? [] : [
     {
       id: 1,
       name: 'Henry Lucas',
@@ -262,113 +267,142 @@ export const TimelinePage: React.FC = () => {
           </div>
 
           {/* Team Member Rows */}
-          {teamMembers.map((member, memberIndex) => (
-            <div key={member.id} className="grid grid-cols-6 border-b border-gray-200 last:border-b-0 min-h-[120px]">
-              {/* Member Info */}
-              <div className="p-4 border-r border-gray-200 flex items-center space-x-3">
-                <Avatar className="w-8 h-8">
-                  <AvatarFallback className="bg-purple-100 text-purple-700 text-sm">
-                    {member.avatar}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="font-medium text-gray-900">{member.name}</span>
-                <button className="ml-auto">
-                  <MoreHorizontal className="w-4 h-4 text-gray-400" />
-                </button>
-              </div>
+          {teamMembers.length > 0 ? (
+            teamMembers.map((member, memberIndex) => (
+              <div key={member.id} className="grid grid-cols-6 border-b border-gray-200 last:border-b-0 min-h-[120px]">
+                {/* Member Info */}
+                <div className="p-4 border-r border-gray-200 flex items-center space-x-3">
+                  <Avatar className="w-8 h-8">
+                    <AvatarFallback className="bg-purple-100 text-purple-700 text-sm">
+                      {member.avatar}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="font-medium text-gray-900">{member.name}</span>
+                  <button className="ml-auto">
+                    <MoreHorizontal className="w-4 h-4 text-gray-400" />
+                  </button>
+                </div>
 
-              {/* Task Timeline */}
-              <div className="col-span-5 relative p-2">
-                <div className="grid grid-cols-5 h-full relative">
-                  {/* Grid lines */}
-                  {getDaysInRange().slice(0, -1).map((_, index) => (
-                    <div key={index} className="border-r border-gray-200"></div>
-                  ))}
-                  
-                  {/* Tasks */}
-                  {member.tasks.map((task, taskIndex) => {
-                    const { startIndex, span } = getTaskPosition(task);
-                    const connectionTarget = getConnectionTarget(task);
+                {/* Task Timeline */}
+                <div className="col-span-5 relative p-2">
+                  <div className="grid grid-cols-5 h-full relative">
+                    {/* Grid lines */}
+                    {getDaysInRange().slice(0, -1).map((_, index) => (
+                      <div key={index} className="border-r border-gray-200"></div>
+                    ))}
                     
-                    // Calculate vertical position for multiple tasks - match the exact design
-                    let topPosition = 8;
-                    if (memberIndex === 1 && taskIndex === 2) { // Johnson's third task (Design Marketing Graphics)
-                      topPosition = 68; // Position it below the second task
-                    } else if (taskIndex > 0) {
-                      topPosition = taskIndex * 60 + 8;
-                    }
-                    
-                    return (
-                      <div key={task.id} className="relative">
-                        {/* Task Card */}
-                        <div
-                          className="absolute bg-white border border-gray-200  p-3 shadow-sm hover:shadow-md transition-shadow"
-                          style={{
-                            left: `${(startIndex * 100) / 5}%`,
-                            width: `calc(${(span * 100) / 5}% - 8px)`,
-                            top: `${topPosition}px`,
-                            marginLeft: '4px',
-                            marginRight: '4px'
-                          }}
-                        >
-                          <div className="flex items-center space-x-2">
-                            <button className={`w-4 h-4 border-2 flex items-center justify-center ${
-                              task.completed 
-                                ? 'bg-purple-600 border-purple-600' 
-                                : 'border-gray-300'
-                            }`}>
-                              {task.completed && (
-                                <Check className="w-3 h-3 text-white" />
-                              )}
-                            </button>
-                            <span className="text-sm font-medium text-gray-900 flex-1 truncate">
-                              {task.title}
-                            </span>
-                            <Avatar className="w-5 h-5">
-                              <AvatarFallback className="bg-purple-100 text-purple-700 text-xs">
-                                {task.assigneeAvatar}
-                              </AvatarFallback>
-                            </Avatar>
-                          </div>
-                          <div className="text-xs text-gray-500 mt-1">
-                            {formatDateRange(task.startDate, task.endDate)}
-                          </div>
-                        </div>
-
-                        {/* Connection Line */}
-                        {hasConnection(task, memberIndex) && connectionTarget && (
-                          <div 
-                            className="absolute left-full w-8 h-8 pointer-events-none"
-                            style={{ top: `${topPosition + 20}px` }}
+                    {/* Tasks */}
+                    {member.tasks.map((task, taskIndex) => {
+                      const { startIndex, span } = getTaskPosition(task);
+                      const connectionTarget = getConnectionTarget(task);
+                      
+                      // Calculate vertical position for multiple tasks - match the exact design
+                      let topPosition = 8;
+                      if (memberIndex === 1 && taskIndex === 2) { // Johnson's third task (Design Marketing Graphics)
+                        topPosition = 68; // Position it below the second task
+                      } else if (taskIndex > 0) {
+                        topPosition = taskIndex * 60 + 8;
+                      }
+                      
+                      return (
+                        <div key={task.id} className="relative">
+                          {/* Task Card */}
+                          <div
+                            className="absolute bg-white border border-gray-200  p-3 shadow-sm hover:shadow-md transition-shadow"
+                            style={{
+                              left: `${(startIndex * 100) / 5}%`,
+                              width: `calc(${(span * 100) / 5}% - 8px)`,
+                              top: `${topPosition}px`,
+                              marginLeft: '4px',
+                              marginRight: '4px'
+                            }}
                           >
-                            <svg className="w-full h-full" viewBox="0 0 32 32">
-                              <path
-                                d={getConnectionPath(task)}
-                                stroke="#8B5CF6"
-                                strokeWidth="2"
-                                fill="none"
-                                className="opacity-60"
-                              />
-                            </svg>
+                            <div className="flex items-center space-x-2">
+                              <button className={`w-4 h-4 border-2 flex items-center justify-center ${
+                                task.completed 
+                                  ? 'bg-purple-600 border-purple-600' 
+                                  : 'border-gray-300'
+                              }`}>
+                                {task.completed && (
+                                  <Check className="w-3 h-3 text-white" />
+                                )}
+                              </button>
+                              <span className="text-sm font-medium text-gray-900 flex-1 truncate">
+                                {task.title}
+                              </span>
+                              <Avatar className="w-5 h-5">
+                                <AvatarFallback className="bg-purple-100 text-purple-700 text-xs">
+                                  {task.assigneeAvatar}
+                                </AvatarFallback>
+                              </Avatar>
+                            </div>
+                            <div className="text-xs text-gray-500 mt-1">
+                              {formatDateRange(task.startDate, task.endDate)}
+                            </div>
                           </div>
-                        )}
-                      </div>
-                    );
-                  })}
+
+                          {/* Connection Line */}
+                          {hasConnection(task, memberIndex) && connectionTarget && (
+                            <div 
+                              className="absolute left-full w-8 h-8 pointer-events-none"
+                              style={{ top: `${topPosition + 20}px` }}
+                            >
+                              <svg className="w-full h-full" viewBox="0 0 32 32">
+                                <path
+                                  d={getConnectionPath(task)}
+                                  stroke="#8B5CF6"
+                                  strokeWidth="2"
+                                  fill="none"
+                                  className="opacity-60"
+                                />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
+            ))
+          ) : (
+            /* Empty State for Guest Users */
+            <div className="col-span-6 p-8 text-center">
+              <div className="flex flex-col items-center justify-center space-y-4">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                  <Calendar className="w-8 h-8 text-gray-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No Timeline Data</h3>
+                  <p className="text-gray-600">
+                    {isGuest 
+                      ? "Sign in to create and manage your team timeline with tasks and projects."
+                      : "Create your first timeline to get started with team collaboration."
+                    }
+                  </p>
+                </div>
+                {isGuest && (
+                  <div className="mt-4">
+                    <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                      Sign In to Get Started
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
-          ))}
+          )}
         </div>
 
         {/* Bottom Text */}
-        <div className="text-center text-gray-600">
-          <span>Add more members by </span>
-          <button className="text-purple-600 hover:text-purple-700 font-medium">
-            +Inviting
-          </button>
-          <span> and assign task to anyone.</span>
-        </div>
+        {!isGuest && (
+          <div className="text-center text-gray-600">
+            <span>Add more members by </span>
+            <button className="text-purple-600 hover:text-purple-700 font-medium">
+              +Inviting
+            </button>
+            <span> and assign task to anyone.</span>
+          </div>
+        )}
       </div>
     </div>
   );

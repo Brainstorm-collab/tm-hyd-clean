@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { Smile } from 'lucide-react';
@@ -15,6 +16,7 @@ export const Login: React.FC<LoginProps> = ({
   onSwitchToSignup,
   onSwitchToForgotPassword
 }) => {
+  const navigate = useNavigate();
   const { login, socialLogin, continueAsGuest } = useAuth();
   const { success, error } = useToast();
   const [email, setEmail] = useState('');
@@ -23,22 +25,15 @@ export const Login: React.FC<LoginProps> = ({
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Login attempt with:', { email, password: '***' });
-    }
     setIsLoading(true);
     try {
       const result = await login(email, password);
-      console.log('Login result:', result);
       if (result.success) {
         success('Welcome!', `Successfully signed in as ${email}`);
       } else {
         error('Login Failed', result.message);
       }
     } catch (err) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Login error:', err);
-      }
       error('Login Failed', 'An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
@@ -64,7 +59,7 @@ export const Login: React.FC<LoginProps> = ({
         </div>
         <div className="flex items-center space-x-3">
           <button 
-            onClick={() => {/* navigate to features page */}}
+            onClick={() => navigate('/explore')}
             className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
           >
             Explore Features

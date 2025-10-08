@@ -106,7 +106,6 @@ export const Dashboard: React.FC = () => {
     } else {
       // Handle team selection for authenticated users
       setSelectedTeam(teamName);
-      console.log(`Selected team: ${teamName}`);
     }
   };
 

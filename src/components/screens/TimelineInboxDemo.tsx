@@ -19,15 +19,12 @@ export const TimelineInboxDemo: React.FC = () => {
   });
 
   const handleSearch = (query: string) => {
-    console.log('Search query:', query);
   };
 
   const handleCreateNew = () => {
-    console.log('Create new item');
   };
 
   const handleLogout = () => {
-    console.log('Logout');
   };
 
   return (

@@ -9,7 +9,6 @@ export const EmptyTimeline: React.FC = () => {
   const { success } = useToast();
 
   const handleTimelineCreated = (timeline: any) => {
-    console.log('Timeline created:', timeline);
     success(
       'Timeline Created',
       `${timeline.name} has been added to your timelines.`

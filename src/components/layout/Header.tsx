@@ -47,12 +47,6 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
   // Update user when currentUser prop changes
   useEffect(() => {
     const newUser = currentUser || getUser();
-    console.log('Header: User updated:');
-    console.log('  userId:', newUser?.id);
-    console.log('  userName:', newUser?.name);
-    console.log('  avatarUrl:', newUser?.avatarUrl);
-    console.log('  provider:', newUser?.provider);
-    console.log('  hasAvatar:', !!newUser?.avatarUrl);
     setUser(newUser);
   }, [currentUser]);
 
@@ -68,12 +62,11 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
     }
   }, [location.pathname, location.search]);
 
-  // Get unread count from notification context
-  const unreadCount = getUnreadCount();
+  // Get unread count from notification context - guests have no notifications
+  const unreadCount = user?.id === 'guest' ? 0 : getUnreadCount();
 
   // Handle notification click
   const handleNotificationClick = (notificationId: string) => {
-    console.log('Notification clicked:', notificationId);
     markAsRead(notificationId);
     setShowNotifications(false);
   };
@@ -323,7 +316,15 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
                   <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
                 </div>
                 <div className="max-h-80 overflow-y-auto">
-                  {notifications.length > 0 ? (
+                  {user?.id === 'guest' ? (
+                    <div className="p-8 text-center">
+                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Bell className="w-8 h-8 text-gray-400" />
+                      </div>
+                      <p className="text-gray-500 text-lg font-medium">Guest Mode</p>
+                      <p className="text-gray-400 text-sm mt-1">Sign in to receive notifications</p>
+                    </div>
+                  ) : notifications.length > 0 ? (
                     <div className="py-2">
                       {notifications.map((notification) => {
                         const IconComponent = notification.icon;
@@ -364,7 +365,7 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, onCreateNew, onLogout,
                     </div>
                   )}
                 </div>
-                {notifications.length > 0 && (
+                {user?.id !== 'guest' && notifications.length > 0 && (
                   <div className="p-3 border-t border-gray-200">
                     <button
                       onClick={() => {

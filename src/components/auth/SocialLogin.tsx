@@ -69,24 +69,15 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
   // Handle Google Login Success
   const handleGoogleSuccess = async (response: any) => {
     try {
-      console.log('Google OAuth Callback URL:', googleCallbackUrl);
-      console.log('Google response:', response);
       
       // Decode the JWT token to extract user data
       let userData;
       if (response.credential) {
         // Decode the JWT token from Google
         userData = jwtDecode(response.credential);
-        console.log('Decoded Google JWT:', userData);
-        console.log('Google JWT picture field:');
-        console.log('  picture:', (userData as any).picture);
-        console.log('  pictureType:', typeof (userData as any).picture);
-        console.log('  pictureLength:', (userData as any).picture?.length);
-        console.log('  allFields:', Object.keys(userData));
       } else {
         // Fallback to response data if no credential
         userData = response.userData || response;
-        console.log('Google user data (fallback):', userData);
       }
       
       const result = await socialLogin('google', userData);
@@ -129,13 +120,6 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
   // Handle Facebook Login
   const handleFacebookResponse = async (response: any) => {
     try {
-      console.log('Facebook OAuth Callback URL:', facebookCallbackUrl);
-      console.log('Facebook response:', response);
-      console.log('Facebook user data being sent to auth:', {
-        name: response.name,
-        email: response.email,
-        picture: response.picture
-      });
       
       // Pass the Facebook response data to the auth context
       const result = await socialLogin('facebook', response);
@@ -169,23 +153,18 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
       return;
     }
 
-     console.log('Starting Facebook login...');
     
     window.FB.login((response: any) => {
-      console.log('Facebook login response:', response);
       
       if (response.authResponse) {
-        console.log('Facebook auth response:', response.authResponse);
         
         // Get user info with more detailed fields
         window.FB.api('/me', { 
           fields: 'id,name,first_name,last_name,email,picture.width(200).height(200),location,website,bio' 
         }, (userInfo: any) => {
-          console.log('Facebook API response:', userInfo);
           
           // Validate that we received user data
           if (!userInfo || userInfo.error) {
-            console.error('Facebook API error:', userInfo?.error);
             error('Facebook Login Failed', 'You are not logged in via Facebook. Failed to fetch user information from Facebook.');
             return;
           }
@@ -208,33 +187,18 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
             signedRequest: response.authResponse.signedRequest
           };
           
-          console.log('Final Facebook user data being sent to AuthContext:', userData);
-          console.log('User data validation:', {
-            hasName: !!userData.name,
-            hasEmail: !!userData.email,
-            hasId: !!userData.id,
-            hasPicture: !!userData.picture,
-            hasLocation: !!userData.location,
-            hasWebsite: !!userData.website,
-            hasBio: !!userData.bio,
-            hasAccessToken: !!userData.accessToken,
-            emailSource: userInfo.email ? 'Facebook API' : 'Generated fallback'
-          });
           
           // Additional validation
           if (!userData.name) {
-            console.warn('No name from Facebook, using fallback');
             userData.name = userData.first_name || 'Facebook User';
           }
           
           if (!userData.email || userData.email.includes('facebook.local')) {
-            console.warn('No email from Facebook, using generated fallback');
           }
           
           handleFacebookResponse(userData);
         });
       } else {
-        console.log('Facebook login failed or cancelled');
         error('Facebook Login Failed', 'You are not logged in via Facebook. Login was cancelled or failed.');
       }
     }, { scope: 'email,public_profile,user_location,user_website' }); // Request email, public profile, location, and website permissions

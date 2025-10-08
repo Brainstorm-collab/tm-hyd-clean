@@ -33,7 +33,6 @@ export const RoleSelection: React.FC = () => {
         await updateUser({ role: primaryRole });
         navigate('/home');
       } catch (err) {
-        console.error('Failed to update user role:', err);
       }
     }
   };
@@ -43,7 +42,6 @@ export const RoleSelection: React.FC = () => {
       await updateUser({});
       navigate('/home');
     } catch (error) {
-      console.error('Failed to update user preferences:', error);
       // TODO: Show error message to user
     }
   };

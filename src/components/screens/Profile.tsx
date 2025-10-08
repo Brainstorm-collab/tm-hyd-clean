@@ -102,20 +102,6 @@ export const Profile: React.FC = () => {
       
       setEditData(extractedData);
       
-      // Log extracted information for debugging
-      console.log('Profile: User data extracted and positioned:', {
-        hasName: !!extractedData.name,
-        hasFirstName: !!extractedData.firstName,
-        hasLastName: !!extractedData.lastName,
-        hasEmail: !!extractedData.email,
-        hasRole: !!extractedData.role,
-        hasBio: !!extractedData.bio,
-        hasPhone: !!extractedData.phone,
-        hasLocation: !!extractedData.location,
-        hasWebsite: !!extractedData.website,
-        provider: currentUser.provider,
-        avatarUrl: currentUser.avatarUrl
-      });
       
       // Show success message if user has social login data and profile was auto-filled
       if (hasSocialLoginData(currentUser)) {
@@ -267,7 +253,6 @@ export const Profile: React.FC = () => {
       // Use the updateUser function from AuthContext to update both localStorage and currentUser state
       updateUser(updatedUser);
       setUserState(updatedUser);
-      console.log('Profile: Profile picture uploaded:', avatarUrl);
     }
   };
 
