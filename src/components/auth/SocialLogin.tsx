@@ -207,8 +207,27 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
 
   return (
     <div className="space-y-2">
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          .google-button-container * {
+            border-radius: 6px !important;
+          }
+          .google-button-container > div {
+            border-radius: 6px !important;
+          }
+          .google-button-container > div > div {
+            border-radius: 6px !important;
+          }
+          .google-button-container > div > div > div {
+            border-radius: 6px !important;
+          }
+        `
+      }} />
       <GoogleOAuthProvider clientId={googleClientId}>
-        <div style={{ opacity: disabled ? 0.5 : 1, pointerEvents: disabled ? 'none' : 'auto' }}>
+        <div 
+          className="google-button-container"
+          style={{ opacity: disabled ? 0.5 : 1, pointerEvents: disabled ? 'none' : 'auto' }}
+        >
           <GoogleLogin
             onSuccess={disabled ? () => {} : handleGoogleSuccess}
             onError={disabled ? () => {} : handleGoogleError}
@@ -227,7 +246,7 @@ export const SocialLogin: React.FC<SocialLoginProps> = ({
         type="button"
         onClick={handleFacebookLogin}
         disabled={disabled}
-        className="w-full flex items-center justify-start px-3 py-2.5 border border-gray-300 hover:bg-gray-50 transition-colors text-sm bg-white text-gray-700 font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full flex items-center justify-start px-3 py-2.5 border border-gray-300 hover:bg-gray-50 transition-colors text-sm bg-white text-gray-700 font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed h-10"
       >
         <FacebookIcon size={16} className="mr-2 flex-shrink-0" />
         <span className="flex-1 text-center">Sign in with Facebook</span>
