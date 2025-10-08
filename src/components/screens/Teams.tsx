@@ -50,51 +50,51 @@ export const Teams: React.FC = () => {
   const teams: Team[] = [
     {
       id: '1',
-      name: 'UI/UX Design Team',
-      memberCount: 36,
-      avatar: 'UI'
+      name: 'Team 1',
+      memberCount: 0,
+      avatar: 'T1'
     },
     {
       id: '2',
-      name: 'Development Team',
-      memberCount: 36,
-      avatar: 'DT'
+      name: 'Team 2',
+      memberCount: 0,
+      avatar: 'T2'
     },
     {
       id: '3',
-      name: 'Product Research Team',
-      memberCount: 36,
-      avatar: 'PR'
+      name: 'Team 3',
+      memberCount: 0,
+      avatar: 'T3'
     },
     {
       id: '4',
-      name: 'HR Team',
-      memberCount: 36,
-      avatar: 'HR'
+      name: 'Team 4',
+      memberCount: 0,
+      avatar: 'T4'
     },
     {
       id: '5',
-      name: 'Marketing Team',
-      memberCount: 36,
-      avatar: 'MT'
+      name: 'Team 5',
+      memberCount: 0,
+      avatar: 'T5'
     },
     {
       id: '6',
-      name: 'Motion Design Team',
-      memberCount: 36,
-      avatar: 'MD'
+      name: 'Team 6',
+      memberCount: 0,
+      avatar: 'T6'
     },
     {
       id: '7',
-      name: 'Senior Developers Team',
-      memberCount: 36,
-      avatar: 'SD'
+      name: 'Team 7',
+      memberCount: 0,
+      avatar: 'T7'
     },
     {
       id: '8',
-      name: 'Managers Team',
-      memberCount: 36,
-      avatar: 'MG'
+      name: 'Team 8',
+      memberCount: 0,
+      avatar: 'T8'
     }
   ];
 
@@ -108,7 +108,7 @@ export const Teams: React.FC = () => {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">My Teams</h1>
-          <p className="text-gray-600">32 Total teams are added</p>
+          <p className="text-gray-600">0 Total teams are added</p>
         </div>
         
         <div className="flex items-center space-x-2">
@@ -179,7 +179,7 @@ export const Teams: React.FC = () => {
                     <h3 className="font-semibold text-gray-900">{team.name}</h3>
                     <div className="flex items-center space-x-1 text-sm text-gray-600">
                       <Users className="w-4 h-4" />
-                      <span>{team.memberCount} Members</span>
+                      <span>0 Members</span>
                     </div>
                   </div>
                 </div>
