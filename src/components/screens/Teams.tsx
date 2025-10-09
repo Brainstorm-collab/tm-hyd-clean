@@ -13,6 +13,7 @@ import {
 import { Card, CardContent, CardHeader } from '../ui/Card';
 import { Avatar, AvatarFallback } from '../ui/Avatar';
 import { CreateTeamModal } from '../modals/CreateTeamModal';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface Team {
   id: string;
@@ -22,9 +23,13 @@ interface Team {
 }
 
 export const Teams: React.FC = () => {
+  const { currentUser, isAuthenticated } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [openDropdowns, setOpenDropdowns] = useState<{[key: string]: boolean}>({});
   const navigate = useNavigate();
+  
+  // Check if user is a guest
+  const isGuest = currentUser?.id === 'guest';
   
   // Refs for dropdowns
   const dropdownRefs = useRef<{[key: string]: HTMLDivElement | null}>({});
@@ -47,7 +52,7 @@ export const Teams: React.FC = () => {
     setOpenDropdowns(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const teams: Team[] = [
+  const teams: Team[] = isGuest ? [
     {
       id: '1',
       name: 'Team 1',
@@ -96,6 +101,55 @@ export const Teams: React.FC = () => {
       memberCount: 0,
       avatar: 'T8'
     }
+  ] : [
+    {
+      id: '1',
+      name: 'Development Team',
+      memberCount: 5,
+      avatar: 'DT'
+    },
+    {
+      id: '2',
+      name: 'Design Team',
+      memberCount: 3,
+      avatar: 'DS'
+    },
+    {
+      id: '3',
+      name: 'QA Team',
+      memberCount: 4,
+      avatar: 'QA'
+    },
+    {
+      id: '4',
+      name: 'Marketing Team',
+      memberCount: 3,
+      avatar: 'MK'
+    },
+    {
+      id: '5',
+      name: 'Product Team',
+      memberCount: 2,
+      avatar: 'PT'
+    },
+    {
+      id: '6',
+      name: 'Sales Team',
+      memberCount: 6,
+      avatar: 'ST'
+    },
+    {
+      id: '7',
+      name: 'Support Team',
+      memberCount: 4,
+      avatar: 'SP'
+    },
+    {
+      id: '8',
+      name: 'HR Team',
+      memberCount: 3,
+      avatar: 'HR'
+    }
   ];
 
   const filteredTeams = teams.filter(team =>
@@ -108,7 +162,7 @@ export const Teams: React.FC = () => {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">My Teams</h1>
-          <p className="text-gray-600">0 Total teams are added</p>
+          <p className="text-gray-600">{teams.length} Total teams are added</p>
         </div>
         
         <div className="flex items-center space-x-2">
@@ -179,7 +233,7 @@ export const Teams: React.FC = () => {
                     <h3 className="font-semibold text-gray-900">{team.name}</h3>
                     <div className="flex items-center space-x-1 text-sm text-gray-600">
                       <Users className="w-4 h-4" />
-                      <span>0 Members</span>
+                      <span>{team.memberCount} Members</span>
                     </div>
                   </div>
                 </div>
